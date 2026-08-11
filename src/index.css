@@ -1,0 +1,211 @@
+:root {
+  /* Moldura branca (fina) */
+  --respiro: clamp(12px, 1.6vw, 24px);
+
+  /*
+    --edge: MENU / HIRE / copyright colados na borda do cinza
+    --content-x: recuo do texto + avatar (longe da “parede”)
+  */
+  --edge: clamp(16px, 1.8vw, 24px);
+  --content-x: clamp(120px, 14vw, 200px);
+  --gap: clamp(32px, 5vw, 64px);
+  --gap-sm: clamp(16px, 2vw, 24px);
+
+  /*
+    --scroll-line: altura total da linha
+    --scroll-peek: quanto do Scroll cabe na 1ª dobra (Hero mais baixo = conteúdo mais no centro)
+    --section-cut: tira um pouco da altura das seções (hero / works / spots)
+  */
+  --scroll-line: clamp(220px, 28vh, 320px);
+  --scroll-peek: clamp(120px, 18vh, 180px);
+  /* Em viewport baixa, corte menor: Hero mantém ar e o peek nao sobe no texto */
+  --section-cut: clamp(24px, 5vh, 96px);
+
+  --bg-stage: #ededed;
+  --bg-loader: #dedede;
+  --bg-outer: #ffffff;
+  --text: #000000;
+  --muted: #2e2e2e;
+  --scroll-wave: #9a9a9a;
+  --scroll-shine-a: #1a1a1a;
+  --scroll-shine-b: #555555;
+  --scroll-shine-c: #9a9a9a;
+  --scroll-shine-d: #c8c8c8;
+  --rain: #141414;
+  --btn-bg: #f6f6f6;
+  --btn-bg-hover: #ffffff;
+  --btn-shadow: #111111;
+  --avatar-ring: #6e6e6e;
+  --avatar-ring-shadow: #9a9a9a;
+  --avatar-shadow: rgba(0, 0, 0, 0.12);
+  --scrollbar-thumb-hover: #cfcfcf;
+  --scrollbar-thumb-active: #c4c4c4;
+  --scrollbar-thumb: #bdbdbd;
+  --scrollbar-track: var(--bg-outer);
+  --icon-filter: none;
+  --loader-work: #efe6a3;
+  --loader-about: #bfe6cf;
+  --loader-reading: #b7d8ea;
+  --loader-contact: #f0bfbc;
+  /*
+    Accents no claro: saturados o bastante para ler a cor,
+    sem cair no pastel (some) nem no tom “sujo” (vira cinza).
+  */
+  --accent-work: #e0a100;
+  --accent-about: #12a954;
+  --accent-reading: #2f6ff0;
+  --accent-contact: #e53e3e;
+  --stage-height: calc(100svh - (var(--respiro) * 2));
+  --stage-radius: 5px;
+
+  --font-sans: 'Inclusive Sans', 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-ui: 'Inter', 'Inclusive Sans', sans-serif;
+
+  /*
+    Escala tipográfica fluida: encolhe com a viewport,
+    sem “pulo” brusco em breakpoints.
+  */
+  --text-display: clamp(1.55rem, 1rem + 2.55vw, 3rem);
+  --text-lead: clamp(1rem, 0.86rem + 0.6vw, 1.45rem);
+  --text-body: clamp(0.9rem, 0.82rem + 0.4vw, 1.0625rem);
+  --text-ui: clamp(0.75rem, 0.68rem + 0.35vw, 1rem);
+
+  /* Mídia do hero / páginas: acompanha a largura da tela */
+  --media-hero: clamp(160px, 23vw + 2rem, 420px);
+  --media-figure: clamp(132px, 19vw + 1.5rem, 300px);
+
+  color: var(--text);
+  background: var(--bg-outer);
+  color-scheme: light;
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme='dark'] {
+  --bg-stage: #1c1c1c;
+  --bg-loader: #141414;
+  --bg-outer: #0a0a0a;
+  --text: #f2f2f2;
+  --muted: #b8b8b8;
+  --scroll-wave: #6e6e6e;
+  --scroll-shine-a: #f2f2f2;
+  --scroll-shine-b: #b0b0b0;
+  --scroll-shine-c: #787878;
+  --scroll-shine-d: #4a4a4a;
+  --rain: #b0b0b0;
+  --btn-bg: #262626;
+  --btn-bg-hover: #303030;
+  --btn-shadow: #f2f2f2;
+  --avatar-ring: #f2f2f2;
+  --avatar-ring-shadow: color-mix(in srgb, #ffffff 55%, transparent);
+  --avatar-shadow: rgba(0, 0, 0, 0.45);
+  --scrollbar-thumb: #7a7a7a;
+  --scrollbar-thumb-hover: #9a9a9a;
+  --scrollbar-thumb-active: #b0b0b0;
+  --scrollbar-track: #121212;
+  --icon-filter: invert(1);
+  --loader-work: #3f3a1f;
+  --loader-about: #1f3328;
+  --loader-reading: #1e303a;
+  --loader-contact: #3a2424;
+  --accent-work: #f0d45c;
+  --accent-about: #74d7a4;
+  --accent-reading: #78bfee;
+  --accent-contact: #f0aaa5;
+  color-scheme: dark;
+}
+
+/* Força accents do claro mesmo com data-theme=light no <html> */
+[data-theme='light'] {
+  --accent-work: #e0a100;
+  --accent-about: #12a954;
+  --accent-reading: #2f6ff0;
+  --accent-contact: #e53e3e;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  margin: 0;
+  background: var(--bg-outer);
+  /* Sempre reserva a faixa da scrollbar: loader/menu não empurram o layout */
+  overflow-x: clip;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+  max-width: 100%;
+  /* Firefox */
+  scrollbar-width: auto;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+html.is-scroll-locked {
+  overflow-x: clip;
+  overflow-y: hidden;
+  /* Mantém o gutter mesmo com overflow hidden */
+  scrollbar-gutter: stable;
+}
+
+/* Chromium / Brave / Safari */
+html::-webkit-scrollbar {
+  width: 14px;
+}
+
+html::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+html::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+  border: 3px solid var(--scrollbar-track);
+  background-clip: padding-box;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  border: 3px solid var(--scrollbar-track);
+  background-clip: padding-box;
+}
+
+html::-webkit-scrollbar-thumb:active {
+  background: var(--scrollbar-thumb-active);
+  border: 3px solid var(--scrollbar-track);
+  background-clip: padding-box;
+}
+
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  background: var(--bg-outer);
+  font-size: var(--text-body);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
