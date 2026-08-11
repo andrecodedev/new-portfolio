@@ -1,4 +1,13 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from 'react'
 import {
   motion,
   useReducedMotion,
@@ -6,6 +15,25 @@ import {
 } from 'framer-motion'
 import { easeOutExpo, easeOutSoft, useEntrance } from './reveal'
 
+export type ScrollRootRef = RefObject<HTMLElement | null>
+
+export const ScrollRootContext = createContext<ScrollRootRef | null>(null)
+
+export function useScrollViewport() {
+  const root = useContext(ScrollRootContext)
+
+  return useMemo(
+    () => ({
+      once: false,
+      amount: 0.28,
+      margin: '0px 0px -10% 0px' as const,
+      ...(root ? { root } : {}),
+    }),
+    [root],
+  )
+}
+
+/** @deprecated Use useScrollViewport() — root precisa do .stage__scroll */
 export const scrollViewport = {
   once: false,
   amount: 0.28,

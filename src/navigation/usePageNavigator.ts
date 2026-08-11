@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getLoaderBgForPath } from '../data/site'
 import { lockPageScroll, unlockPageScroll } from './scroll-lock'
+import { scrollRootToTop } from './scroll-root'
 
 const TRANSITION_HOLD_MS = 900
 const TRANSITION_EXIT_MS = 700
@@ -28,7 +29,7 @@ export function usePageNavigator() {
       const target = path.startsWith('/') ? path : `/${path}`
       if (lockedRef.current) return
       if (window.location.pathname === target) {
-        window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+        scrollRootToTop('auto')
         return
       }
 
@@ -39,7 +40,7 @@ export function usePageNavigator() {
 
       window.setTimeout(() => {
         navigate(target)
-        window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+        scrollRootToTop('auto')
         setTransition({ active: true, exiting: true, background })
       }, TRANSITION_HOLD_MS)
     },

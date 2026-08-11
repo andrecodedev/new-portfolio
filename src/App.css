@@ -1,58 +1,32 @@
 /*
-  Espaçamento:
-  - --edge: MENU / HIRE / copyright na borda do cinza
-  - --content-x: recuo do texto + avatar
-  - seções empilhadas no .stage com gap (--gap)
-  - SCROLL: section própria; na 1ª dobra só peek (--scroll-peek)
+  Layout:
+  - html/body = fundo (--bg-outer), sem scroll
+  - .stage = quadrado cinza FIXO (só visual + rain)
+  - .stage__scroll = único scroll; estende até a borda direita do viewport
+    pra scrollbar ficar na faixa escura (--respiro), não dentro do cinza
 */
-
-.frame {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  box-sizing: border-box;
-  padding: var(--respiro);
-  pointer-events: none;
-  transform: translateZ(0);
-  overflow: hidden;
-}
-
-/*
-  Furo arredondado da moldura (viewport).
-  O branco fica no box-shadow; o centro é transparente e mostra o stage.
-  Scroll da página não muda.
-  Pra testar: muda --stage-radius no :root (não o border-radius do .stage).
-*/
-.frame::before {
-  content: '';
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: var(--stage-radius);
-  box-shadow: 0 0 0 100vmax var(--bg-outer);
-}
 
 .page {
   position: relative;
   z-index: 0;
-  padding: var(--respiro);
+  box-sizing: border-box;
+  height: 100%;
   color: var(--text);
   max-width: 100%;
-  overflow-x: clip;
+  overflow: hidden;
 }
 
 .stage {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  min-height: var(--stage-height);
-  padding: var(--edge);
+  position: absolute;
+  top: var(--respiro);
+  left: var(--respiro);
+  right: var(--respiro);
+  bottom: var(--respiro);
+  z-index: 0;
   background: var(--bg-stage);
   border-radius: var(--stage-radius);
-  overflow-x: clip;
-  overflow-y: visible;
-  max-width: 100%;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .stage__rain {
@@ -64,7 +38,60 @@
   pointer-events: none;
 }
 
-.stage > :not(.stage__rain):not(.copyright) {
+.stage__scroll {
+  position: absolute;
+  top: var(--respiro);
+  left: var(--respiro);
+  bottom: var(--respiro);
+  /* Vai até a borda da tela: a barra nativa assenta no preto da direita */
+  right: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  box-sizing: border-box;
+  padding: var(--edge);
+  padding-right: calc(var(--respiro) + var(--edge));
+  overflow-x: clip;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+  scrollbar-color: var(--scrollbar-thumb) var(--bg-outer);
+}
+
+.stage__scroll.is-scroll-locked {
+  overflow-y: hidden;
+}
+
+.stage__scroll::-webkit-scrollbar {
+  width: 14px;
+}
+
+.stage__scroll::-webkit-scrollbar-track {
+  background: var(--bg-outer);
+}
+
+.stage__scroll::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+  border: 3px solid var(--bg-outer);
+  background-clip: padding-box;
+}
+
+.stage__scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  border: 3px solid var(--bg-outer);
+  background-clip: padding-box;
+}
+
+.stage__scroll::-webkit-scrollbar-thumb:active {
+  background: var(--scrollbar-thumb-active);
+  border: 3px solid var(--bg-outer);
+  background-clip: padding-box;
+}
+
+.stage__scroll > :not(.copyright) {
   position: relative;
   z-index: 1;
 }
@@ -438,21 +465,40 @@
   background: var(--text);
 }
 
-/*
-  Menu overlay: mesmo retângulo cinza do stage.
-  Abre descendo (translateY 0), fecha subindo (translateY -100%).
-*/
-.menu {
-  position: fixed;
+.stage-panel {
+  position: absolute;
   top: var(--respiro);
   left: var(--respiro);
   right: var(--respiro);
+  bottom: var(--respiro);
+  border-radius: var(--stage-radius);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Menu abaixo do header; loader acima de tudo no clip do cinza */
+.stage-panel--menu {
   z-index: 12;
+}
+
+.stage-panel--loader {
+  z-index: 30;
+}
+
+/*
+  Menu overlay: mesmo retângulo cinza do stage.
+  Clip no .stage-panel: a animação não vaza pro fundo preto.
+  Abre descendo (translateY 0), fecha subindo (translateY -100%).
+*/
+.menu {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   box-sizing: border-box;
-  height: var(--stage-height);
+  height: 100%;
   padding: clamp(64px, 8vh, 100px) var(--content-x);
   background: var(--bg-loader);
   border-radius: var(--stage-radius);
@@ -465,19 +511,17 @@
 }
 
 /*
-  Loader: mesmo retângulo do menu (#C9C9C9).
-  Ao terminar, sai para baixo (translateY 110%), espelho do menu.
+  Loader: mesmo retângulo do menu.
+  Sai pra baixo (translateY 110%) clipado no cinza, sem invadir o preto.
 */
 .loader {
-  position: fixed;
-  top: var(--respiro);
-  left: var(--respiro);
-  right: var(--respiro);
-  z-index: 30;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   display: grid;
   place-items: center;
   box-sizing: border-box;
-  height: var(--stage-height);
+  height: 100%;
   background: var(--bg-loader);
   border-radius: var(--stage-radius);
   transform: translateY(0);
@@ -1255,7 +1299,7 @@
   }
 
   /* No mobile o copyright sobe no fluxo; o FAB continua fixo no canto */
-  .stage {
+  .stage__scroll {
     padding-bottom: 72px;
   }
 

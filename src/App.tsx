@@ -36,15 +36,23 @@ import {
   RevealCopy,
   RevealRule,
   SCROLL_RECIPES,
+  ScrollRootContext,
   sectionStagger,
-  scrollViewport,
   useScrollReveal,
+  useScrollViewport,
 } from './motion/scroll-reveal'
 import { usePageNavigator } from './navigation/usePageNavigator'
 import {
   lockPageScroll,
   unlockPageScroll,
 } from './navigation/scroll-lock'
+import {
+  getScrollRoot,
+  getScrollRootClientHeight,
+  getScrollRootTop,
+  setScrollRoot,
+  scrollRootToTop,
+} from './navigation/scroll-root'
 import './App.css'
 
 type Theme = 'light' | 'dark'
@@ -188,14 +196,30 @@ function BackToTop() {
 
   useEffect(() => {
     const sync = () => {
-      const threshold = Math.min(420, window.innerHeight * 0.55)
-      setVisible(window.scrollY > threshold)
+      const threshold = Math.min(420, getScrollRootClientHeight() * 0.55)
+      setVisible(getScrollRootTop() > threshold)
     }
+
+    const bind = () => {
+      const root =
+        getScrollRoot() ?? document.querySelector('.stage__scroll')
+      if (!root) return () => {}
+      root.addEventListener('scroll', sync, { passive: true })
+      return () => root.removeEventListener('scroll', sync)
+    }
+
     sync()
-    window.addEventListener('scroll', sync, { passive: true })
+    let unbind = bind()
     window.addEventListener('resize', sync)
+    const retry = window.setTimeout(() => {
+      unbind()
+      unbind = bind()
+      sync()
+    }, 0)
+
     return () => {
-      window.removeEventListener('scroll', sync)
+      window.clearTimeout(retry)
+      unbind()
       window.removeEventListener('resize', sync)
     }
   }, [])
@@ -218,11 +242,7 @@ function BackToTop() {
             mass: 0.75,
           }}
           onClick={() => {
-            window.scrollTo({
-              top: 0,
-              left: 0,
-              behavior: reduce ? 'auto' : 'smooth',
-            })
+            scrollRootToTop(reduce ? 'auto' : 'smooth')
           }}
         >
           <svg
@@ -569,6 +589,7 @@ function Menu({ id, open, onNavigate }: MenuProps) {
 
 function Hero() {
   const { canAnimate, reduce, playId } = useScrollReveal()
+  const scrollViewport = useScrollViewport()
   const titleLines = ['Hi, my', 'name is André.']
 
   return (
@@ -673,6 +694,7 @@ function Hero() {
 function ScrollCue() {
   const letters = ['S', 'C', 'R', 'O', 'L', 'L']
   const { canAnimate, reduce, playId } = useScrollReveal()
+  const scrollViewport = useScrollViewport()
 
   return (
     <motion.section
@@ -745,6 +767,7 @@ type NavigateProps = {
 
 function Works({ onNavigate }: NavigateProps) {
   const { canAnimate, reduce, playId } = useScrollReveal()
+  const scrollViewport = useScrollViewport()
   const recipe = SCROLL_RECIPES.work
 
   return (
@@ -819,6 +842,7 @@ function Spot({
   onNavigate,
 }: SpotProps) {
   const { canAnimate, reduce, playId } = useScrollReveal()
+  const scrollViewport = useScrollViewport()
   const recipe = SCROLL_RECIPES[accent] ?? SCROLL_RECIPES.work
 
   return (
@@ -865,12 +889,10 @@ function ContentPage({ page }: { page: SitePage }) {
   const accent = page.id as AccentTone
   const titleBase = page.title.replace(/\.$/, '')
   const { canAnimate, reduce, playId } = useScrollReveal()
+  const scrollViewport = useScrollViewport()
 
   return (
-    <div className="stage">
-      <div className="stage__rain">
-        <CodeRain />
-      </div>
+    <>
       <section className="hero" aria-label={page.title} data-accent={accent}>
         <motion.div
           key={playId}
@@ -981,16 +1003,13 @@ function ContentPage({ page }: { page: SitePage }) {
       </section>
       <ScrollCue />
       <Copyright />
-    </div>
+    </>
   )
 }
 
 function HomePage({ onNavigate }: NavigateProps) {
   return (
-    <div className="stage">
-      <div className="stage__rain">
-        <CodeRain />
-      </div>
+    <>
       <Hero />
       <ScrollCue />
       <Works onNavigate={onNavigate} />
@@ -1057,12 +1076,13 @@ function HomePage({ onNavigate }: NavigateProps) {
         onNavigate={onNavigate}
       />
       <Copyright />
-    </div>
+    </>
   )
 }
 
 function PortfolioShell() {
   const menuId = useId()
+  const scrollRef = useRef<HTMLDivElement>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   /** Mantém copyright/FAB escondidos até o menu terminar de subir. */
   const [menuBlocksChrome, setMenuBlocksChrome] = useState(false)
@@ -1087,6 +1107,15 @@ function PortfolioShell() {
   useEffect(() => {
     applyTheme(theme)
   }, [theme])
+
+  useEffect(() => {
+    const el = scrollRef.current
+    setScrollRoot(el)
+    if (el && document.documentElement.classList.contains('is-scroll-locked')) {
+      el.classList.add('is-scroll-locked')
+    }
+    return () => setScrollRoot(null)
+  }, [])
 
   useEffect(() => {
     if (menuOpen) {
@@ -1248,22 +1277,23 @@ function PortfolioShell() {
   return (
     <RevealProvider ready={revealReady}>
       <MenuOpenProvider open={menuBlocksChrome}>
-        <div className="frame" aria-hidden="true" />
         <div className={`page${menuBlocksChrome ? ' page--menu-open' : ''}`}>
-          {bootVisible ? (
-            <Loader
-              exiting={bootExiting}
-              background={bootBackground}
-              onExitComplete={handleBootExitComplete}
-            />
-          ) : null}
-          {transition.active ? (
-            <Loader
-              exiting={transition.exiting}
-              background={transition.background}
-              onExitComplete={finishTransition}
-            />
-          ) : null}
+          <div className="stage-panel stage-panel--loader">
+            {bootVisible ? (
+              <Loader
+                exiting={bootExiting}
+                background={bootBackground}
+                onExitComplete={handleBootExitComplete}
+              />
+            ) : null}
+            {transition.active ? (
+              <Loader
+                exiting={transition.exiting}
+                background={transition.background}
+                onExitComplete={finishTransition}
+              />
+            ) : null}
+          </div>
           <Header
             menuOpen={menuOpen}
             menuId={menuId}
@@ -1279,26 +1309,40 @@ function PortfolioShell() {
               }
             />
           </div>
-          <Menu id={menuId} open={menuOpen} onNavigate={navigateTo} />
-          <Routes>
-            <Route path="/" element={<HomePage onNavigate={navigateTo} />} />
-            <Route
-              path={SITE_PAGES.work.path}
-              element={<ContentPage page={SITE_PAGES.work} />}
-            />
-            <Route
-              path={SITE_PAGES.about.path}
-              element={<ContentPage page={SITE_PAGES.about} />}
-            />
-            <Route
-              path={SITE_PAGES.reading.path}
-              element={<ContentPage page={SITE_PAGES.reading} />}
-            />
-            <Route
-              path={SITE_PAGES.contact.path}
-              element={<ContentPage page={SITE_PAGES.contact} />}
-            />
-          </Routes>
+          <div className="stage-panel stage-panel--menu">
+            <Menu id={menuId} open={menuOpen} onNavigate={navigateTo} />
+          </div>
+          <div className="stage" aria-hidden="true">
+            <div className="stage__rain">
+              <CodeRain />
+            </div>
+          </div>
+          <ScrollRootContext.Provider value={scrollRef}>
+            <div className="stage__scroll" ref={scrollRef}>
+              <Routes>
+                <Route
+                  path="/"
+                  element={<HomePage onNavigate={navigateTo} />}
+                />
+                <Route
+                  path={SITE_PAGES.work.path}
+                  element={<ContentPage page={SITE_PAGES.work} />}
+                />
+                <Route
+                  path={SITE_PAGES.about.path}
+                  element={<ContentPage page={SITE_PAGES.about} />}
+                />
+                <Route
+                  path={SITE_PAGES.reading.path}
+                  element={<ContentPage page={SITE_PAGES.reading} />}
+                />
+                <Route
+                  path={SITE_PAGES.contact.path}
+                  element={<ContentPage page={SITE_PAGES.contact} />}
+                />
+              </Routes>
+            </div>
+          </ScrollRootContext.Provider>
         </div>
       </MenuOpenProvider>
     </RevealProvider>
