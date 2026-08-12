@@ -127,9 +127,16 @@ type HeaderProps = {
   menuId: string
   onToggleMenu: () => void
   onGoHome: () => void
+  onHireMe: () => void
 }
 
-function Header({ menuOpen, menuId, onToggleMenu, onGoHome }: HeaderProps) {
+function Header({
+  menuOpen,
+  menuId,
+  onToggleMenu,
+  onGoHome,
+  onHireMe,
+}: HeaderProps) {
   const { show } = useEntrance()
 
   return (
@@ -179,8 +186,13 @@ function Header({ menuOpen, menuId, onToggleMenu, onGoHome }: HeaderProps) {
 
       <motion.a
         className="header__btn"
-        href="mailto:hello@example.com"
+        href={SITE_PAGES.contact.path}
+        aria-label="Hire me"
         variants={headerFromRight}
+        onClick={(event) => {
+          event.preventDefault()
+          onHireMe()
+        }}
       >
         <Icon src={ASSETS.hireMe} alt="" />
         <span>Hire me</span>
@@ -1299,6 +1311,7 @@ function PortfolioShell() {
             menuId={menuId}
             onToggleMenu={() => setMenuOpen((open) => !open)}
             onGoHome={() => navigateTo('/')}
+            onHireMe={() => navigateTo(SITE_PAGES.contact.path)}
           />
           <div className="corner-tools">
             <BackToTop />

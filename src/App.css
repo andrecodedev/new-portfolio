@@ -537,34 +537,42 @@
 .loader__dots {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: var(--loader-dot-gap, 14px);
 }
 
 .loader__dot {
-  width: 14px;
-  height: 14px;
+  width: var(--loader-dot-size, 14px);
+  height: var(--loader-dot-size, 14px);
   border-radius: 50%;
   background: var(--text);
-  animation: loader-pulse 1s ease-in-out infinite;
+  /* Onda contínua, um pouco mais lenta */
+  animation: loader-wave 1.45s ease-in-out infinite;
+  will-change: transform, opacity, background-color;
+}
+
+.loader__dot:nth-child(1) {
+  animation-delay: 0s;
 }
 
 .loader__dot:nth-child(2) {
-  animation-delay: 0.15s;
+  animation-delay: 0.18s;
 }
 
 .loader__dot:nth-child(3) {
-  animation-delay: 0.3s;
+  animation-delay: 0.36s;
 }
 
-@keyframes loader-pulse {
+@keyframes loader-wave {
   0%,
   100% {
-    opacity: 0.25;
-    transform: scale(0.85);
+    transform: translateY(0) scale(0.92);
+    opacity: 0.28;
+    background-color: color-mix(in srgb, var(--text) 42%, transparent);
   }
-  50% {
+  45% {
+    transform: translateY(-9px) scale(1.08);
     opacity: 1;
-    transform: scale(1);
+    background-color: var(--text);
   }
 }
 
@@ -1077,7 +1085,7 @@
 [data-accent] .works__btn,
 [data-accent] .spot__btn {
   --btn-stripe-color: var(--section-accent);
-  --btn-stripe-opacity: 0.34;
+  --btn-stripe-opacity: 0.58;
   transition:
     background-color 0.18s ease,
     box-shadow 0.18s ease,
@@ -1089,7 +1097,7 @@
 [data-accent] .spot__btn:hover {
   border-color: var(--section-accent);
   color: var(--text);
-  --btn-stripe-opacity: 0.4;
+  --btn-stripe-opacity: 0.72;
   background-color: var(--btn-bg-hover);
   box-shadow: 2px 2px 0 var(--section-accent);
 }
@@ -1098,7 +1106,7 @@
 [data-accent] .spot__btn:active {
   border-color: var(--section-accent);
   color: var(--text);
-  --btn-stripe-opacity: 0.26;
+  --btn-stripe-opacity: 0.48;
   box-shadow: 0 0 0 var(--section-accent);
 }
 
@@ -1129,7 +1137,7 @@
 .spot__btn {
   --btn-offset: 4px;
   --btn-stripe-color: var(--text);
-  --btn-stripe-opacity: 0.2;
+  --btn-stripe-opacity: 0.42;
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -1257,15 +1265,18 @@
   :root {
     --content-x: clamp(56px, 8vw, 140px);
     --gap: clamp(24px, 3.5vw, 40px);
-    --text-display: clamp(1.45rem, 1rem + 1.6vw, 2.25rem);
-    --text-lead: clamp(0.9rem, 0.82rem + 0.35vw, 1.125rem);
-    --text-body: clamp(0.85rem, 0.8rem + 0.25vw, 1rem);
-    --media-hero: clamp(172px, 19vw + 1rem, 320px);
-    --media-figure: clamp(140px, 16vw + 1rem, 236px);
+    --text-display: clamp(1.75rem, 1.1rem + 2.1vw, 2.65rem);
+    --text-lead: clamp(1.0625rem, 0.92rem + 0.45vw, 1.35rem);
+    --text-body: clamp(1rem, 0.9rem + 0.35vw, 1.125rem);
+    --text-ui: clamp(0.875rem, 0.78rem + 0.35vw, 1.0625rem);
+    --media-hero: clamp(210px, 23vw + 1rem, 380px);
+    --media-figure: clamp(170px, 18vw + 1rem, 280px);
+    --loader-dot-size: 11px;
+    --loader-dot-gap: 11px;
   }
 
   .hero__media {
-    max-width: min(var(--media-hero), 38%);
+    max-width: min(var(--media-hero), 42%);
   }
 }
 
@@ -1276,21 +1287,37 @@
     --edge: 16px;
     --content-x: 16px;
     /*
-      Escala compacta: em 375px ~22px título / ~13.5px lead / ~13px body.
-      (Antes: ~28px / ~16.5px / ~15px — exagerado pra phone.)
+      Escala mobile/tablet maior.
+      Em ~375px: título ~29px / lead ~17.5px / body ~16px / UI ~14px.
     */
-    --text-display: clamp(1.2rem, 0.9rem + 2vw, 1.85rem);
-    --text-lead: clamp(0.8125rem, 0.75rem + 0.4vw, 1rem);
-    --text-body: clamp(0.8125rem, 0.76rem + 0.28vw, 0.9375rem);
-    --text-ui: clamp(0.65rem, 0.6rem + 0.3vw, 0.8125rem);
-    --media-hero: clamp(152px, 44vw, 260px);
-    --media-figure: clamp(120px, 38vw, 216px);
+    --text-display: clamp(1.55rem, 1.1rem + 3vw, 2.35rem);
+    --text-lead: clamp(1.05rem, 0.92rem + 0.55vw, 1.25rem);
+    --text-body: clamp(0.975rem, 0.9rem + 0.4vw, 1.125rem);
+    --text-ui: clamp(0.8125rem, 0.74rem + 0.4vw, 1rem);
+    --media-hero: clamp(196px, 52vw, 320px);
+    --media-figure: clamp(156px, 46vw, 268px);
+    --loader-dot-size: 8px;
+    --loader-dot-gap: 8px;
   }
 
   .header {
     top: calc(var(--respiro) + var(--edge));
     left: calc(var(--respiro) + var(--edge));
     right: calc(var(--respiro) + var(--edge));
+  }
+
+  .header__icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .header__theme-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .header__sep {
+    height: 18px;
   }
 
   .corner-tools {
@@ -1465,7 +1492,7 @@
 
   .loader__dot {
     animation: none;
-    opacity: 1;
+    opacity: 0.7;
     transform: none;
   }
 }
