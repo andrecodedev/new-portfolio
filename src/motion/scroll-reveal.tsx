@@ -197,7 +197,9 @@ export function MaskTitle({
       {lines.map((line, index) => {
         const isLast = index === lines.length - 1
         return (
-          <span key={`${line}-${index}`} className="reveal-title__line">
+          /* key estável por índice: troca de idioma atualiza o texto sem remount
+             (remount deixava y:110% preso atrás do overflow). */
+          <span key={index} className="reveal-title__line">
             <motion.span
               className="reveal-title__text"
               variants={

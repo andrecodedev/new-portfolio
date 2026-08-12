@@ -16,12 +16,23 @@
     <script>
       (function () {
         try {
-          var key = 'portfolio-theme'
-          var stored = localStorage.getItem(key)
-          var theme = stored === 'light' ? 'light' : 'dark'
+          var themeKey = 'portfolio-theme'
+          var themeStored = localStorage.getItem(themeKey)
+          var theme = themeStored === 'light' ? 'light' : 'dark'
           document.documentElement.setAttribute('data-theme', theme)
+
+          var localeKey = 'portfolio-locale'
+          var localeStored = localStorage.getItem(localeKey)
+          var lang =
+            localeStored === 'en'
+              ? 'en'
+              : localeStored === 'es'
+                ? 'es'
+                : 'pt-BR'
+          document.documentElement.lang = lang
         } catch (error) {
           document.documentElement.setAttribute('data-theme', 'dark')
+          document.documentElement.lang = 'pt-BR'
         }
       })()
     </script>

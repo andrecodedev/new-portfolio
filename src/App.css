@@ -854,7 +854,7 @@
 
 .hero__subtitle {
   margin: 0;
-  max-width: min(41rem, 100%);
+  max-width: min(26rem, 100%);
   font-family: var(--font-sans);
   font-size: var(--text-lead);
   font-weight: 500;
@@ -862,6 +862,44 @@
   letter-spacing: 0;
   color: var(--text);
   text-wrap: pretty;
+}
+
+.hero__subtitle-line {
+  display: block;
+}
+
+/* Páginas dedicadas: título + linha de accent (igual works/spots) */
+.hero__heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--gap-sm);
+  width: fit-content;
+  max-width: 100%;
+}
+
+.hero__rule {
+  display: block;
+  width: 83px;
+  height: 1px;
+  background: var(--text);
+}
+
+.hero--page[data-accent] .hero__rule {
+  background: var(--section-accent);
+}
+
+.hero--page[data-accent] .accent-mark {
+  color: var(--section-accent);
+}
+
+/* Descrição das páginas dedicadas: largura do hero__copy, tipografia menor */
+.hero__subtitle--page {
+  max-width: 100%;
+  width: 100%;
+  font-size: var(--text-body);
+  line-height: 1.6;
+  letter-spacing: 0.02em;
 }
 
 .hero__media {
@@ -1076,7 +1114,8 @@
 }
 
 [data-accent] .works__rule,
-[data-accent] .spot__rule {
+[data-accent] .spot__rule,
+[data-accent] .hero__rule {
   width: 88px;
   height: 2px;
   background: var(--section-accent);
@@ -1119,7 +1158,7 @@
 .spot__text {
   margin: 0;
   width: 100%;
-  max-width: 884px;
+  max-width: min(34rem, 100%);
   font-family: var(--font-sans);
   font-size: var(--text-body);
   font-weight: 500;
@@ -1131,6 +1170,7 @@
 
 .spot--end .spot__text {
   text-align: right;
+  margin-left: auto;
 }
 
 .works__btn,

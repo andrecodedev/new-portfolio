@@ -4,12 +4,18 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import CodeRain from './components/CodeRain'
 import {
   ASSETS,
-  NAV_LINKS,
-  SITE_PAGES,
+  PAGE_META,
   SOCIAL_LINKS,
   getLoaderBgForPath,
-  type SitePage,
+  highlightAccents,
+  type ContentPageId,
 } from './data/site'
+import {
+  LOCALE_FLAGS,
+  LOCALE_LABELS,
+  LOCALES,
+} from './i18n/copy'
+import { LocaleProvider, useLocale } from './i18n/LocaleProvider'
 import {
   MenuOpenProvider,
   RevealProvider,
@@ -122,6 +128,28 @@ function Icon({ src, alt = '', className = 'header__icon' }: IconProps) {
   return <img className={className} src={src} alt={alt} draggable={false} />
 }
 
+function AccentedText({
+  body,
+  accents,
+}: {
+  body: string
+  accents: readonly string[]
+}) {
+  return (
+    <>
+      {highlightAccents(body, accents).map((part) =>
+        part.accent ? (
+          <strong key={part.key} className="accent-text">
+            {part.text}
+          </strong>
+        ) : (
+          <span key={part.key}>{part.text}</span>
+        ),
+      )}
+    </>
+  )
+}
+
 type HeaderProps = {
   menuOpen: boolean
   menuId: string
@@ -138,6 +166,7 @@ function Header({
   onHireMe,
 }: HeaderProps) {
   const { show } = useEntrance()
+  const { t } = useLocale()
 
   return (
     <motion.header
@@ -162,7 +191,7 @@ function Header({
         <button
           type="button"
           className="header__menu"
-          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-label={menuOpen ? t.chrome.closeMenu : t.chrome.openMenu}
           aria-expanded={menuOpen}
           aria-controls={menuId}
           onClick={onToggleMenu}
@@ -177,7 +206,7 @@ function Header({
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.22, ease: easeOutExpo }}
               >
-                {menuOpen ? 'Close' : 'Menu'}
+                {menuOpen ? t.chrome.close : t.chrome.menu}
               </motion.span>
             </AnimatePresence>
           </span>
@@ -186,8 +215,8 @@ function Header({
 
       <motion.a
         className="header__btn"
-        href={SITE_PAGES.contact.path}
-        aria-label="Hire me"
+        href={PAGE_META.contact.path}
+        aria-label={t.chrome.hireMe}
         variants={headerFromRight}
         onClick={(event) => {
           event.preventDefault()
@@ -195,7 +224,7 @@ function Header({
         }}
       >
         <Icon src={ASSETS.hireMe} alt="" />
-        <span>Hire me</span>
+        <span>{t.chrome.hireMe}</span>
       </motion.a>
     </motion.header>
   )
@@ -204,6 +233,7 @@ function Header({
 function BackToTop() {
   const [visible, setVisible] = useState(false)
   const { show } = useEntrance()
+  const { t } = useLocale()
   const reduce = Boolean(useReducedMotion())
 
   useEffect(() => {
@@ -242,8 +272,8 @@ function BackToTop() {
         <motion.button
           type="button"
           className="back-top"
-          aria-label="Voltar ao topo"
-          title="Voltar ao topo"
+          aria-label={t.chrome.backToTop}
+          title={t.chrome.backToTop}
           initial={reduce ? false : { opacity: 0, scale: 0.7, y: 12 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={reduce ? undefined : { opacity: 0, scale: 0.7, y: 12 }}
@@ -295,6 +325,7 @@ function SideTools({ theme, onToggleTheme }: SideToolsProps) {
   const [open, setOpen] = useState(false)
   const [touchMode, setTouchMode] = useState(false)
   const { show } = useEntrance()
+  const { locale, setLocale, t } = useLocale()
 
   useEffect(() => {
     const media = window.matchMedia('(hover: none), (max-width: 1024px)')
@@ -323,7 +354,7 @@ function SideTools({ theme, onToggleTheme }: SideToolsProps) {
     <motion.aside
       ref={rootRef}
       className={`side-tools${open ? ' side-tools--open' : ''}${touchMode ? ' side-tools--touch' : ''}`}
-      aria-label="Ferramentas do site"
+      aria-label={t.chrome.tools}
       initial="hidden"
       animate={show ? 'show' : 'hidden'}
       variants={fabEntrance}
@@ -337,37 +368,22 @@ function SideTools({ theme, onToggleTheme }: SideToolsProps) {
           id="side-tools-panel"
           inert={!open ? true : undefined}
         >
-          <div className="side-tools__langs" role="group" aria-label="Idioma">
-            <button
-              type="button"
-              className="side-tools__lang side-tools__lang--active"
-              aria-label="Português"
-              title="Português (em breve)"
-            >
-              <span className="side-tools__flag" aria-hidden="true">
-                🇧🇷
-              </span>
-            </button>
-            <button
-              type="button"
-              className="side-tools__lang"
-              aria-label="English"
-              title="English (em breve)"
-            >
-              <span className="side-tools__flag" aria-hidden="true">
-                🇺🇸
-              </span>
-            </button>
-            <button
-              type="button"
-              className="side-tools__lang"
-              aria-label="Español"
-              title="Español (em breve)"
-            >
-              <span className="side-tools__flag" aria-hidden="true">
-                🇪🇸
-              </span>
-            </button>
+          <div className="side-tools__langs" role="group" aria-label={t.chrome.language}>
+            {LOCALES.map((code) => (
+              <button
+                key={code}
+                type="button"
+                className={`side-tools__lang${locale === code ? ' side-tools__lang--active' : ''}`}
+                aria-label={LOCALE_LABELS[code]}
+                aria-pressed={locale === code}
+                title={LOCALE_LABELS[code]}
+                onClick={() => setLocale(code)}
+              >
+                <span className="side-tools__flag" aria-hidden="true">
+                  {LOCALE_FLAGS[code]}
+                </span>
+              </button>
+            ))}
           </div>
 
           <span className="side-tools__divider" aria-hidden="true" />
@@ -381,9 +397,7 @@ function SideTools({ theme, onToggleTheme }: SideToolsProps) {
               className={`side-tools__switch${isDark ? ' side-tools__switch--dark' : ''}`}
               role="switch"
               aria-checked={isDark}
-              aria-label={
-                isDark ? 'Ativar tema claro' : 'Ativar tema escuro'
-              }
+              aria-label={isDark ? t.chrome.themeLight : t.chrome.themeDark}
               onClick={onToggleTheme}
             >
               <span className="side-tools__switch-thumb" />
@@ -394,7 +408,7 @@ function SideTools({ theme, onToggleTheme }: SideToolsProps) {
         <button
           type="button"
           className="side-tools__fab"
-          aria-label="Abrir configurações"
+          aria-label={t.chrome.openSettings}
           aria-expanded={open}
           aria-controls="side-tools-panel"
           onMouseEnter={() => {
@@ -432,6 +446,7 @@ function SideTools({ theme, onToggleTheme }: SideToolsProps) {
 function Copyright() {
   const { show, reduce } = useEntrance()
   const menuOpen = useMenuOpen()
+  const { t } = useLocale()
   const visible = show && !menuOpen
 
   return (
@@ -462,8 +477,8 @@ function Copyright() {
           }
         />
         <p className="copyright__text">
-          <span>Direitos Autorais © 2024 - 2026 and.rvitor.dev.br</span>
-          <span>Todos os direitos reservados.</span>
+          <span>{t.chrome.copyrightLine1}</span>
+          <span>{t.chrome.copyrightLine2}</span>
         </p>
       </div>
     </motion.aside>
@@ -487,6 +502,8 @@ function Loader({
   background = 'var(--bg-loader)',
   onExitComplete,
 }: LoaderProps) {
+  const { t } = useLocale()
+
   return (
     <div
       className={`loader${exiting ? ' loader--exit' : ''}`}
@@ -494,7 +511,7 @@ function Loader({
       role="status"
       aria-live="polite"
       aria-busy={!exiting}
-      aria-label="Loading"
+      aria-label={t.chrome.loading}
       onTransitionEnd={(event) => {
         if (event.target !== event.currentTarget) return
         if (event.propertyName !== 'transform') return
@@ -514,6 +531,40 @@ function Loader({
 function Menu({ id, open, onNavigate }: MenuProps) {
   const reduce = Boolean(useReducedMotion())
   const state = open ? 'show' : 'hidden'
+  const { t } = useLocale()
+
+  const navLinks = [
+    {
+      label: t.navHome.label,
+      path: '/',
+      description: t.navHome.description,
+      accent: null as ContentPageId | null,
+    },
+    {
+      label: t.pages.about.menuLabel,
+      path: PAGE_META.about.path,
+      description: t.pages.about.menuDescription,
+      accent: 'about' as const,
+    },
+    {
+      label: t.pages.work.menuLabel,
+      path: PAGE_META.work.path,
+      description: t.pages.work.menuDescription,
+      accent: 'work' as const,
+    },
+    {
+      label: t.pages.reading.menuLabel,
+      path: PAGE_META.reading.path,
+      description: t.pages.reading.menuDescription,
+      accent: 'reading' as const,
+    },
+    {
+      label: t.pages.contact.menuLabel,
+      path: PAGE_META.contact.path,
+      description: t.pages.contact.menuDescription,
+      accent: 'contact' as const,
+    },
+  ]
 
   return (
     <div
@@ -533,9 +584,9 @@ function Menu({ id, open, onNavigate }: MenuProps) {
         variants={menuRoot}
       >
         <ul className="menu__list">
-          {NAV_LINKS.map((item) => (
+          {navLinks.map((item) => (
             <motion.li
-              key={item.label}
+              key={item.path}
               className="menu__item"
               variants={reduce ? undefined : menuItem}
             >
@@ -602,7 +653,8 @@ function Menu({ id, open, onNavigate }: MenuProps) {
 function Hero() {
   const { canAnimate, reduce, playId } = useScrollReveal()
   const scrollViewport = useScrollViewport()
-  const titleLines = ['Hi, my', 'name is André.']
+  const { t } = useLocale()
+  const titleLines = [...t.home.heroTitleLines]
 
   return (
     <section className="hero" id="introduction" aria-label="Introduction">
@@ -617,7 +669,7 @@ function Hero() {
         <motion.div className="hero__copy" variants={sectionStagger}>
           <h1 className="hero__title">
             {titleLines.map((line, index) => (
-              <span key={line} className="hero__title-line">
+              <span key={index} className="hero__title-line">
                 <motion.span
                   className="hero__title-text"
                   variants={
@@ -663,8 +715,11 @@ function Hero() {
                   }
             }
           >
-            I&apos;m an independent creative developer from Abergavenny, South
-            Wales.
+            {t.home.heroSubtitleLines.map((line, index) => (
+              <span key={index} className="hero__subtitle-line">
+                {line}
+              </span>
+            ))}
           </motion.p>
         </motion.div>
 
@@ -693,7 +748,7 @@ function Hero() {
             <img
               className="hero__avatar-img"
               src={ASSETS.avatar}
-              alt="André"
+              alt="André Vitor"
               draggable={false}
             />
           </div>
@@ -781,12 +836,14 @@ function Works({ onNavigate }: NavigateProps) {
   const { canAnimate, reduce, playId } = useScrollReveal()
   const scrollViewport = useScrollViewport()
   const recipe = SCROLL_RECIPES.work
+  const { t } = useLocale()
+  const copy = t.home.works
 
   return (
     <section
       className="works"
       id="trabalhos"
-      aria-label="Works"
+      aria-label={copy.ariaLabel}
       data-accent="work"
     >
       <motion.div
@@ -800,25 +857,22 @@ function Works({ onNavigate }: NavigateProps) {
         <motion.div className="works__heading" variants={sectionStagger}>
           <MaskTitle
             className="works__title"
-            lines={['Meus trabalhos e', 'estatísticas']}
+            lines={[...copy.titleLines]}
             reduce={reduce}
           />
           <RevealRule className="works__rule" from={recipe.rule} />
         </motion.div>
 
         <RevealCopy className="works__text" kind={recipe.body}>
-          Uma visão geral da minha trajetória como desenvolvedor, reunindo{' '}
-          <strong className="accent-text">projetos</strong>,{' '}
-          <strong className="accent-text">estatísticas</strong>, contribuições e
-          resultados construídos ao longo da minha jornada.
+          <AccentedText body={copy.body} accents={copy.accents} />
         </RevealCopy>
 
         <RevealButton
           className="works__btn"
           kind={recipe.button}
-          onClick={() => onNavigate(SITE_PAGES.work.path)}
+          onClick={() => onNavigate(PAGE_META.work.path)}
         >
-          Meus trabalhos
+          {copy.cta}
         </RevealButton>
       </motion.div>
     </section>
@@ -897,15 +951,19 @@ function Spot({
   )
 }
 
-function ContentPage({ page }: { page: SitePage }) {
-  const accent = page.id as AccentTone
+function ContentPage({ pageId }: { pageId: ContentPageId }) {
+  const { t } = useLocale()
+  const page = t.pages[pageId]
+  const meta = PAGE_META[pageId]
+  const accent = meta.accent
   const titleBase = page.title.replace(/\.$/, '')
   const { canAnimate, reduce, playId } = useScrollReveal()
   const scrollViewport = useScrollViewport()
+  const recipe = SCROLL_RECIPES[accent] ?? SCROLL_RECIPES.work
 
   return (
     <>
-      <section className="hero" aria-label={page.title} data-accent={accent}>
+      <section className="hero hero--page" aria-label={page.title} data-accent={accent}>
         <motion.div
           key={playId}
           className="hero__content"
@@ -915,36 +973,39 @@ function ContentPage({ page }: { page: SitePage }) {
           variants={sectionStagger}
         >
           <motion.div className="hero__copy" variants={sectionStagger}>
-            <h1 className="hero__title">
-              <span className="hero__title-line">
-                <motion.span
-                  className="hero__title-text"
-                  variants={
-                    reduce
-                      ? { hidden: { y: 0 }, show: { y: 0 } }
-                      : {
-                          hidden: {
-                            y: '110%',
-                            transition: { duration: 0.28, ease: easeOutExpo },
-                          },
-                          show: {
-                            y: 0,
-                            transition: {
-                              duration: 0.85,
-                              delay: 0.1,
-                              ease: easeOutExpo,
+            <motion.div className="hero__heading" variants={sectionStagger}>
+              <h1 className="hero__title">
+                <span className="hero__title-line">
+                  <motion.span
+                    className="hero__title-text"
+                    variants={
+                      reduce
+                        ? { hidden: { y: 0 }, show: { y: 0 } }
+                        : {
+                            hidden: {
+                              y: '110%',
+                              transition: { duration: 0.28, ease: easeOutExpo },
                             },
-                          },
-                        }
-                  }
-                >
-                  {titleBase}
-                  <span className="accent-mark">.</span>
-                </motion.span>
-              </span>
-            </h1>
+                            show: {
+                              y: 0,
+                              transition: {
+                                duration: 0.85,
+                                delay: 0.1,
+                                ease: easeOutExpo,
+                              },
+                            },
+                          }
+                    }
+                  >
+                    {titleBase}
+                    <span className="accent-mark">.</span>
+                  </motion.span>
+                </span>
+              </h1>
+              <RevealRule className="hero__rule" from={recipe.rule} />
+            </motion.div>
             <motion.p
-              className="hero__subtitle"
+              className="hero__subtitle hero__subtitle--page"
               variants={
                 reduce
                   ? { hidden: { opacity: 1 }, show: { opacity: 1 } }
@@ -966,12 +1027,7 @@ function ContentPage({ page }: { page: SitePage }) {
                     }
               }
             >
-              Do design de interação a sistemas de design escaláveis, aplicativos
-              de página única a algo mais{' '}
-              <strong className="accent-text">experimental</strong> com WebGL.
-              Ajudo pessoas incríveis a criar projetos web{' '}
-              <strong className="accent-text">ambiciosos</strong>, mas
-              acessíveis. Quanto mais ousados, melhor.
+              <AccentedText body={page.body} accents={page.accents} />
             </motion.p>
           </motion.div>
           <motion.div
@@ -1005,7 +1061,7 @@ function ContentPage({ page }: { page: SitePage }) {
             <div className="hero__figure">
               <img
                 className="hero__figure-img"
-                src={page.image}
+                src={meta.image}
                 alt={page.imageAlt}
                 draggable={false}
               />
@@ -1020,6 +1076,8 @@ function ContentPage({ page }: { page: SitePage }) {
 }
 
 function HomePage({ onNavigate }: NavigateProps) {
+  const { t } = useLocale()
+
   return (
     <>
       <Hero />
@@ -1027,64 +1085,53 @@ function HomePage({ onNavigate }: NavigateProps) {
       <Works onNavigate={onNavigate} />
       <Spot
         id="historia"
-        ariaLabel="História"
+        ariaLabel={t.home.about.ariaLabel}
         align="end"
         accent="about"
-        titleLine1="Conheça um pouco da"
-        titleLine2="minha história"
+        titleLine1={t.home.about.titleLines[0]}
+        titleLine2={t.home.about.titleLines[1]}
         text={
-          <>
-            Do design de interação a sistemas de design escaláveis, aplicativos
-            de página única a algo mais experimental com WebGL. Ajudo pessoas
-            incríveis a criar projetos web{' '}
-            <strong className="accent-text">ambiciosos</strong>, mas acessíveis.
-            Quanto mais <strong className="accent-text">ousados</strong>,
-            melhor.
-          </>
+          <AccentedText
+            body={t.home.about.body}
+            accents={t.home.about.accents}
+          />
         }
-        ctaLabel="Minha história"
-        to={SITE_PAGES.about.path}
+        ctaLabel={t.home.about.cta}
+        to={PAGE_META.about.path}
         onNavigate={onNavigate}
       />
       <Spot
         id="estudos"
-        ariaLabel="Estudos e projetos"
+        ariaLabel={t.home.reading.ariaLabel}
         align="start"
         accent="reading"
-        titleLine1="Veja meus estudos e"
-        titleLine2="projetos"
+        titleLine1={t.home.reading.titleLines[0]}
+        titleLine2={t.home.reading.titleLines[1]}
         text={
-          <>
-            Do design de interação a sistemas de design escaláveis, aplicativos
-            de página única a algo mais{' '}
-            <strong className="accent-text">experimental</strong> com WebGL.
-            Ajudo pessoas incríveis a criar{' '}
-            <strong className="accent-text">projetos</strong> web ambiciosos,
-            mas acessíveis. Quanto mais ousados, melhor.
-          </>
+          <AccentedText
+            body={t.home.reading.body}
+            accents={t.home.reading.accents}
+          />
         }
-        ctaLabel="Meus estudos"
-        to={SITE_PAGES.reading.path}
+        ctaLabel={t.home.reading.cta}
+        to={PAGE_META.reading.path}
         onNavigate={onNavigate}
       />
       <Spot
         id="juntos"
-        ariaLabel="Vamos trabalhar juntos"
+        ariaLabel={t.home.contact.ariaLabel}
         align="end"
         accent="contact"
-        titleLine1="Vamos trabalhar"
-        titleLine2="juntos"
+        titleLine1={t.home.contact.titleLines[0]}
+        titleLine2={t.home.contact.titleLines[1]}
         text={
-          <>
-            Do design de interação a sistemas de design escaláveis, aplicativos
-            de página única a algo mais experimental com WebGL. Ajudo pessoas
-            incríveis a <strong className="accent-text">criar</strong> projetos
-            web ambiciosos, mas acessíveis. Quanto mais ousados,{' '}
-            <strong className="accent-text">melhor</strong>.
-          </>
+          <AccentedText
+            body={t.home.contact.body}
+            accents={t.home.contact.accents}
+          />
         }
-        ctaLabel="Sobre minha abordagem"
-        to={SITE_PAGES.contact.path}
+        ctaLabel={t.home.contact.cta}
+        to={PAGE_META.contact.path}
         onNavigate={onNavigate}
       />
       <Copyright />
@@ -1311,7 +1358,7 @@ function PortfolioShell() {
             menuId={menuId}
             onToggleMenu={() => setMenuOpen((open) => !open)}
             onGoHome={() => navigateTo('/')}
-            onHireMe={() => navigateTo(SITE_PAGES.contact.path)}
+            onHireMe={() => navigateTo(PAGE_META.contact.path)}
           />
           <div className="corner-tools">
             <BackToTop />
@@ -1338,20 +1385,20 @@ function PortfolioShell() {
                   element={<HomePage onNavigate={navigateTo} />}
                 />
                 <Route
-                  path={SITE_PAGES.work.path}
-                  element={<ContentPage page={SITE_PAGES.work} />}
+                  path={PAGE_META.work.path}
+                  element={<ContentPage pageId="work" />}
                 />
                 <Route
-                  path={SITE_PAGES.about.path}
-                  element={<ContentPage page={SITE_PAGES.about} />}
+                  path={PAGE_META.about.path}
+                  element={<ContentPage pageId="about" />}
                 />
                 <Route
-                  path={SITE_PAGES.reading.path}
-                  element={<ContentPage page={SITE_PAGES.reading} />}
+                  path={PAGE_META.reading.path}
+                  element={<ContentPage pageId="reading" />}
                 />
                 <Route
-                  path={SITE_PAGES.contact.path}
-                  element={<ContentPage page={SITE_PAGES.contact} />}
+                  path={PAGE_META.contact.path}
+                  element={<ContentPage pageId="contact" />}
                 />
               </Routes>
             </div>
@@ -1365,7 +1412,9 @@ function PortfolioShell() {
 function App() {
   return (
     <BrowserRouter>
-      <PortfolioShell />
+      <LocaleProvider>
+        <PortfolioShell />
+      </LocaleProvider>
     </BrowserRouter>
   )
 }
