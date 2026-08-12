@@ -25,8 +25,10 @@ export function useScrollViewport() {
   return useMemo(
     () => ({
       once: false,
-      amount: 0.28,
-      margin: '0px 0px -10% 0px' as const,
+      /* Meio-termo: original (0.28 + margem negativa) pedia scroll demais;
+         0.1 + margem positiva grande animava fora da vista. */
+      amount: 0.2,
+      margin: '0px 0px -4% 0px' as const,
       ...(root ? { root } : {}),
     }),
     [root],
@@ -36,8 +38,8 @@ export function useScrollViewport() {
 /** @deprecated Use useScrollViewport() — root precisa do .stage__scroll */
 export const scrollViewport = {
   once: false,
-  amount: 0.28,
-  margin: '0px 0px -10% 0px',
+  amount: 0.2,
+  margin: '0px 0px -4% 0px',
 } as const
 
 export type BodySlide = 'up' | 'left' | 'right' | 'soft'
