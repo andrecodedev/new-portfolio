@@ -81,23 +81,76 @@ export function useScrollReveal() {
   return { canAnimate, reduce, playId }
 }
 
-/** Saída mais rápida que a entrada: reseta sem “enrolar” no scroll. */
-const exitQuick = { duration: 0.28, ease: easeOutExpo } as const
+/** Saída um pouco mais curta que a entrada, sem corte seco. */
+const slideHide = { duration: 0.55, ease: easeOutSoft } as const
+const slideShow = { duration: 0.78, ease: easeOutSoft } as const
+const exitQuick = slideHide
 
 export const sectionStagger: Variants = {
   hidden: {
     transition: {
-      staggerChildren: 0.03,
+      staggerChildren: 0.06,
       staggerDirection: -1,
       when: 'afterChildren',
     },
   },
   show: {
     transition: {
-      staggerChildren: 0.07,
+      staggerChildren: 0.06,
       delayChildren: 0,
     },
   },
+}
+
+export type SectionSide = 'left' | 'right'
+
+/** Entra pelo lado do bloco e volta pelo mesmo lado. */
+export function sideSlideVariants(side: SectionSide): Variants {
+  const from = side === 'right' ? 36 : -36
+  return {
+    hidden: {
+      opacity: 0,
+      x: from,
+      transition: slideHide,
+    },
+    show: {
+      opacity: 1,
+      x: 0,
+      transition: slideShow,
+    },
+  }
+}
+
+/** Centro: sobe de baixo para cima e desce de volta. */
+export function riseSlideVariants(): Variants {
+  return {
+    hidden: {
+      opacity: 0,
+      y: 28,
+      transition: slideHide,
+    },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: slideShow,
+    },
+  }
+}
+
+const stillSlide: Variants = {
+  hidden: { opacity: 1, x: 0, y: 0 },
+  show: { opacity: 1, x: 0, y: 0 },
+}
+
+export function visibleSideVariants(
+  side: SectionSide,
+  reduce: boolean,
+): Variants {
+  return reduce ? stillSlide : sideSlideVariants(side)
+}
+
+export function visibleRiseVariants(reduce: boolean): Variants {
+  return reduce ? stillSlide : riseSlideVariants()
 }
 
 const bodyHidden: Record<BodySlide, { opacity: number; x?: number; y?: number }> =
@@ -112,7 +165,7 @@ export function bodyVariants(kind: BodySlide): Variants {
   return {
     hidden: {
       ...bodyHidden[kind],
-      transition: exitQuick,
+      transition: slideHide,
     },
     show: {
       opacity: 1,
@@ -185,62 +238,74 @@ type MaskTitleProps = {
   /** Marca (ponto) na última linha */
   withMark?: boolean
   reduce?: boolean
+  /** Home: desliza no mesmo eixo da seção (esquerda ou direita). */
+  side?: SectionSide
 }
 
-/** Título com máscara: texto sobe linha a linha (efeito “escrita limpa”). */
+/** Título: máscara vertical na home antiga, ou deslize lateral nas seções. */
 export function MaskTitle({
   className = '',
   lines,
   withMark = true,
   reduce = false,
+  side,
 }: MaskTitleProps) {
+  const lineVariants = side
+    ? visibleSideVariants(side, reduce)
+    : reduce
+      ? { hidden: { y: 0 }, show: { y: 0 } }
+      : {
+          hidden: {
+            y: '110%',
+            transition: { duration: 0.28, ease: easeOutExpo },
+          },
+          show: {
+            y: 0,
+            transition: {
+              duration: 0.8,
+              ease: easeOutExpo,
+            },
+          },
+        }
+
   return (
-    <h2 className={className}>
+    <motion.h2 className={className} variants={side ? visibleSideVariants(side, reduce) : undefined}>
       {lines.map((line, index) => {
         const isLast = index === lines.length - 1
         return (
-          /* key estável por índice: troca de idioma atualiza o texto sem remount
-             (remount deixava y:110% preso atrás do overflow). */
           <span key={index} className="reveal-title__line">
-            <motion.span
-              className="reveal-title__text"
-              variants={
-                reduce
-                  ? { hidden: { y: 0 }, show: { y: 0 } }
-                  : {
-                      hidden: {
-                        y: '110%',
-                        transition: { duration: 0.28, ease: easeOutExpo },
-                      },
-                      show: {
-                        y: 0,
-                        transition: {
-                          duration: 0.8,
-                          delay: index * 0.08,
-                          ease: easeOutExpo,
-                        },
-                      },
-                    }
-              }
-            >
-              {line}
-              {withMark && isLast ? (
-                <span className="accent-mark">.</span>
-              ) : null}
-            </motion.span>
+            {side ? (
+              <span className="reveal-title__text">
+                {line}
+                {withMark && isLast ? (
+                  <span className="accent-mark">.</span>
+                ) : null}
+              </span>
+            ) : (
+              <motion.span
+                className="reveal-title__text"
+                variants={lineVariants}
+              >
+                {line}
+                {withMark && isLast ? (
+                  <span className="accent-mark">.</span>
+                ) : null}
+              </motion.span>
+            )}
           </span>
         )
       })}
-    </h2>
+    </motion.h2>
   )
 }
 
 type RevealRuleProps = {
   className?: string
   from: RuleGrow
+  side?: SectionSide
 }
 
-export function RevealRule({ className = '', from }: RevealRuleProps) {
+export function RevealRule({ className = '', from, side }: RevealRuleProps) {
   const reduce = Boolean(useReducedMotion())
 
   return (
@@ -248,24 +313,36 @@ export function RevealRule({ className = '', from }: RevealRuleProps) {
       className={className}
       aria-hidden="true"
       variants={
-        reduce
-          ? { hidden: { scaleX: 1 }, show: { scaleX: 1 } }
-          : ruleVariants(from)
+        side
+          ? visibleSideVariants(side, reduce)
+          : reduce
+            ? { hidden: { scaleX: 1 }, show: { scaleX: 1 } }
+            : ruleVariants(from)
       }
-      style={{
-        transformOrigin: from === 'right' ? 'right center' : 'left center',
-      }}
+      style={
+        side
+          ? undefined
+          : {
+              transformOrigin: from === 'right' ? 'right center' : 'left center',
+            }
+      }
     />
   )
 }
 
 type RevealCopyProps = {
   className?: string
-  kind: BodySlide
+  kind?: BodySlide
+  side?: SectionSide
   children: ReactNode
 }
 
-export function RevealCopy({ className = '', kind, children }: RevealCopyProps) {
+export function RevealCopy({
+  className = '',
+  kind = 'up',
+  side,
+  children,
+}: RevealCopyProps) {
   const reduce = Boolean(useReducedMotion())
 
   return (
@@ -273,8 +350,10 @@ export function RevealCopy({ className = '', kind, children }: RevealCopyProps) 
       className={className}
       variants={
         reduce
-          ? { hidden: { opacity: 1 }, show: { opacity: 1 } }
-          : bodyVariants(kind)
+          ? { hidden: { opacity: 1, x: 0 }, show: { opacity: 1, x: 0 } }
+          : side
+            ? sideSlideVariants(side)
+            : bodyVariants(kind)
       }
     >
       {children}
@@ -284,14 +363,16 @@ export function RevealCopy({ className = '', kind, children }: RevealCopyProps) 
 
 type RevealButtonProps = {
   className?: string
-  kind: ButtonPunch
+  kind?: ButtonPunch
+  side?: SectionSide
   onClick: () => void
   children: ReactNode
 }
 
 export function RevealButton({
   className = '',
-  kind,
+  kind = 'lift',
+  side,
   onClick,
   children,
 }: RevealButtonProps) {
@@ -304,8 +385,10 @@ export function RevealButton({
       onClick={onClick}
       variants={
         reduce
-          ? { hidden: { opacity: 1 }, show: { opacity: 1 } }
-          : buttonVariants(kind)
+          ? { hidden: { opacity: 1, x: 0 }, show: { opacity: 1, x: 0 } }
+          : side
+            ? sideSlideVariants(side)
+            : buttonVariants(kind)
       }
     >
       {children}

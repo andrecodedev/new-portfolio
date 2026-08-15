@@ -32,7 +32,6 @@ import {
   menuLabel,
   menuRoot,
   menuSocial,
-  metaEntranceTransition,
   useEntrance,
   useMenuOpen,
 } from './motion/reveal'
@@ -41,11 +40,12 @@ import {
   RevealButton,
   RevealCopy,
   RevealRule,
-  SCROLL_RECIPES,
   ScrollRootContext,
   sectionStagger,
   useScrollReveal,
   useScrollViewport,
+  visibleRiseVariants,
+  visibleSideVariants,
 } from './motion/scroll-reveal'
 import { usePageNavigator } from './navigation/usePageNavigator'
 import {
@@ -453,29 +453,18 @@ function Copyright() {
     <motion.aside
       className="copyright"
       aria-label="Copyright"
-      initial={reduce ? false : { opacity: 0, x: -18 }}
+      initial={reduce ? false : { opacity: 0, y: 28 }}
       animate={
-        visible ? { opacity: 1, x: 0 } : { opacity: 0, x: -18 }
+        visible ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }
       }
       transition={
         visible
-          ? metaEntranceTransition(0.2)
-          : { duration: 0.22, ease: easeOutExpo }
+          ? { duration: 0.78, delay: 0.12, ease: easeOutSoft }
+          : { duration: 0.55, ease: easeOutSoft }
       }
     >
       <div className="copyright__group">
-        <motion.span
-          className="copyright__line"
-          aria-hidden="true"
-          initial={reduce ? false : { scaleY: 0 }}
-          animate={visible ? { scaleY: 1 } : { scaleY: 0 }}
-          style={{ transformOrigin: 'bottom center' }}
-          transition={
-            visible
-              ? { duration: 0.65, delay: 0.12, ease: easeOutExpo }
-              : { duration: 0.2, ease: easeOutExpo }
-          }
-        />
+        <span className="copyright__line" aria-hidden="true" />
         <p className="copyright__text">
           <span>{t.chrome.copyrightLine1}</span>
           <span>{t.chrome.copyrightLine2}</span>
@@ -541,16 +530,16 @@ function Menu({ id, open, onNavigate }: MenuProps) {
       accent: null as ContentPageId | null,
     },
     {
-      label: t.pages.about.menuLabel,
-      path: PAGE_META.about.path,
-      description: t.pages.about.menuDescription,
-      accent: 'about' as const,
-    },
-    {
       label: t.pages.work.menuLabel,
       path: PAGE_META.work.path,
       description: t.pages.work.menuDescription,
       accent: 'work' as const,
+    },
+    {
+      label: t.pages.about.menuLabel,
+      path: PAGE_META.about.path,
+      description: t.pages.about.menuDescription,
+      accent: 'about' as const,
     },
     {
       label: t.pages.reading.menuLabel,
@@ -655,6 +644,7 @@ function Hero() {
   const scrollViewport = useScrollViewport()
   const { t } = useLocale()
   const titleLines = [...t.home.heroTitleLines]
+  const rise = visibleRiseVariants(reduce)
 
   return (
     <section className="hero" id="introduction" aria-label="Introduction">
@@ -666,84 +656,24 @@ function Hero() {
         viewport={scrollViewport}
         variants={sectionStagger}
       >
-        <motion.div className="hero__copy" variants={sectionStagger}>
+        <motion.div className="hero__copy" variants={rise}>
           <h1 className="hero__title">
-            {titleLines.map((line, index) => (
-              <span key={index} className="hero__title-line">
-                <motion.span
-                  className="hero__title-text"
-                  variants={
-                    reduce
-                      ? { hidden: { y: 0 }, show: { y: 0 } }
-                      : {
-                          hidden: {
-                            y: '110%',
-                            transition: { duration: 0.28, ease: easeOutExpo },
-                          },
-                          show: {
-                            y: 0,
-                            transition: {
-                              duration: 0.7,
-                              delay: index * 0.08,
-                              ease: easeOutExpo,
-                            },
-                          },
-                        }
-                  }
-                >
-                  {line}
-                </motion.span>
+            {titleLines.map((line) => (
+              <span key={line} className="hero__title-line">
+                <span className="hero__title-text">{line}</span>
               </span>
             ))}
           </h1>
-          <motion.p
-            className="hero__subtitle"
-            variants={
-              reduce
-                ? { hidden: { opacity: 1 }, show: { opacity: 1 } }
-                : {
-                    hidden: {
-                      opacity: 0,
-                      y: 20,
-                      transition: { duration: 0.28, ease: easeOutExpo },
-                    },
-                    show: {
-                      opacity: 1,
-                      y: 0,
-                      transition: { duration: 0.55, delay: 0.12, ease: easeOutSoft },
-                    },
-                  }
-            }
-          >
-            {t.home.heroSubtitleLines.map((line, index) => (
-              <span key={index} className="hero__subtitle-line">
+          <p className="hero__subtitle">
+            {t.home.heroSubtitleLines.map((line) => (
+              <span key={line} className="hero__subtitle-line">
                 {line}
               </span>
             ))}
-          </motion.p>
+          </p>
         </motion.div>
 
-        <motion.div
-          className="hero__media"
-          variants={
-            reduce
-              ? { hidden: { opacity: 1, scale: 1 }, show: { opacity: 1, scale: 1 } }
-              : {
-                  hidden: {
-                    opacity: 0,
-                    scale: 0.86,
-                    y: 28,
-                    transition: { duration: 0.28, ease: easeOutExpo },
-                  },
-                  show: {
-                    opacity: 1,
-                    scale: 1,
-                    y: 0,
-                    transition: { duration: 0.75, delay: 0.05, ease: easeOutExpo },
-                  },
-                }
-          }
-        >
+        <motion.div className="hero__media" variants={rise}>
           <div className="hero__avatar">
             <img
               className="hero__avatar-img"
@@ -762,6 +692,7 @@ function ScrollCue() {
   const letters = ['S', 'C', 'R', 'O', 'L', 'L']
   const { canAnimate, reduce, playId } = useScrollReveal()
   const scrollViewport = useScrollViewport()
+  const rise = visibleRiseVariants(reduce)
 
   return (
     <motion.section
@@ -771,58 +702,21 @@ function ScrollCue() {
       initial="hidden"
       whileInView={canAnimate ? 'show' : 'hidden'}
       viewport={scrollViewport}
-      variants={sectionStagger}
+      variants={rise}
     >
       <div className="scroll__inner">
         <span className="scroll__label">
           {letters.map((letter, index) => (
-            <motion.span
+            <span
               key={`${letter}-${index}`}
               className="scroll__char"
-              variants={
-                reduce
-                  ? { hidden: { opacity: 1 }, show: { opacity: 1 } }
-                  : {
-                      hidden: {
-                        opacity: 0,
-                        y: 10,
-                        transition: { duration: 0.22, ease: easeOutExpo },
-                      },
-                      show: {
-                        opacity: 1,
-                        y: 0,
-                        transition: {
-                          duration: 0.4,
-                          delay: index * 0.05,
-                          ease: easeOutExpo,
-                        },
-                      },
-                    }
-              }
               style={{ animationDelay: `${index * 0.16}s` }}
             >
               {letter}
-            </motion.span>
+            </span>
           ))}
         </span>
-        <motion.span
-          className="scroll__line"
-          variants={
-            reduce
-              ? { hidden: { scaleY: 1 }, show: { scaleY: 1 } }
-              : {
-                  hidden: {
-                    scaleY: 0,
-                    transition: { duration: 0.25, ease: easeOutExpo },
-                  },
-                  show: {
-                    scaleY: 1,
-                    transition: { duration: 0.75, delay: 0.2, ease: easeOutExpo },
-                  },
-                }
-          }
-          style={{ transformOrigin: 'top center' }}
-        />
+        <span className="scroll__line" />
       </div>
     </motion.section>
   )
@@ -835,7 +729,6 @@ type NavigateProps = {
 function Works({ onNavigate }: NavigateProps) {
   const { canAnimate, reduce, playId } = useScrollReveal()
   const scrollViewport = useScrollViewport()
-  const recipe = SCROLL_RECIPES.work
   const { t } = useLocale()
   const copy = t.home.works
 
@@ -859,17 +752,18 @@ function Works({ onNavigate }: NavigateProps) {
             className="works__title"
             lines={[...copy.titleLines]}
             reduce={reduce}
+            side="left"
           />
-          <RevealRule className="works__rule" from={recipe.rule} />
+          <RevealRule className="works__rule" from="left" side="left" />
         </motion.div>
 
-        <RevealCopy className="works__text" kind={recipe.body}>
+        <RevealCopy className="works__text" side="left">
           <AccentedText body={copy.body} accents={copy.accents} />
         </RevealCopy>
 
         <RevealButton
           className="works__btn"
-          kind={recipe.button}
+          side="left"
           onClick={() => onNavigate(PAGE_META.work.path)}
         >
           {copy.cta}
@@ -909,7 +803,7 @@ function Spot({
 }: SpotProps) {
   const { canAnimate, reduce, playId } = useScrollReveal()
   const scrollViewport = useScrollViewport()
-  const recipe = SCROLL_RECIPES[accent] ?? SCROLL_RECIPES.work
+  const side = align === 'end' ? 'right' : 'left'
 
   return (
     <section
@@ -931,17 +825,18 @@ function Spot({
             className="spot__title"
             lines={[titleLine1, titleLine2]}
             reduce={reduce}
+            side={side}
           />
-          <RevealRule className="spot__rule" from={recipe.rule} />
+          <RevealRule className="spot__rule" from={side} side={side} />
         </motion.div>
 
-        <RevealCopy className="spot__text" kind={recipe.body}>
+        <RevealCopy className="spot__text" side={side}>
           {text}
         </RevealCopy>
 
         <RevealButton
           className="spot__btn"
-          kind={recipe.button}
+          side={side}
           onClick={() => onNavigate(to)}
         >
           {ctaLabel}
@@ -959,7 +854,7 @@ function ContentPage({ pageId }: { pageId: ContentPageId }) {
   const titleBase = page.title.replace(/\.$/, '')
   const { canAnimate, reduce, playId } = useScrollReveal()
   const scrollViewport = useScrollViewport()
-  const recipe = SCROLL_RECIPES[accent] ?? SCROLL_RECIPES.work
+  const rise = visibleRiseVariants(reduce)
 
   return (
     <>
@@ -972,92 +867,23 @@ function ContentPage({ pageId }: { pageId: ContentPageId }) {
           viewport={scrollViewport}
           variants={sectionStagger}
         >
-          <motion.div className="hero__copy" variants={sectionStagger}>
-            <motion.div className="hero__heading" variants={sectionStagger}>
+          <motion.div className="hero__copy" variants={rise}>
+            <div className="hero__heading">
               <h1 className="hero__title">
                 <span className="hero__title-line">
-                  <motion.span
-                    className="hero__title-text"
-                    variants={
-                      reduce
-                        ? { hidden: { y: 0 }, show: { y: 0 } }
-                        : {
-                            hidden: {
-                              y: '110%',
-                              transition: { duration: 0.28, ease: easeOutExpo },
-                            },
-                            show: {
-                              y: 0,
-                              transition: {
-                                duration: 0.85,
-                                delay: 0.1,
-                                ease: easeOutExpo,
-                              },
-                            },
-                          }
-                    }
-                  >
+                  <span className="hero__title-text">
                     {titleBase}
                     <span className="accent-mark">.</span>
-                  </motion.span>
+                  </span>
                 </span>
               </h1>
-              <RevealRule className="hero__rule" from={recipe.rule} />
-            </motion.div>
-            <motion.p
-              className="hero__subtitle hero__subtitle--page"
-              variants={
-                reduce
-                  ? { hidden: { opacity: 1 }, show: { opacity: 1 } }
-                  : {
-                      hidden: {
-                        opacity: 0,
-                        y: 20,
-                        transition: { duration: 0.28, ease: easeOutExpo },
-                      },
-                      show: {
-                        opacity: 1,
-                        y: 0,
-                        transition: {
-                          duration: 0.55,
-                          delay: 0.1,
-                          ease: easeOutSoft,
-                        },
-                      },
-                    }
-              }
-            >
+              <span className="hero__rule" aria-hidden="true" />
+            </div>
+            <p className="hero__subtitle hero__subtitle--page">
               <AccentedText body={page.body} accents={page.accents} />
-            </motion.p>
+            </p>
           </motion.div>
-          <motion.div
-            className="hero__media"
-            variants={
-              reduce
-                ? {
-                    hidden: { opacity: 1, scale: 1 },
-                    show: { opacity: 1, scale: 1 },
-                  }
-                : {
-                    hidden: {
-                      opacity: 0,
-                      scale: 0.9,
-                      y: 20,
-                      transition: { duration: 0.28, ease: easeOutExpo },
-                    },
-                    show: {
-                      opacity: 1,
-                      scale: 1,
-                      y: 0,
-                      transition: {
-                        duration: 0.9,
-                        delay: 0.12,
-                        ease: easeOutExpo,
-                      },
-                    },
-                  }
-            }
-          >
+          <motion.div className="hero__media" variants={rise}>
             <div className="hero__figure">
               <img
                 className="hero__figure-img"

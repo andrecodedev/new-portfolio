@@ -64,8 +64,8 @@ const pt: Dictionary = {
   htmlLang: 'pt-BR',
   chrome: {
     menu: 'Menu',
-    close: 'Close',
-    hireMe: 'Hire me',
+    close: 'Fechar',
+    hireMe: 'Me contate',
     openMenu: 'Abrir menu',
     closeMenu: 'Fechar menu',
     language: 'Idioma',
@@ -250,8 +250,8 @@ const es: Dictionary = {
   htmlLang: 'es',
   chrome: {
     menu: 'Menu',
-    close: 'Close',
-    hireMe: 'Hire me',
+    close: 'Cerrar',
+    hireMe: 'Contáctame',
     openMenu: 'Abrir menú',
     closeMenu: 'Cerrar menú',
     language: 'Idioma',
