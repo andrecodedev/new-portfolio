@@ -6,6 +6,7 @@ export const ASSETS = {
   history: '/history.png',
   studies: '/studingProject.png',
   contact: '/contact.png',
+  hire: '/contrate.png',
   email: '/email.png',
   github: '/github.png',
   linkedin: '/linkedin.png',
@@ -41,7 +42,7 @@ export const SOCIAL_LINKS = [
   },
 ] as const
 
-export type SitePageId = 'home' | 'work' | 'about' | 'reading' | 'contact'
+export type SitePageId = 'home' | 'work' | 'about' | 'reading' | 'hire' | 'contact'
 
 export type ContentPageId = Exclude<SitePageId, 'home'>
 
@@ -77,6 +78,13 @@ export const PAGE_META: Record<ContentPageId, PageMeta> = {
     loaderBg: 'var(--loader-reading)',
     image: ASSETS.studies,
     accent: 'reading',
+  },
+  hire: {
+    id: 'hire',
+    path: '/contrato',
+    loaderBg: 'var(--loader-hire)',
+    image: ASSETS.hire,
+    accent: 'hire',
   },
   contact: {
     id: 'contact',

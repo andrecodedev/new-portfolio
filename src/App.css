@@ -600,12 +600,18 @@
 
 .menu__link {
   display: grid;
-  grid-template-columns: minmax(7rem, 11rem) 1fr;
+  grid-template-columns: max-content minmax(0, 1fr);
   gap: clamp(24px, 4vw, 56px);
   align-items: baseline;
   width: fit-content;
   max-width: 100%;
   transition: color 0.2s ease;
+  pointer-events: none;
+}
+
+.menu__link-label,
+.menu__link-desc {
+  pointer-events: auto;
 }
 
 .menu__link:hover .menu__link-label,
@@ -627,8 +633,9 @@
 .menu__link-label {
   position: relative;
   display: inline-block;
-  width: fit-content;
-  max-width: 100%;
+  justify-self: start;
+  width: max-content;
+  max-width: none;
   font-family: var(--font-sans);
   font-size: var(--text-display);
   font-weight: 500;
@@ -645,7 +652,7 @@
   content: '';
   position: absolute;
   left: 0;
-  right: 0;
+  width: 100%;
   bottom: 0.02em;
   height: 1.5px;
   background: currentColor;
@@ -656,8 +663,138 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .menu__link:hover .menu__link-label::after {
+  .menu__link:hover .menu__link-label::after,
+  .menu__link--hot .menu__link-label::after {
     transform: scaleX(1);
+  }
+
+  .menu__list--paused .menu__link-label::after {
+    transform: scaleX(var(--line-scale, 0));
+  }
+
+  .menu__list--paused .menu__link--hot .menu__link-label::after {
+    transform: scaleX(var(--line-scale, 1));
+  }
+}
+
+/* Onda = o mesmo hover, em sequência. Cor = --section-accent (igual ao mouse). */
+@keyframes menu-wave-ink {
+  0%,
+  12%,
+  50%,
+  100% {
+    color: var(--text);
+  }
+  20%,
+  38% {
+    color: var(--section-accent, var(--text));
+  }
+}
+
+@keyframes menu-wave-home {
+  0%,
+  12%,
+  50%,
+  100% {
+    color: var(--text);
+    opacity: 1;
+  }
+  20%,
+  38% {
+    color: var(--text);
+    opacity: 0.55;
+  }
+}
+
+@keyframes menu-wave-line {
+  0%,
+  12%,
+  50%,
+  100% {
+    transform: scaleX(0);
+  }
+  20%,
+  38% {
+    transform: scaleX(1);
+  }
+}
+
+.menu__item:nth-child(1) {
+  --wave-delay: 0ms;
+}
+
+.menu__item:nth-child(2) {
+  --wave-delay: 320ms;
+}
+
+.menu__item:nth-child(3) {
+  --wave-delay: 640ms;
+}
+
+.menu__item:nth-child(4) {
+  --wave-delay: 960ms;
+}
+
+.menu__item:nth-child(5) {
+  --wave-delay: 1280ms;
+}
+
+.menu__item:nth-child(6) {
+  --wave-delay: 1600ms;
+}
+
+.menu__list--wave .menu__link .menu__link-label,
+.menu__list--wave .menu__link .menu__link-desc {
+  animation: menu-wave-ink 4.4s cubic-bezier(0.45, 0.05, 0.2, 1) infinite;
+  animation-delay: var(--wave-delay);
+}
+
+.menu__list--wave .menu__link:not([data-accent]) .menu__link-label,
+.menu__list--wave .menu__link:not([data-accent]) .menu__link-desc {
+  animation-name: menu-wave-home;
+}
+
+.menu__list--wave .menu__link-label::after {
+  animation: menu-wave-line 4.4s cubic-bezier(0.45, 0.05, 0.2, 1) infinite;
+  animation-delay: var(--wave-delay);
+}
+
+.menu__list--paused .menu__link-label,
+.menu__list--paused .menu__link-desc {
+  animation: none;
+  color: var(--text);
+  transition:
+    color 0.32s ease,
+    opacity 0.32s ease;
+}
+
+.menu__list--paused .menu__link-label::after {
+  animation: none;
+  transform: scaleX(var(--line-scale, 0));
+  transition: transform 0.32s ease;
+}
+
+.menu__list--paused .menu__link--hot .menu__link-label,
+.menu__list--paused .menu__link--hot .menu__link-desc,
+.menu__link--hot .menu__link-label,
+.menu__link--hot .menu__link-desc {
+  color: var(--section-accent, var(--text));
+  opacity: 1;
+}
+
+.menu__list--paused .menu__link--hot:not([data-accent]) .menu__link-label,
+.menu__list--paused .menu__link--hot:not([data-accent]) .menu__link-desc,
+.menu__link--hot:not([data-accent]) .menu__link-label,
+.menu__link--hot:not([data-accent]) .menu__link-desc {
+  opacity: 0.55;
+  color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu__list--wave .menu__link .menu__link-label,
+  .menu__list--wave .menu__link .menu__link-desc,
+  .menu__list--wave .menu__link-label::after {
+    animation: none;
   }
 }
 
@@ -876,11 +1013,6 @@
   gap: var(--gap-sm);
   width: fit-content;
   max-width: 100%;
-}
-
-.hero--page .hero__heading {
-  align-items: center;
-  align-self: center;
 }
 
 .hero__rule {
@@ -1102,6 +1234,10 @@
 
 [data-accent='contact'] {
   --section-accent: var(--accent-contact);
+}
+
+[data-accent='hire'] {
+  --section-accent: var(--accent-hire);
 }
 
 .accent-mark,
@@ -1429,6 +1565,11 @@
     align-items: center;
   }
 
+  .hero--page .hero__heading {
+    align-items: center;
+    align-self: center;
+  }
+
   .hero__media {
     width: var(--media-hero);
     max-width: 100%;
@@ -1493,6 +1634,8 @@
 
   .menu__link-label {
     margin-inline: 0;
+    width: max-content;
+    max-width: none;
   }
 
   .menu__link-desc {

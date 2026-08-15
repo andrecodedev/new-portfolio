@@ -50,12 +50,14 @@ export type Dictionary = {
     }
     about: SpotCopy
     reading: SpotCopy
+    hire: SpotCopy
     contact: SpotCopy
   }
   pages: {
     work: PageCopy
     about: PageCopy
     reading: PageCopy
+    hire: PageCopy
     contact: PageCopy
   }
 }
@@ -109,11 +111,18 @@ const pt: Dictionary = {
       accents: ['clareza', 'qualidade'],
       cta: 'Meus estudos',
     },
+    hire: {
+      ariaLabel: 'Contrato',
+      titleLines: ['Contrate meus', 'serviços'],
+      body: 'Um espaço para fechar projeto com clareza e compromisso. Briefing, prazo e proposta no mesmo lugar.',
+      accents: ['clareza', 'compromisso'],
+      cta: 'Meu contrato',
+    },
     contact: {
-      ariaLabel: 'Vamos trabalhar juntos',
-      titleLines: ['Vamos trabalhar', 'juntos'],
-      body: 'Se você tem um projeto ambicioso, uma ideia ousada ou só quer trocar uma ideia, vamos conversar. Aberto a novos desafios.',
-      accents: ['ambicioso', 'ousada'],
+      ariaLabel: 'Contato',
+      titleLines: ['Vamos', 'conversar'],
+      body: 'Uma dúvida, um recado ou uma conversa: estou por aqui. Respondo com atenção e sem enrolação.',
+      accents: ['dúvida', 'atenção'],
       cta: 'Fale comigo',
     },
   },
@@ -142,12 +151,20 @@ const pt: Dictionary = {
       accents: ['clareza', 'qualidade'],
       imageAlt: 'Ilustração de estudos e projetos',
     },
+    hire: {
+      menuLabel: 'Contrato',
+      menuDescription: 'Contrate meu serviço por aqui.',
+      title: 'Sobre o contrato.',
+      body: 'Aqui você contrata meu serviço de forma direta. Conta o projeto, alinha o prazo e recebe uma proposta.',
+      accents: ['contrata', 'proposta'],
+      imageAlt: 'Ilustração de contrato',
+    },
     contact: {
       menuLabel: 'Contato',
-      menuDescription: 'Vamos construir algo juntos.',
-      title: 'Contato.',
-      body: 'Vamos falar sobre projetos, ideias e oportunidades. Aberto a colaborações e desafios que peçam cuidado técnico e vontade de construir.',
-      accents: ['colaborações', 'desafios'],
+      menuDescription: 'Uma dúvida, um recado.',
+      title: 'Fale comigo.',
+      body: 'Se quiser tirar uma dúvida, deixar um recado ou só conversar, estou por aqui. Escreve quando fizer sentido.',
+      accents: ['dúvida', 'conversar'],
       imageAlt: 'Ilustração de contato',
     },
   },
@@ -202,11 +219,18 @@ const en: Dictionary = {
       accents: ['clarity', 'quality'],
       cta: 'My studies',
     },
+    hire: {
+      ariaLabel: 'Contract',
+      titleLines: ['Hire my', 'services'],
+      body: 'A space to close a project with clarity and commitment. Briefing, timeline, and proposal in the same place.',
+      accents: ['clarity', 'commitment'],
+      cta: 'My contract',
+    },
     contact: {
-      ariaLabel: "Let's work together",
-      titleLines: ["Let's work", 'together'],
-      body: "If you have an ambitious project, a bold idea, or just want to chat, let's talk. Open to new challenges.",
-      accents: ['ambitious', 'bold'],
+      ariaLabel: 'Contact',
+      titleLines: ["Let's", 'talk'],
+      body: 'A question, a note, or a conversation: I am here. I reply with care and without the runaround.',
+      accents: ['question', 'care'],
       cta: 'Talk to me',
     },
   },
@@ -235,12 +259,20 @@ const en: Dictionary = {
       accents: ['clarity', 'quality'],
       imageAlt: 'Studies and projects illustration',
     },
+    hire: {
+      menuLabel: 'Contract',
+      menuDescription: 'Hire my service from here.',
+      title: 'About the contract.',
+      body: 'This is where you hire my service directly. Share the project, align the timeline, and get a proposal.',
+      accents: ['hire', 'proposal'],
+      imageAlt: 'Contract illustration',
+    },
     contact: {
       menuLabel: 'Contact',
-      menuDescription: "Let's build something together.",
-      title: 'Contact.',
-      body: "Let's talk about projects, ideas, and opportunities. Open to collaborations and challenges that call for technical care and a will to build.",
-      accents: ['collaborations', 'challenges'],
+      menuDescription: 'A hello, a question, a note.',
+      title: 'Talk to me.',
+      body: 'If you want to ask something or just talk, I am around. Write when it feels right.',
+      accents: ['ask', 'talk'],
       imageAlt: 'Contact illustration',
     },
   },
@@ -295,11 +327,18 @@ const es: Dictionary = {
       accents: ['claridad', 'calidad'],
       cta: 'Mis estudios',
     },
+    hire: {
+      ariaLabel: 'Contrato',
+      titleLines: ['Contrata mis', 'servicios'],
+      body: 'Un espacio para cerrar un proyecto con claridad y compromiso. Briefing, plazo y propuesta en el mismo lugar.',
+      accents: ['claridad', 'compromiso'],
+      cta: 'Mi contrato',
+    },
     contact: {
-      ariaLabel: 'Trabajemos juntos',
-      titleLines: ['Trabajemos', 'juntos'],
-      body: 'Si tienes un proyecto ambicioso, una idea audaz o solo quieres charlar, hablemos. Abierto a nuevos desafíos.',
-      accents: ['ambicioso', 'audaz'],
+      ariaLabel: 'Contacto',
+      titleLines: ['Hablemos', 'un rato'],
+      body: 'Una duda, un recado o una conversación: estoy por aquí. Respondo con atención y sin rodeos.',
+      accents: ['duda', 'atención'],
       cta: 'Habla conmigo',
     },
   },
@@ -328,12 +367,20 @@ const es: Dictionary = {
       accents: ['claridad', 'calidad'],
       imageAlt: 'Ilustración de estudios y proyectos',
     },
+    hire: {
+      menuLabel: 'Contrato',
+      menuDescription: 'Contrata mi servicio por aquí.',
+      title: 'Sobre el contrato.',
+      body: 'Aquí contratas mi servicio de forma directa. Cuentas el proyecto, alineas el plazo y recibes una propuesta.',
+      accents: ['contratas', 'propuesta'],
+      imageAlt: 'Ilustración de contrato',
+    },
     contact: {
       menuLabel: 'Contacto',
-      menuDescription: 'Construyamos algo juntos.',
-      title: 'Contacto.',
-      body: 'Hablemos de proyectos, ideas y oportunidades. Abierto a colaboraciones y desafíos que pidan cuidado técnico y ganas de construir.',
-      accents: ['colaboraciones', 'desafíos'],
+      menuDescription: 'Una duda, un recado.',
+      title: 'Habla conmigo.',
+      body: 'Si quieres resolver una duda, dejar un recado o solo conversar, estoy por aquí. Escribe cuando tenga sentido.',
+      accents: ['duda', 'conversar'],
       imageAlt: 'Ilustración de contacto',
     },
   },

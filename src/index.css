@@ -47,6 +47,7 @@
   --loader-about: #bfe6cf;
   --loader-reading: #b7d8ea;
   --loader-contact: #f0bfbc;
+  --loader-hire: #d9c8f0;
   /*
     Accents no claro: saturados o bastante para ler a cor,
     sem cair no pastel (some) nem no tom “sujo” (vira cinza).
@@ -55,6 +56,7 @@
   --accent-about: #12a954;
   --accent-reading: #2f6ff0;
   --accent-contact: #e53e3e;
+  --accent-hire: #7c4dff;
   --stage-height: calc(100svh - (var(--respiro) * 2));
   --stage-radius: 5px;
 
@@ -112,10 +114,12 @@
   --loader-about: #1f3328;
   --loader-reading: #1e303a;
   --loader-contact: #3a2424;
+  --loader-hire: #32284a;
   --accent-work: #f0d45c;
   --accent-about: #74d7a4;
   --accent-reading: #78bfee;
   --accent-contact: #f0aaa5;
+  --accent-hire: #c4b5fd;
   color-scheme: dark;
 }
 
@@ -125,6 +129,7 @@
   --accent-about: #12a954;
   --accent-reading: #2f6ff0;
   --accent-contact: #e53e3e;
+  --accent-hire: #7c4dff;
 }
 
 *,

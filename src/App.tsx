@@ -1,4 +1,11 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
+import {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import CodeRain from './components/CodeRain'
@@ -70,6 +77,67 @@ const BOOT_LOADER_EXIT_MS = 700
 const MENU_EXIT_MS = 700
 /** Libera fades no começo da saída do loader (acompanha o painel, sem espera no final). */
 const REVEAL_LEAD_MS = 90
+
+function scaleXFromTransform(transform: string) {
+  if (!transform || transform === 'none') return 0
+  try {
+    return new DOMMatrixReadOnly(transform).a
+  } catch {
+    return 0
+  }
+}
+
+function isMenuText(node: EventTarget | null) {
+  return (
+    node instanceof Element &&
+    (node.classList.contains('menu__link-label') ||
+      node.classList.contains('menu__link-desc'))
+  )
+}
+
+function commitWaveStyles(list: HTMLElement) {
+  list.querySelectorAll<HTMLElement>('.menu__link-label').forEach((el) => {
+    const cs = getComputedStyle(el)
+    el.style.color = cs.color
+    el.style.opacity = cs.opacity
+    const after = getComputedStyle(el, '::after')
+    el.style.setProperty(
+      '--line-scale',
+      String(scaleXFromTransform(after.transform)),
+    )
+  })
+  list.querySelectorAll<HTMLElement>('.menu__link-desc').forEach((el) => {
+    const cs = getComputedStyle(el)
+    el.style.color = cs.color
+    el.style.opacity = cs.opacity
+  })
+}
+
+function releaseWaveStyles(list: HTMLElement) {
+  list.querySelectorAll<HTMLElement>('.menu__link-label').forEach((el) => {
+    const hovered = Boolean(
+      el.closest('.menu__link')?.classList.contains('menu__link--hot'),
+    )
+    el.style.removeProperty('color')
+    el.style.removeProperty('opacity')
+    el.style.setProperty('--line-scale', hovered ? '1' : '0')
+  })
+  list.querySelectorAll<HTMLElement>('.menu__link-desc').forEach((el) => {
+    el.style.removeProperty('color')
+    el.style.removeProperty('opacity')
+  })
+}
+
+function clearWaveStyles(list: HTMLElement | null) {
+  if (!list) return
+  list
+    .querySelectorAll<HTMLElement>('.menu__link-label, .menu__link-desc')
+    .forEach((el) => {
+      el.style.removeProperty('color')
+      el.style.removeProperty('opacity')
+      el.style.removeProperty('--line-scale')
+    })
+}
 
 function readStoredTheme(): Theme {
   const stored = window.localStorage.getItem(THEME_STORAGE_KEY)
@@ -521,6 +589,47 @@ function Menu({ id, open, onNavigate }: MenuProps) {
   const reduce = Boolean(useReducedMotion())
   const state = open ? 'show' : 'hidden'
   const { t } = useLocale()
+  const [paused, setPaused] = useState(false)
+  const [hotPath, setHotPath] = useState<string | null>(null)
+  const listRef = useRef<HTMLUListElement>(null)
+  const pausedRef = useRef(false)
+  pausedRef.current = paused
+
+  useEffect(() => {
+    if (!open) {
+      setPaused(false)
+      setHotPath(null)
+      clearWaveStyles(listRef.current)
+    }
+  }, [open])
+
+  useLayoutEffect(() => {
+    const list = listRef.current
+    if (!paused) {
+      clearWaveStyles(list)
+      return
+    }
+    if (!list) return
+
+    const frame = window.requestAnimationFrame(() => {
+      releaseWaveStyles(list)
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [paused])
+
+  const pauseWave = (path: string) => {
+    if (!pausedRef.current && listRef.current) {
+      commitWaveStyles(listRef.current)
+    }
+    setHotPath(path)
+    setPaused(true)
+  }
+
+  const resumeWave = (event: { relatedTarget: EventTarget | null }) => {
+    if (isMenuText(event.relatedTarget)) return
+    setHotPath(null)
+    setPaused(false)
+  }
 
   const navLinks = [
     {
@@ -548,6 +657,12 @@ function Menu({ id, open, onNavigate }: MenuProps) {
       accent: 'reading' as const,
     },
     {
+      label: t.pages.hire.menuLabel,
+      path: PAGE_META.hire.path,
+      description: t.pages.hire.menuDescription,
+      accent: 'hire' as const,
+    },
+    {
       label: t.pages.contact.menuLabel,
       path: PAGE_META.contact.path,
       description: t.pages.contact.menuDescription,
@@ -572,7 +687,10 @@ function Menu({ id, open, onNavigate }: MenuProps) {
         animate={reduce && open ? 'show' : state}
         variants={menuRoot}
       >
-        <ul className="menu__list">
+        <ul
+          ref={listRef}
+          className={`menu__list${open && !reduce && !paused ? ' menu__list--wave' : ''}${paused ? ' menu__list--paused' : ''}`}
+        >
           {navLinks.map((item) => (
             <motion.li
               key={item.path}
@@ -580,7 +698,7 @@ function Menu({ id, open, onNavigate }: MenuProps) {
               variants={reduce ? undefined : menuItem}
             >
               <a
-                className="menu__link"
+                className={`menu__link${hotPath === item.path ? ' menu__link--hot' : ''}`}
                 href={item.path}
                 data-accent={item.accent ?? undefined}
                 onClick={(event) => {
@@ -591,12 +709,16 @@ function Menu({ id, open, onNavigate }: MenuProps) {
                 <motion.span
                   className="menu__link-label"
                   variants={reduce ? undefined : menuLabel}
+                  onPointerEnter={() => pauseWave(item.path)}
+                  onPointerLeave={resumeWave}
                 >
                   {item.label}
                 </motion.span>
                 <motion.span
                   className="menu__link-desc"
                   variants={reduce ? undefined : menuDesc}
+                  onPointerEnter={() => pauseWave(item.path)}
+                  onPointerLeave={resumeWave}
                 >
                   {item.description}
                 </motion.span>
@@ -774,7 +896,7 @@ function Works({ onNavigate }: NavigateProps) {
 }
 
 type SpotAlign = 'start' | 'end'
-type AccentTone = 'work' | 'about' | 'reading' | 'contact'
+type AccentTone = 'work' | 'about' | 'reading' | 'hire' | 'contact'
 
 type SpotProps = {
   id: string
@@ -944,9 +1066,26 @@ function HomePage({ onNavigate }: NavigateProps) {
         onNavigate={onNavigate}
       />
       <Spot
+        id="contrato"
+        ariaLabel={t.home.hire.ariaLabel}
+        align="end"
+        accent="hire"
+        titleLine1={t.home.hire.titleLines[0]}
+        titleLine2={t.home.hire.titleLines[1]}
+        text={
+          <AccentedText
+            body={t.home.hire.body}
+            accents={t.home.hire.accents}
+          />
+        }
+        ctaLabel={t.home.hire.cta}
+        to={PAGE_META.hire.path}
+        onNavigate={onNavigate}
+      />
+      <Spot
         id="juntos"
         ariaLabel={t.home.contact.ariaLabel}
-        align="end"
+        align="start"
         accent="contact"
         titleLine1={t.home.contact.titleLines[0]}
         titleLine2={t.home.contact.titleLines[1]}
@@ -1221,6 +1360,10 @@ function PortfolioShell() {
                 <Route
                   path={PAGE_META.reading.path}
                   element={<ContentPage pageId="reading" />}
+                />
+                <Route
+                  path={PAGE_META.hire.path}
+                  element={<ContentPage pageId="hire" />}
                 />
                 <Route
                   path={PAGE_META.contact.path}
