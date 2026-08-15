@@ -52,7 +52,6 @@ import {
   useScrollReveal,
   useScrollViewport,
   visibleRiseVariants,
-  visibleSideVariants,
 } from './motion/scroll-reveal'
 import { usePageNavigator } from './navigation/usePageNavigator'
 import {
