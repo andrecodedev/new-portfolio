@@ -7,6 +7,8 @@ export const ASSETS = {
   studies: '/studingProject.png',
   contact: '/contact.png',
   hire: '/contrate.png',
+  hireVideo: '/videoContrato.mp4',
+  youtubeChannel: '/imgTagAbertaCanalYoutube.jpg',
   email: '/email.png',
   github: '/github.png',
   linkedin: '/linkedin.png',
@@ -37,7 +39,7 @@ export const SOCIAL_LINKS = [
   },
   {
     src: ASSETS.youtube,
-    href: 'https://youtube.com/',
+    href: 'https://www.youtube.com/@TagAberta',
     label: 'YouTube',
   },
 ] as const

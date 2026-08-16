@@ -584,6 +584,366 @@ function Loader({
   )
 }
 
+type NewsFabProps = {
+  onOpen: () => void
+}
+
+function NewsFab({ onOpen }: NewsFabProps) {
+  const { show } = useEntrance()
+  const { t } = useLocale()
+
+  return (
+    <motion.div
+      className="news-fab"
+      initial="hidden"
+      animate={show ? 'show' : 'hidden'}
+      variants={fabEntrance}
+    >
+      <button
+        type="button"
+        className="side-tools__fab"
+        aria-label={t.chrome.openNews}
+        title={t.chrome.news}
+        onClick={onOpen}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="20"
+          height="20"
+          fill="none"
+          aria-hidden="true"
+        >
+          <rect
+            x="3.5"
+            y="3.5"
+            width="17"
+            height="17"
+            rx="3.2"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          />
+          <path
+            d="M10.2 13.8 15.6 8.4"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+          <path
+            d="M11.8 8.4h3.8v3.8"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+    </motion.div>
+  )
+}
+
+type GatePopupProps = {
+  open: boolean
+  onClose: () => void
+  onHire: () => void
+  onStudies: () => void
+}
+
+type GateSlide = {
+  id: 'hire' | 'youtube'
+  accent: 'hire' | 'contact' | 'reading'
+  image?: string
+  video?: string
+  imageAlt: string
+  kicker: string
+  title: string
+  body: string
+  cta: string
+  href?: string
+  ctaSecondary?: string
+}
+
+function GateVisual({
+  slide,
+  reduce,
+}: {
+  slide: GateSlide
+  reduce: boolean
+}) {
+  const [ready, setReady] = useState(false)
+
+  const show = () => {
+    setReady(true)
+  }
+
+  return (
+    <div className="gate__visual" aria-busy={!ready}>
+      {ready ? null : (
+        <div className="gate__media-ph" aria-hidden="true">
+          <div className="loader__dots">
+            <span className="loader__dot" />
+            <span className="loader__dot" />
+            <span className="loader__dot" />
+          </div>
+        </div>
+      )}
+      {slide.video ? (
+        <video
+          className={`gate__media${ready ? ' gate__media--on' : ''}`}
+          src={slide.video}
+          muted
+          loop
+          playsInline
+          autoPlay={!reduce}
+          preload="auto"
+          aria-label={slide.imageAlt}
+          onLoadedData={show}
+          onError={show}
+        />
+      ) : (
+        <img
+          className={`gate__media${ready ? ' gate__media--on' : ''}`}
+          src={slide.image}
+          alt={slide.imageAlt}
+          onLoad={show}
+          onError={show}
+          ref={(node) => {
+            if (!node) return
+            if (node.complete && node.naturalWidth > 0) show()
+          }}
+        />
+      )}
+    </div>
+  )
+}
+
+function GateSlideFace({
+  slide,
+  onHire,
+  onStudies,
+  onClose,
+  reduce,
+  footer,
+}: {
+  slide: GateSlide
+  onHire: () => void
+  onStudies: () => void
+  onClose: () => void
+  reduce: boolean
+  footer?: ReactNode
+}) {
+  const isLink = Boolean(slide.href)
+
+  return (
+    <div className="gate__spread" data-accent={slide.accent}>
+      <GateVisual slide={slide} reduce={reduce} />
+      <div className="gate__copy">
+        <div className="gate__copy-main">
+          <p className="gate__kicker">{slide.kicker}</p>
+          <h2 className="gate__headline">{slide.title}</h2>
+          <p className="gate__body">{slide.body}</p>
+          <div className="gate__cta-row">
+            {isLink ? (
+              <a
+                className="spot__btn gate__cta"
+                href={slide.href}
+                target="_blank"
+                rel="noreferrer"
+                onClick={onClose}
+              >
+                {slide.cta}
+              </a>
+            ) : (
+              <button type="button" className="spot__btn gate__cta" onClick={onHire}>
+                {slide.cta}
+              </button>
+            )}
+            {slide.ctaSecondary ? (
+              <button
+                type="button"
+                className="spot__btn gate__cta"
+                onClick={onStudies}
+              >
+                {slide.ctaSecondary}
+              </button>
+            ) : null}
+          </div>
+        </div>
+        {footer}
+      </div>
+    </div>
+  )
+}
+
+function GatePopup({ open, onClose, onHire, onStudies }: GatePopupProps) {
+  const { t } = useLocale()
+  const reduce = Boolean(useReducedMotion())
+  const closeRef = useRef<HTMLButtonElement>(null)
+  const openRef = useRef(open)
+  const [index, setIndex] = useState(0)
+  openRef.current = open
+  const youtubeHref = 'https://www.youtube.com/@TagAberta'
+
+  const slides: GateSlide[] = [
+    {
+      id: 'hire',
+      accent: 'hire',
+      video: ASSETS.hireVideo,
+      imageAlt: t.pages.hire.imageAlt,
+      kicker: t.gate.hireKicker,
+      title: t.gate.hireTitle,
+      body: t.gate.hireBody,
+      cta: t.gate.hireCta,
+    },
+    {
+      id: 'youtube',
+      accent: 'reading',
+      image: ASSETS.youtubeChannel,
+      imageAlt: t.gate.youtubeTitle,
+      kicker: t.gate.youtubeKicker,
+      title: t.gate.youtubeTitle,
+      body: t.gate.youtubeBody,
+      cta: t.gate.youtubeCta,
+      ctaSecondary: t.gate.youtubeStudiesCta,
+      href: youtubeHref,
+    },
+  ]
+
+  const total = slides.length
+  const current = slides[index] ?? slides[0]
+
+  useEffect(() => {
+    const img = new Image()
+    img.src = ASSETS.youtubeChannel
+    const video = document.createElement('video')
+    video.preload = 'auto'
+    video.src = ASSETS.hireVideo
+  }, [])
+
+  useEffect(() => {
+    if (!open) return
+    closeRef.current?.focus()
+  }, [open])
+
+  const goNext = () => {
+    setIndex((currentIndex) => Math.min(currentIndex + 1, total - 1))
+  }
+
+  const goPrev = () => {
+    setIndex((currentIndex) => Math.max(currentIndex - 1, 0))
+  }
+
+  return (
+    <AnimatePresence
+      onExitComplete={() => {
+        if (openRef.current) return
+        setIndex(0)
+      }}
+    >
+      {open ? (
+        <div className="gate">
+          <motion.button
+            type="button"
+            className="gate__backdrop"
+            aria-label={t.chrome.close}
+            initial={reduce ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            onClick={onClose}
+          />
+          <motion.div
+            className="gate__panel"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="gate-title"
+            initial={reduce ? false : { opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -18 }}
+            transition={{ duration: reduce ? 0 : 0.42, ease: easeOutSoft }}
+          >
+            <button
+              ref={closeRef}
+              type="button"
+              className="gate__close"
+              aria-label={t.chrome.close}
+              onClick={onClose}
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                <path
+                  d="M6 6l12 12M18 6L6 18"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+
+            <div className="gate__stage">
+              {slides.map((slide) => {
+                const active = slide.id === current.id
+
+                return (
+                  <div
+                    key={slide.id}
+                    className={`gate__slide${active ? ' gate__slide--active' : ''}`}
+                    aria-hidden={!active}
+                    inert={!active ? true : undefined}
+                  >
+                    <GateSlideFace
+                      slide={slide}
+                      onHire={onHire}
+                      onStudies={onStudies}
+                      onClose={onClose}
+                      reduce={reduce}
+                      footer={
+                        <div className="gate__nav">
+                          <div className="gate__nav-side">
+                            {index > 0 ? (
+                              <button
+                                type="button"
+                                className="gate__nav-btn"
+                                onClick={goPrev}
+                              >
+                                {t.gate.prev}
+                              </button>
+                            ) : null}
+                          </div>
+                          <p className="gate__dots" aria-hidden="true">
+                            {slides.map((item, slideIndex) => (
+                              <span
+                                key={item.id}
+                                className={`gate__dot${slideIndex === index ? ' gate__dot--on' : ''}`}
+                              />
+                            ))}
+                          </p>
+                          <div className="gate__nav-side gate__nav-side--end">
+                            {index < total - 1 ? (
+                              <button
+                                type="button"
+                                className="gate__nav-btn"
+                                onClick={goNext}
+                              >
+                                {t.gate.next}
+                              </button>
+                            ) : null}
+                          </div>
+                        </div>
+                      }
+                    />
+                  </div>
+                )
+              })}
+            </div>
+            <span id="gate-title" className="sr-only">
+              {current.title}
+            </span>
+          </motion.div>
+        </div>
+      ) : null}
+    </AnimatePresence>
+  )
+}
+
 function Menu({ id, open, onNavigate }: MenuProps) {
   const reduce = Boolean(useReducedMotion())
   const state = open ? 'show' : 'hidden'
@@ -1124,6 +1484,7 @@ function PortfolioShell() {
     if (current === 'light' || current === 'dark') return current
     return readStoredTheme()
   })
+  const [gateOpen, setGateOpen] = useState(false)
   const { transition, goTo, finishTransition, transitionExitMs } =
     usePageNavigator()
 
@@ -1287,9 +1648,38 @@ function PortfolioShell() {
     }
   }, [menuOpen, bootVisible, transition.active])
 
+  useEffect(() => {
+    if (bootVisible) return
+
+    const timer = window.setTimeout(() => {
+      setGateOpen(true)
+    }, 600)
+
+    return () => window.clearTimeout(timer)
+  }, [bootVisible])
+
+  useEffect(() => {
+    if (!gateOpen || menuOpen || bootVisible) return
+
+    lockPageScroll()
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      setGateOpen(false)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      unlockPageScroll()
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [gateOpen, menuOpen, bootVisible])
+
   const handleBootExitComplete = () => {
     setBootVisible(false)
     unlockPageScroll()
+  }
+
+  const dismissGate = () => {
+    setGateOpen(false)
   }
 
   const navigateTo = (path: string) => {
@@ -1326,11 +1716,26 @@ function PortfolioShell() {
           />
           <div className="corner-tools">
             <BackToTop />
+            <NewsFab onOpen={() => setGateOpen(true)} />
             <SideTools
               theme={theme}
               onToggleTheme={() =>
                 setTheme((current) => (current === 'dark' ? 'light' : 'dark'))
               }
+            />
+          </div>
+          <div className="stage-panel stage-panel--gate">
+            <GatePopup
+              open={gateOpen && !menuOpen && !bootVisible}
+              onClose={dismissGate}
+              onHire={() => {
+                dismissGate()
+                navigateTo(PAGE_META.hire.path)
+              }}
+              onStudies={() => {
+                dismissGate()
+                navigateTo(PAGE_META.reading.path)
+              }}
             />
           </div>
           <div className="stage-panel stage-panel--menu">

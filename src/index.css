@@ -65,13 +65,16 @@
   --font-ui: 'Inter', 'Inclusive Sans', sans-serif;
 
   /*
-    Escala tipográfica fluida: encolhe com a viewport,
-    sem “pulo” brusco em breakpoints.
+    Uma escala só, do MENU ao popup.
+    display: títulos de página / hero / itens do menu
+    lead: subtítulo e título de card (popup)
+    body: parágrafos
+    ui: chrome, kicker, botão, SCROLL
   */
-  --text-display: clamp(1.55rem, 1rem + 2.55vw, 3rem);
-  --text-lead: clamp(1rem, 0.86rem + 0.6vw, 1.45rem);
-  --text-body: clamp(0.9rem, 0.82rem + 0.4vw, 1.0625rem);
-  --text-ui: clamp(0.75rem, 0.68rem + 0.35vw, 1rem);
+  --text-display: clamp(1.5rem, 1.05rem + 1.85vw, 2.35rem);
+  --text-lead: clamp(1.05rem, 0.92rem + 0.5vw, 1.35rem);
+  --text-body: clamp(0.95rem, 0.86rem + 0.38vw, 1.125rem);
+  --text-ui: clamp(0.8125rem, 0.74rem + 0.28vw, 1rem);
 
   /* Mídia do hero / páginas: acompanha a largura da tela */
   --media-hero: clamp(160px, 23vw + 2rem, 420px);

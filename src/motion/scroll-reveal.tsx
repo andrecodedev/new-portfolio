@@ -390,6 +390,8 @@ export function RevealButton({
             ? sideSlideVariants(side)
             : buttonVariants(kind)
       }
+      whileHover={reduce ? undefined : { x: 2, y: 2, transition: { duration: 0.18 } }}
+      whileTap={reduce ? undefined : { x: 4, y: 4, transition: { duration: 0.12 } }}
     >
       {children}
     </motion.button>

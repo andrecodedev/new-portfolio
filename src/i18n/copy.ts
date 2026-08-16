@@ -35,6 +35,21 @@ export type Dictionary = {
     copyrightLine2: string
     backToTop: string
     loading: string
+    news: string
+    openNews: string
+  }
+  gate: {
+    hireKicker: string
+    hireTitle: string
+    hireBody: string
+    hireCta: string
+    youtubeKicker: string
+    youtubeTitle: string
+    youtubeBody: string
+    youtubeCta: string
+    youtubeStudiesCta: string
+    next: string
+    prev: string
   }
   navHome: {
     label: string
@@ -79,6 +94,23 @@ const pt: Dictionary = {
     copyrightLine2: 'Todos os direitos reservados.',
     backToTop: 'Voltar ao topo',
     loading: 'Carregando',
+    news: 'Novidades',
+    openNews: 'Abrir novidades',
+  },
+  gate: {
+    hireKicker: 'Contrato',
+    hireTitle: 'Tem um projeto?',
+    hireBody:
+      'Contrate pelo contrato: briefing, prazo e proposta no mesmo lugar, com clareza e compromisso.',
+    hireCta: 'Ir para o contrato',
+    youtubeKicker: 'YouTube',
+    youtubeTitle: 'Canal no YouTube',
+    youtubeBody:
+      'Aulas, bastidores e o que estou construindo em público. Se quiser acompanhar o processo, o canal está aberto.',
+    youtubeCta: 'Ver o canal',
+    youtubeStudiesCta: 'Ver mais',
+    next: 'Próxima novidade',
+    prev: 'Novidade anterior',
   },
   navHome: {
     label: 'Home',
@@ -187,6 +219,23 @@ const en: Dictionary = {
     copyrightLine2: 'All rights reserved.',
     backToTop: 'Back to top',
     loading: 'Loading',
+    news: 'News',
+    openNews: 'Open news',
+  },
+  gate: {
+    hireKicker: 'Contract',
+    hireTitle: 'Got a project?',
+    hireBody:
+      'Hire through the contract page: briefing, timeline, and a proposal in one place, with clarity and commitment.',
+    hireCta: 'Go to the contract',
+    youtubeKicker: 'YouTube',
+    youtubeTitle: 'YouTube channel',
+    youtubeBody:
+      'Lessons, behind the scenes, and what I am building in public. If you want to follow the process, the channel is open.',
+    youtubeCta: 'Watch the channel',
+    youtubeStudiesCta: 'See more',
+    next: 'Next news',
+    prev: 'Previous news',
   },
   navHome: {
     label: 'Home',
@@ -295,6 +344,23 @@ const es: Dictionary = {
     copyrightLine2: 'Todos los derechos reservados.',
     backToTop: 'Volver arriba',
     loading: 'Cargando',
+    news: 'Novedades',
+    openNews: 'Abrir novedades',
+  },
+  gate: {
+    hireKicker: 'Contrato',
+    hireTitle: '¿Tienes un proyecto?',
+    hireBody:
+      'Contrata desde la página de contrato: briefing, plazo y propuesta en el mismo lugar, con claridad y compromiso.',
+    hireCta: 'Ir al contrato',
+    youtubeKicker: 'YouTube',
+    youtubeTitle: 'Canal de YouTube',
+    youtubeBody:
+      'Clases, detrás de cámaras y lo que estoy construyendo en público. Si quieres seguir el proceso, el canal está abierto.',
+    youtubeCta: 'Ver el canal',
+    youtubeStudiesCta: 'Ver más',
+    next: 'Siguiente novedad',
+    prev: 'Novedad anterior',
   },
   navHome: {
     label: 'Home',
