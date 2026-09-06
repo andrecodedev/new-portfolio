@@ -789,7 +789,6 @@
   inset: 20%;
   z-index: -1;
   border-radius: 42%;
-  box-shadow: 0 16px 28px color-mix(in srgb, #000 22%, transparent);
   pointer-events: none;
 }
 
