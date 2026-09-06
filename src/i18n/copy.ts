@@ -8,6 +8,7 @@ export type AccentedCopy = {
 export type PageCopy = AccentedCopy & {
   menuLabel: string
   menuDescription: string
+  menuAccents: readonly string[]
   title: string
   imageAlt: string
 }
@@ -54,6 +55,7 @@ export type Dictionary = {
   navHome: {
     label: string
     description: string
+    accents: readonly string[]
   }
   home: {
     heroTitleLines: readonly [string, string]
@@ -88,8 +90,8 @@ const pt: Dictionary = {
     language: 'Idioma',
     tools: 'Ferramentas do site',
     openSettings: 'Abrir configurações',
-    themeLight: 'Ativar tema claro',
-    themeDark: 'Ativar tema escuro',
+    themeLight: 'Mudar para o tema claro',
+    themeDark: 'Mudar para o tema escuro',
     copyrightLine1: 'Direitos Autorais © 2024 - 2026 andrevitordev.vercel.app',
     copyrightLine2: 'Todos os direitos reservados.',
     backToTop: 'Voltar ao topo',
@@ -115,6 +117,7 @@ const pt: Dictionary = {
   navHome: {
     label: 'Home',
     description: 'Voltar para a página inicial.',
+    accents: ['página', 'inicial'],
   },
   home: {
     heroTitleLines: ['Olá, eu sou', 'André Vitor.'],
@@ -162,6 +165,7 @@ const pt: Dictionary = {
     work: {
       menuLabel: 'Trabalho',
       menuDescription: 'Como eu construo e entrego.',
+      menuAccents: ['construo', 'entrego'],
       title: 'Sobre meu trabalho.',
       body: 'Do front ao detalhe da experiência, construo interfaces acessíveis e produtos que resolvem problema de verdade. Aqui estão trabalhos, contribuições e resultados da jornada. Quanto mais desafiador, melhor.',
       accents: ['interfaces', 'desafiador'],
@@ -170,6 +174,7 @@ const pt: Dictionary = {
     about: {
       menuLabel: 'Sobre',
       menuDescription: 'Quem sou e de onde venho.',
+      menuAccents: ['sou', 'venho'],
       title: 'Sobre minha história.',
       body: 'Desenvolvedor web júnior na TEC4U, com base técnica na ETEC e graduação em ADS na FACENS. Apaixonado por tecnologia desde cedo, construo projetos web com foco em aprendizado contínuo e impacto real.',
       accents: ['aprendizado', 'impacto'],
@@ -178,6 +183,7 @@ const pt: Dictionary = {
     reading: {
       menuLabel: 'Estudos',
       menuDescription: 'Prática, experimentos e evolução.',
+      menuAccents: ['Prática', 'evolução'],
       title: 'Sobre meus estudos e projetos.',
       body: 'Evoluo na prática: projetos, experimentos e hábitos constantes. Aplico práticas modernas no código do dia a dia, sempre buscando entregar com clareza e qualidade.',
       accents: ['clareza', 'qualidade'],
@@ -186,6 +192,7 @@ const pt: Dictionary = {
     hire: {
       menuLabel: 'Contrato',
       menuDescription: 'Contrate meu serviço por aqui.',
+      menuAccents: ['Contrate', 'serviço'],
       title: 'Sobre o contrato.',
       body: 'Aqui você contrata meu serviço de forma direta. Conta o projeto, alinha o prazo e recebe uma proposta.',
       accents: ['contrata', 'proposta'],
@@ -194,6 +201,7 @@ const pt: Dictionary = {
     contact: {
       menuLabel: 'Contato',
       menuDescription: 'Uma dúvida, um recado.',
+      menuAccents: ['dúvida', 'recado'],
       title: 'Fale comigo.',
       body: 'Se quiser tirar uma dúvida, deixar um recado ou só conversar, estou por aqui. Escreve quando fizer sentido.',
       accents: ['dúvida', 'conversar'],
@@ -240,6 +248,7 @@ const en: Dictionary = {
   navHome: {
     label: 'Home',
     description: 'Back to the home page.',
+    accents: ['home', 'page'],
   },
   home: {
     heroTitleLines: ['Hi, I am', 'André Vitor.'],
@@ -287,6 +296,7 @@ const en: Dictionary = {
     work: {
       menuLabel: 'Work',
       menuDescription: 'How I build and ship.',
+      menuAccents: ['build', 'ship'],
       title: 'About my work.',
       body: 'From the front end to the details of the experience, I build accessible interfaces and products that solve real problems. Here are works, contributions, and results from the journey. The more challenging, the better.',
       accents: ['interfaces', 'challenging'],
@@ -295,6 +305,7 @@ const en: Dictionary = {
     about: {
       menuLabel: 'About',
       menuDescription: 'Who I am and where I come from.',
+      menuAccents: ['Who', 'where'],
       title: 'About my story.',
       body: 'Junior web developer at TEC4U, with a technical foundation from ETEC and an ADS degree at FACENS. Passionate about technology from early on, I build web projects focused on continuous learning and real impact.',
       accents: ['learning', 'impact'],
@@ -303,6 +314,7 @@ const en: Dictionary = {
     reading: {
       menuLabel: 'Studies',
       menuDescription: 'Practice, experiments, and growth.',
+      menuAccents: ['Practice', 'growth'],
       title: 'About my studies and projects.',
       body: 'I grow by doing: projects, experiments, and steady habits. I apply modern practices in day-to-day code, always aiming to ship with clarity and quality.',
       accents: ['clarity', 'quality'],
@@ -311,6 +323,7 @@ const en: Dictionary = {
     hire: {
       menuLabel: 'Contract',
       menuDescription: 'Hire my service from here.',
+      menuAccents: ['Hire', 'service'],
       title: 'About the contract.',
       body: 'This is where you hire my service directly. Share the project, align the timeline, and get a proposal.',
       accents: ['hire', 'proposal'],
@@ -319,6 +332,7 @@ const en: Dictionary = {
     contact: {
       menuLabel: 'Contact',
       menuDescription: 'A hello, a question, a note.',
+      menuAccents: ['question', 'note'],
       title: 'Talk to me.',
       body: 'If you want to ask something or just talk, I am around. Write when it feels right.',
       accents: ['ask', 'talk'],
@@ -338,8 +352,8 @@ const es: Dictionary = {
     language: 'Idioma',
     tools: 'Herramientas del sitio',
     openSettings: 'Abrir ajustes',
-    themeLight: 'Activar tema claro',
-    themeDark: 'Activar tema oscuro',
+    themeLight: 'Cambiar al tema claro',
+    themeDark: 'Cambiar al tema oscuro',
     copyrightLine1: 'Derechos de autor © 2024 - 2026 andrevitordev.vercel.app',
     copyrightLine2: 'Todos los derechos reservados.',
     backToTop: 'Volver arriba',
@@ -365,6 +379,7 @@ const es: Dictionary = {
   navHome: {
     label: 'Home',
     description: 'Volver a la página de inicio.',
+    accents: ['página', 'inicio'],
   },
   home: {
     heroTitleLines: ['Hola, soy', 'André Vitor.'],
@@ -412,6 +427,7 @@ const es: Dictionary = {
     work: {
       menuLabel: 'Trabajo',
       menuDescription: 'Cómo construyo y entrego.',
+      menuAccents: ['construyo', 'entrego'],
       title: 'Sobre mi trabajo.',
       body: 'Del front al detalle de la experiencia, construyo interfaces accesibles y productos que resuelven problemas de verdad. Aquí están trabajos, contribuciones y resultados del camino. Cuanto más desafiante, mejor.',
       accents: ['interfaces', 'desafiante'],
@@ -420,6 +436,7 @@ const es: Dictionary = {
     about: {
       menuLabel: 'Sobre',
       menuDescription: 'Quién soy y de dónde vengo.',
+      menuAccents: ['soy', 'vengo'],
       title: 'Sobre mi historia.',
       body: 'Desarrollador web junior en TEC4U, con base técnica en la ETEC y graduación en ADS en FACENS. Apasionado por la tecnología desde temprano, construyo proyectos web con foco en aprendizaje continuo e impacto real.',
       accents: ['aprendizaje', 'impacto'],
@@ -428,6 +445,7 @@ const es: Dictionary = {
     reading: {
       menuLabel: 'Estudios',
       menuDescription: 'Práctica, experimentos y evolución.',
+      menuAccents: ['Práctica', 'evolución'],
       title: 'Sobre mis estudios y proyectos.',
       body: 'Evoluciono en la práctica: proyectos, experimentos y hábitos constantes. Aplico prácticas modernas en el código del día a día, siempre buscando entregar con claridad y calidad.',
       accents: ['claridad', 'calidad'],
@@ -436,6 +454,7 @@ const es: Dictionary = {
     hire: {
       menuLabel: 'Contrato',
       menuDescription: 'Contrata mi servicio por aquí.',
+      menuAccents: ['Contrata', 'servicio'],
       title: 'Sobre el contrato.',
       body: 'Aquí contratas mi servicio de forma directa. Cuentas el proyecto, alineas el plazo y recibes una propuesta.',
       accents: ['contratas', 'propuesta'],
@@ -444,6 +463,7 @@ const es: Dictionary = {
     contact: {
       menuLabel: 'Contacto',
       menuDescription: 'Una duda, un recado.',
+      menuAccents: ['duda', 'recado'],
       title: 'Habla conmigo.',
       body: 'Si quieres resolver una duda, dejar un recado o solo conversar, estoy por aquí. Escribe cuando tenga sentido.',
       accents: ['duda', 'conversar'],

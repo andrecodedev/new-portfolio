@@ -7,14 +7,22 @@ import {
   type ReactNode,
 } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
+import { AccentedText } from './components/accented-text'
 import CodeRain from './components/CodeRain'
+import { SkeletonImage } from './components/skeleton-image'
+import {
+  applyTheme,
+  readDocumentTheme,
+  ThemeIcon,
+  type Theme,
+} from './theme'
 import {
   ASSETS,
   PAGE_META,
   SOCIAL_LINKS,
+  getAccentForPath,
   getLoaderBgForPath,
-  highlightAccents,
   type ContentPageId,
 } from './data/site'
 import {
@@ -22,6 +30,12 @@ import {
   LOCALE_LABELS,
   LOCALES,
 } from './i18n/copy'
+import AdminAuth from './admin/admin-auth'
+import AdminDashboard from './admin/admin-dashboard'
+import { ADMIN_BASE_PATH, ADMIN_DASHBOARD_PATH } from './admin/admin-paths'
+import { CmsProvider, useCmsHero } from './cms/cms-provider'
+import GatePopup from './cms/gate-popup'
+import { HeroModulesView } from './cms/hero-stack'
 import { LocaleProvider, useLocale } from './i18n/LocaleProvider'
 import {
   MenuOpenProvider,
@@ -67,9 +81,6 @@ import {
 } from './navigation/scroll-root'
 import './App.css'
 
-type Theme = 'light' | 'dark'
-
-const THEME_STORAGE_KEY = 'portfolio-theme'
 const BOOT_LOADER_MIN_MS = 1400
 const BOOT_LOADER_EXIT_MS = 700
 /** Mesmo tempo do CSS `.menu` (subida/descida). */
@@ -86,12 +97,8 @@ function scaleXFromTransform(transform: string) {
   }
 }
 
-function isMenuText(node: EventTarget | null) {
-  return (
-    node instanceof Element &&
-    (node.classList.contains('menu__link-label') ||
-      node.classList.contains('menu__link-desc'))
-  )
+function isMenuLinkTarget(node: EventTarget | null) {
+  return node instanceof Element && Boolean(node.closest('.menu__link'))
 }
 
 function commitWaveStyles(list: HTMLElement) {
@@ -138,53 +145,6 @@ function clearWaveStyles(list: HTMLElement | null) {
     })
 }
 
-function readStoredTheme(): Theme {
-  const stored = window.localStorage.getItem(THEME_STORAGE_KEY)
-  return stored === 'light' ? 'light' : 'dark'
-}
-
-function applyTheme(theme: Theme) {
-  document.documentElement.setAttribute('data-theme', theme)
-  window.localStorage.setItem(THEME_STORAGE_KEY, theme)
-}
-
-function ThemeIcon({ theme }: { theme: Theme }) {
-  if (theme === 'dark') {
-    return (
-      <svg
-        className="header__theme-icon"
-        viewBox="0 0 24 24"
-        fill="none"
-        aria-hidden="true"
-      >
-        <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.5" />
-        <path
-          d="M12 2v2.5M12 19.5V22M4.22 4.22l1.77 1.77M17.99 17.99l1.77 1.77M2 12h2.5M19.5 12H22M4.22 19.78l1.77-1.77M17.99 6.03l1.77-1.77"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      </svg>
-    )
-  }
-
-  return (
-    <svg
-      className="header__theme-icon"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M20.2 13.4A8.2 8.2 0 0 1 10.6 3.8 8.5 8.5 0 1 0 20.2 13.4Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
 type IconProps = {
   src: string
   alt?: string
@@ -195,31 +155,10 @@ function Icon({ src, alt = '', className = 'header__icon' }: IconProps) {
   return <img className={className} src={src} alt={alt} draggable={false} />
 }
 
-function AccentedText({
-  body,
-  accents,
-}: {
-  body: string
-  accents: readonly string[]
-}) {
-  return (
-    <>
-      {highlightAccents(body, accents).map((part) =>
-        part.accent ? (
-          <strong key={part.key} className="accent-text">
-            {part.text}
-          </strong>
-        ) : (
-          <span key={part.key}>{part.text}</span>
-        ),
-      )}
-    </>
-  )
-}
-
 type HeaderProps = {
   menuOpen: boolean
   menuId: string
+  pinned?: boolean
   onToggleMenu: () => void
   onGoHome: () => void
   onHireMe: () => void
@@ -228,16 +167,68 @@ type HeaderProps = {
 function Header({
   menuOpen,
   menuId,
+  pinned = false,
   onToggleMenu,
   onGoHome,
   onHireMe,
 }: HeaderProps) {
   const { show } = useEntrance()
   const { t } = useLocale()
+  const reduce = Boolean(useReducedMotion())
+  const [away, setAway] = useState(false)
+  const lastTop = useRef(0)
+
+  useEffect(() => {
+    if (pinned) {
+      setAway(false)
+      return
+    }
+
+    const TOP_ALWAYS = 24
+    const DELTA = 8
+
+    const sync = () => {
+      const top = getScrollRootTop()
+      const delta = top - lastTop.current
+
+      if (top <= TOP_ALWAYS) {
+        setAway(false)
+      } else if (delta > DELTA) {
+        setAway(true)
+      } else if (delta < -DELTA) {
+        setAway(false)
+      }
+
+      lastTop.current = top
+    }
+
+    const bind = () => {
+      const root =
+        getScrollRoot() ?? document.querySelector('.stage__scroll')
+      if (!root) return () => {}
+      lastTop.current = root.scrollTop
+      sync()
+      root.addEventListener('scroll', sync, { passive: true })
+      return () => root.removeEventListener('scroll', sync)
+    }
+
+    let unbind = bind()
+    const timer = window.setTimeout(() => {
+      unbind()
+      unbind = bind()
+    }, 0)
+
+    return () => {
+      window.clearTimeout(timer)
+      unbind()
+    }
+  }, [pinned])
+
+  const hide = away && !pinned && !reduce
 
   return (
     <motion.header
-      className="header"
+      className={`header${hide ? ' header--away' : ''}`}
       initial="hidden"
       animate={show ? 'show' : 'hidden'}
       variants={headerStagger}
@@ -354,13 +345,7 @@ function BackToTop() {
             scrollRootToTop(reduce ? 'auto' : 'smooth')
           }}
         >
-          <svg
-            viewBox="0 0 24 24"
-            width="20"
-            height="20"
-            fill="none"
-            aria-hidden="true"
-          >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path
               d="M12 19V5"
               stroke="currentColor"
@@ -456,18 +441,23 @@ function SideTools({ theme, onToggleTheme }: SideToolsProps) {
           <span className="side-tools__divider" aria-hidden="true" />
 
           <div className="side-tools__theme">
-            <span className="side-tools__theme-label" aria-hidden="true">
-              <ThemeIcon theme={isDark ? 'light' : 'dark'} />
-            </span>
             <button
               type="button"
-              className={`side-tools__switch${isDark ? ' side-tools__switch--dark' : ''}`}
-              role="switch"
-              aria-checked={isDark}
+              className="side-tools__theme-toggle"
+              title={isDark ? t.chrome.themeLight : t.chrome.themeDark}
               aria-label={isDark ? t.chrome.themeLight : t.chrome.themeDark}
+              aria-pressed={isDark}
               onClick={onToggleTheme}
             >
-              <span className="side-tools__switch-thumb" />
+              <span className="side-tools__theme-label" aria-hidden="true">
+                <ThemeIcon theme={isDark ? 'light' : 'dark'} />
+              </span>
+              <span
+                className={`side-tools__switch${isDark ? ' side-tools__switch--dark' : ''}`}
+                aria-hidden="true"
+              >
+                <span className="side-tools__switch-thumb" />
+              </span>
             </button>
           </div>
         </div>
@@ -485,13 +475,7 @@ function SideTools({ theme, onToggleTheme }: SideToolsProps) {
             if (touchMode) setOpen((current) => !current)
           }}
         >
-          <svg
-            viewBox="0 0 24 24"
-            width="20"
-            height="20"
-            fill="none"
-            aria-hidden="true"
-          >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path
               d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
               stroke="currentColor"
@@ -606,13 +590,7 @@ function NewsFab({ onOpen }: NewsFabProps) {
         title={t.chrome.news}
         onClick={onOpen}
       >
-        <svg
-          viewBox="0 0 24 24"
-          width="20"
-          height="20"
-          fill="none"
-          aria-hidden="true"
-        >
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <rect
             x="3.5"
             y="3.5"
@@ -638,309 +616,6 @@ function NewsFab({ onOpen }: NewsFabProps) {
         </svg>
       </button>
     </motion.div>
-  )
-}
-
-type GatePopupProps = {
-  open: boolean
-  onClose: () => void
-  onHire: () => void
-  onStudies: () => void
-}
-
-type GateSlide = {
-  id: 'hire' | 'youtube'
-  accent: 'hire' | 'contact' | 'reading'
-  image?: string
-  video?: string
-  imageAlt: string
-  kicker: string
-  title: string
-  body: string
-  cta: string
-  href?: string
-  ctaSecondary?: string
-}
-
-function GateVisual({
-  slide,
-  reduce,
-}: {
-  slide: GateSlide
-  reduce: boolean
-}) {
-  const [ready, setReady] = useState(false)
-
-  const show = () => {
-    setReady(true)
-  }
-
-  return (
-    <div className="gate__visual" aria-busy={!ready}>
-      {ready ? null : (
-        <div className="gate__media-ph" aria-hidden="true">
-          <div className="loader__dots">
-            <span className="loader__dot" />
-            <span className="loader__dot" />
-            <span className="loader__dot" />
-          </div>
-        </div>
-      )}
-      {slide.video ? (
-        <video
-          className={`gate__media${ready ? ' gate__media--on' : ''}`}
-          src={slide.video}
-          muted
-          loop
-          playsInline
-          autoPlay={!reduce}
-          preload="auto"
-          aria-label={slide.imageAlt}
-          onLoadedData={show}
-          onError={show}
-        />
-      ) : (
-        <img
-          className={`gate__media${ready ? ' gate__media--on' : ''}`}
-          src={slide.image}
-          alt={slide.imageAlt}
-          onLoad={show}
-          onError={show}
-          ref={(node) => {
-            if (!node) return
-            if (node.complete && node.naturalWidth > 0) show()
-          }}
-        />
-      )}
-    </div>
-  )
-}
-
-function GateSlideFace({
-  slide,
-  onHire,
-  onStudies,
-  onClose,
-  reduce,
-  footer,
-}: {
-  slide: GateSlide
-  onHire: () => void
-  onStudies: () => void
-  onClose: () => void
-  reduce: boolean
-  footer?: ReactNode
-}) {
-  const isLink = Boolean(slide.href)
-
-  return (
-    <div className="gate__spread" data-accent={slide.accent}>
-      <GateVisual slide={slide} reduce={reduce} />
-      <div className="gate__copy">
-        <div className="gate__copy-main">
-          <p className="gate__kicker">{slide.kicker}</p>
-          <h2 className="gate__headline">{slide.title}</h2>
-          <p className="gate__body">{slide.body}</p>
-          <div className="gate__cta-row">
-            {isLink ? (
-              <a
-                className="spot__btn gate__cta"
-                href={slide.href}
-                target="_blank"
-                rel="noreferrer"
-                onClick={onClose}
-              >
-                {slide.cta}
-              </a>
-            ) : (
-              <button type="button" className="spot__btn gate__cta" onClick={onHire}>
-                {slide.cta}
-              </button>
-            )}
-            {slide.ctaSecondary ? (
-              <button
-                type="button"
-                className="spot__btn gate__cta"
-                onClick={onStudies}
-              >
-                {slide.ctaSecondary}
-              </button>
-            ) : null}
-          </div>
-        </div>
-        {footer}
-      </div>
-    </div>
-  )
-}
-
-function GatePopup({ open, onClose, onHire, onStudies }: GatePopupProps) {
-  const { t } = useLocale()
-  const reduce = Boolean(useReducedMotion())
-  const closeRef = useRef<HTMLButtonElement>(null)
-  const openRef = useRef(open)
-  const [index, setIndex] = useState(0)
-  openRef.current = open
-  const youtubeHref = 'https://www.youtube.com/@TagAberta'
-
-  const slides: GateSlide[] = [
-    {
-      id: 'hire',
-      accent: 'hire',
-      video: ASSETS.hireVideo,
-      imageAlt: t.pages.hire.imageAlt,
-      kicker: t.gate.hireKicker,
-      title: t.gate.hireTitle,
-      body: t.gate.hireBody,
-      cta: t.gate.hireCta,
-    },
-    {
-      id: 'youtube',
-      accent: 'reading',
-      image: ASSETS.youtubeChannel,
-      imageAlt: t.gate.youtubeTitle,
-      kicker: t.gate.youtubeKicker,
-      title: t.gate.youtubeTitle,
-      body: t.gate.youtubeBody,
-      cta: t.gate.youtubeCta,
-      ctaSecondary: t.gate.youtubeStudiesCta,
-      href: youtubeHref,
-    },
-  ]
-
-  const total = slides.length
-  const current = slides[index] ?? slides[0]
-
-  useEffect(() => {
-    const img = new Image()
-    img.src = ASSETS.youtubeChannel
-    const video = document.createElement('video')
-    video.preload = 'auto'
-    video.src = ASSETS.hireVideo
-  }, [])
-
-  useEffect(() => {
-    if (!open) return
-    closeRef.current?.focus()
-  }, [open])
-
-  const goNext = () => {
-    setIndex((currentIndex) => Math.min(currentIndex + 1, total - 1))
-  }
-
-  const goPrev = () => {
-    setIndex((currentIndex) => Math.max(currentIndex - 1, 0))
-  }
-
-  return (
-    <AnimatePresence
-      onExitComplete={() => {
-        if (openRef.current) return
-        setIndex(0)
-      }}
-    >
-      {open ? (
-        <div className="gate">
-          <motion.button
-            type="button"
-            className="gate__backdrop"
-            aria-label={t.chrome.close}
-            initial={reduce ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            onClick={onClose}
-          />
-          <motion.div
-            className="gate__panel"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="gate-title"
-            initial={reduce ? false : { opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -18 }}
-            transition={{ duration: reduce ? 0 : 0.42, ease: easeOutSoft }}
-          >
-            <button
-              ref={closeRef}
-              type="button"
-              className="gate__close"
-              aria-label={t.chrome.close}
-              onClick={onClose}
-            >
-              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-                <path
-                  d="M6 6l12 12M18 6L6 18"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </button>
-
-            <div className="gate__stage">
-              {slides.map((slide) => {
-                const active = slide.id === current.id
-
-                return (
-                  <div
-                    key={slide.id}
-                    className={`gate__slide${active ? ' gate__slide--active' : ''}`}
-                    aria-hidden={!active}
-                    inert={!active ? true : undefined}
-                  >
-                    <GateSlideFace
-                      slide={slide}
-                      onHire={onHire}
-                      onStudies={onStudies}
-                      onClose={onClose}
-                      reduce={reduce}
-                      footer={
-                        <div className="gate__nav">
-                          <div className="gate__nav-side">
-                            {index > 0 ? (
-                              <button
-                                type="button"
-                                className="gate__nav-btn"
-                                onClick={goPrev}
-                              >
-                                {t.gate.prev}
-                              </button>
-                            ) : null}
-                          </div>
-                          <p className="gate__dots" aria-hidden="true">
-                            {slides.map((item, slideIndex) => (
-                              <span
-                                key={item.id}
-                                className={`gate__dot${slideIndex === index ? ' gate__dot--on' : ''}`}
-                              />
-                            ))}
-                          </p>
-                          <div className="gate__nav-side gate__nav-side--end">
-                            {index < total - 1 ? (
-                              <button
-                                type="button"
-                                className="gate__nav-btn"
-                                onClick={goNext}
-                              >
-                                {t.gate.next}
-                              </button>
-                            ) : null}
-                          </div>
-                        </div>
-                      }
-                    />
-                  </div>
-                )
-              })}
-            </div>
-            <span id="gate-title" className="sr-only">
-              {current.title}
-            </span>
-          </motion.div>
-        </div>
-      ) : null}
-    </AnimatePresence>
   )
 }
 
@@ -985,7 +660,9 @@ function Menu({ id, open, onNavigate }: MenuProps) {
   }
 
   const resumeWave = (event: { relatedTarget: EventTarget | null }) => {
-    if (isMenuText(event.relatedTarget)) return
+    if (isMenuLinkTarget(event.relatedTarget)) return
+    // Touch: mantém o preview até outro item ou fechar o menu
+    if (window.matchMedia('(hover: none)').matches) return
     setHotPath(null)
     setPaused(false)
   }
@@ -995,39 +672,54 @@ function Menu({ id, open, onNavigate }: MenuProps) {
       label: t.navHome.label,
       path: '/',
       description: t.navHome.description,
+      accents: t.navHome.accents,
       accent: null as ContentPageId | null,
+      image: ASSETS.home as string | null,
     },
     {
       label: t.pages.work.menuLabel,
       path: PAGE_META.work.path,
       description: t.pages.work.menuDescription,
+      accents: t.pages.work.menuAccents,
       accent: 'work' as const,
+      image: PAGE_META.work.image,
     },
     {
       label: t.pages.about.menuLabel,
       path: PAGE_META.about.path,
       description: t.pages.about.menuDescription,
+      accents: t.pages.about.menuAccents,
       accent: 'about' as const,
+      image: PAGE_META.about.image,
     },
     {
       label: t.pages.reading.menuLabel,
       path: PAGE_META.reading.path,
       description: t.pages.reading.menuDescription,
+      accents: t.pages.reading.menuAccents,
       accent: 'reading' as const,
+      image: PAGE_META.reading.image,
     },
     {
       label: t.pages.hire.menuLabel,
       path: PAGE_META.hire.path,
       description: t.pages.hire.menuDescription,
+      accents: t.pages.hire.menuAccents,
       accent: 'hire' as const,
+      image: PAGE_META.hire.image,
     },
     {
       label: t.pages.contact.menuLabel,
       path: PAGE_META.contact.path,
       description: t.pages.contact.menuDescription,
+      accents: t.pages.contact.menuAccents,
       accent: 'contact' as const,
+      image: PAGE_META.contact.image,
     },
   ]
+
+  const previewItem = navLinks.find((item) => item.path === hotPath)
+  const previewSrc = previewItem?.image ?? null
 
   return (
     <div
@@ -1064,28 +756,66 @@ function Menu({ id, open, onNavigate }: MenuProps) {
                   event.preventDefault()
                   onNavigate(item.path)
                 }}
+                onPointerDown={() => pauseWave(item.path)}
+                onPointerEnter={() => pauseWave(item.path)}
+                onPointerLeave={resumeWave}
               >
                 <motion.span
                   className="menu__link-label"
                   variants={reduce ? undefined : menuLabel}
-                  onPointerEnter={() => pauseWave(item.path)}
-                  onPointerLeave={resumeWave}
                 >
                   {item.label}
+                  <span className="menu__link-dot" aria-hidden="true">
+                    .
+                  </span>
                 </motion.span>
                 <motion.span
                   className="menu__link-desc"
                   variants={reduce ? undefined : menuDesc}
-                  onPointerEnter={() => pauseWave(item.path)}
-                  onPointerLeave={resumeWave}
                 >
-                  {item.description}
+                  <AccentedText body={item.description} accents={item.accents} />
                 </motion.span>
               </a>
             </motion.li>
           ))}
         </ul>
       </motion.nav>
+
+      <div className="menu__preview" aria-hidden="true">
+        <AnimatePresence initial={false}>
+          {previewSrc ? (
+            <motion.div
+              key={previewSrc}
+              className="menu__preview-enter"
+              initial={
+                reduce
+                  ? { opacity: 0 }
+                  : { opacity: 0, scale: 0.92, y: 12 }
+              }
+              animate={
+                reduce
+                  ? { opacity: 1 }
+                  : { opacity: 1, scale: 1, y: 0 }
+              }
+              exit={
+                reduce
+                  ? { opacity: 0 }
+                  : { opacity: 0, scale: 0.96, y: -8 }
+              }
+              transition={{ duration: reduce ? 0.08 : 0.18, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="menu__preview-orbit">
+                <img
+                  className="menu__preview-img"
+                  src={previewSrc}
+                  alt=""
+                  draggable={false}
+                />
+              </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </div>
 
       <motion.div
         className="menu__footer"
@@ -1120,52 +850,32 @@ function Menu({ id, open, onNavigate }: MenuProps) {
   )
 }
 
-function Hero() {
+function Hero({ onNavigate }: { onNavigate: (path: string) => void }) {
   const { canAnimate, reduce, playId } = useScrollReveal()
   const scrollViewport = useScrollViewport()
-  const { t } = useLocale()
-  const titleLines = [...t.home.heroTitleLines]
+  const hero = useCmsHero()
+  const { locale } = useLocale()
   const rise = visibleRiseVariants(reduce)
 
   return (
-    <section className="hero" id="introduction" aria-label="Introduction">
+    <div id="introduction">
       <motion.div
         key={playId}
-        className="hero__content"
         initial="hidden"
         whileInView={canAnimate ? 'show' : 'hidden'}
         viewport={scrollViewport}
         variants={sectionStagger}
       >
-        <motion.div className="hero__copy" variants={rise}>
-          <h1 className="hero__title">
-            {titleLines.map((line) => (
-              <span key={line} className="hero__title-line">
-                <span className="hero__title-text">{line}</span>
-              </span>
-            ))}
-          </h1>
-          <p className="hero__subtitle">
-            {t.home.heroSubtitleLines.map((line) => (
-              <span key={line} className="hero__subtitle-line">
-                {line}
-              </span>
-            ))}
-          </p>
-        </motion.div>
-
-        <motion.div className="hero__media" variants={rise}>
-          <div className="hero__avatar">
-            <img
-              className="hero__avatar-img"
-              src={ASSETS.avatar}
-              alt="André Vitor"
-              draggable={false}
-            />
-          </div>
+        <motion.div variants={rise}>
+          <HeroModulesView
+            modules={hero.modules}
+            locale={locale}
+            animated
+            onNavigate={onNavigate}
+          />
         </motion.div>
       </motion.div>
-    </section>
+    </div>
   )
 }
 
@@ -1366,11 +1076,10 @@ function ContentPage({ pageId }: { pageId: ContentPageId }) {
           </motion.div>
           <motion.div className="hero__media" variants={rise}>
             <div className="hero__figure">
-              <img
+              <SkeletonImage
                 className="hero__figure-img"
                 src={meta.image}
                 alt={page.imageAlt}
-                draggable={false}
               />
             </div>
           </motion.div>
@@ -1387,8 +1096,7 @@ function HomePage({ onNavigate }: NavigateProps) {
 
   return (
     <>
-      <Hero />
-      <ScrollCue />
+      <Hero onNavigate={onNavigate} />
       <Works onNavigate={onNavigate} />
       <Spot
         id="historia"
@@ -1465,6 +1173,8 @@ function HomePage({ onNavigate }: NavigateProps) {
 
 function PortfolioShell() {
   const menuId = useId()
+  const location = useLocation()
+  const pageAccent = getAccentForPath(location.pathname)
   const scrollRef = useRef<HTMLDivElement>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   /** Mantém copyright/FAB escondidos até o menu terminar de subir. */
@@ -1478,12 +1188,7 @@ function PortfolioShell() {
       ? 'var(--bg-loader)'
       : getLoaderBgForPath(window.location.pathname),
   )
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof document === 'undefined') return 'dark'
-    const current = document.documentElement.getAttribute('data-theme')
-    if (current === 'light' || current === 'dark') return current
-    return readStoredTheme()
-  })
+  const [theme, setTheme] = useState<Theme>(readDocumentTheme)
   const [gateOpen, setGateOpen] = useState(false)
   const { transition, goTo, finishTransition, transitionExitMs } =
     usePageNavigator()
@@ -1687,10 +1392,20 @@ function PortfolioShell() {
     goTo(path)
   }
 
+  const pageClass = [
+    'page',
+    menuBlocksChrome ? 'page--menu-open' : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   return (
     <RevealProvider ready={revealReady}>
       <MenuOpenProvider open={menuBlocksChrome}>
-        <div className={`page${menuBlocksChrome ? ' page--menu-open' : ''}`}>
+        <div
+          className={pageClass}
+          data-accent={pageAccent ?? undefined}
+        >
           <div className="stage-panel stage-panel--loader">
             {bootVisible ? (
               <Loader
@@ -1707,13 +1422,16 @@ function PortfolioShell() {
               />
             ) : null}
           </div>
-          <Header
-            menuOpen={menuOpen}
-            menuId={menuId}
-            onToggleMenu={() => setMenuOpen((open) => !open)}
-            onGoHome={() => navigateTo('/')}
-            onHireMe={() => navigateTo(PAGE_META.contact.path)}
-          />
+          <div className="stage-panel stage-panel--header">
+            <Header
+              menuOpen={menuOpen}
+              menuId={menuId}
+              pinned={menuOpen || gateOpen}
+              onToggleMenu={() => setMenuOpen((open) => !open)}
+              onGoHome={() => navigateTo('/')}
+              onHireMe={() => navigateTo(PAGE_META.contact.path)}
+            />
+          </div>
           <div className="corner-tools">
             <BackToTop />
             <NewsFab onOpen={() => setGateOpen(true)} />
@@ -1728,13 +1446,9 @@ function PortfolioShell() {
             <GatePopup
               open={gateOpen && !menuOpen && !bootVisible}
               onClose={dismissGate}
-              onHire={() => {
+              onNavigate={(path) => {
                 dismissGate()
-                navigateTo(PAGE_META.hire.path)
-              }}
-              onStudies={() => {
-                dismissGate()
-                navigateTo(PAGE_META.reading.path)
+                navigateTo(path)
               }}
             />
           </div>
@@ -1786,7 +1500,13 @@ function App() {
   return (
     <BrowserRouter>
       <LocaleProvider>
-        <PortfolioShell />
+        <CmsProvider>
+          <Routes>
+            <Route path={ADMIN_BASE_PATH} element={<AdminAuth />} />
+            <Route path={ADMIN_DASHBOARD_PATH} element={<AdminDashboard />} />
+            <Route path="*" element={<PortfolioShell />} />
+          </Routes>
+        </CmsProvider>
       </LocaleProvider>
     </BrowserRouter>
   )

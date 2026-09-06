@@ -13,6 +13,7 @@ import {
   useReducedMotion,
   type Variants,
 } from 'framer-motion'
+import { AccentedText } from '../components/accented-text'
 import { easeOutExpo, easeOutSoft, useEntrance } from './reveal'
 
 export type ScrollRootRef = RefObject<HTMLElement | null>
@@ -24,7 +25,7 @@ export function useScrollViewport() {
 
   return useMemo(
     () => ({
-      once: false,
+      once: true,
       /* Meio-termo: original (0.28 + margem negativa) pedia scroll demais;
          0.1 + margem positiva grande animava fora da vista. */
       amount: 0.2,
@@ -37,7 +38,7 @@ export function useScrollViewport() {
 
 /** @deprecated Use useScrollViewport() — root precisa do .stage__scroll */
 export const scrollViewport = {
-  once: false,
+  once: true,
   amount: 0.2,
   margin: '0px 0px -4% 0px',
 } as const
@@ -240,6 +241,7 @@ type MaskTitleProps = {
   reduce?: boolean
   /** Home: desliza no mesmo eixo da seção (esquerda ou direita). */
   side?: SectionSide
+  accents?: readonly string[]
 }
 
 /** Título: máscara vertical na home antiga, ou deslize lateral nas seções. */
@@ -249,6 +251,7 @@ export function MaskTitle({
   withMark = true,
   reduce = false,
   side,
+  accents = [],
 }: MaskTitleProps) {
   const lineVariants = side
     ? visibleSideVariants(side, reduce)
@@ -276,7 +279,11 @@ export function MaskTitle({
           <span key={index} className="reveal-title__line">
             {side ? (
               <span className="reveal-title__text">
-                {line}
+                {accents.length > 0 ? (
+                  <AccentedText body={line} accents={accents} />
+                ) : (
+                  line
+                )}
                 {withMark && isLast ? (
                   <span className="accent-mark">.</span>
                 ) : null}
@@ -286,7 +293,11 @@ export function MaskTitle({
                 className="reveal-title__text"
                 variants={lineVariants}
               >
-                {line}
+                {accents.length > 0 ? (
+                  <AccentedText body={line} accents={accents} />
+                ) : (
+                  line
+                )}
                 {withMark && isLast ? (
                   <span className="accent-mark">.</span>
                 ) : null}

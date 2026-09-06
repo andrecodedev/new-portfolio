@@ -1,5 +1,6 @@
 export const ASSETS = {
   logo: '/logo.png',
+  home: '/home.png',
   hireMe: '/hireMe.png',
   avatar: '/avatar.png',
   notebook: '/notebook.png',
@@ -123,4 +124,11 @@ export function getLoaderBgForPath(path: string): string {
   if (path === '/' || path === '') return HOME_LOADER_BG
   const page = Object.values(PAGE_META).find((item) => item.path === path)
   return page?.loaderBg ?? HOME_LOADER_BG
+}
+
+/** Accent da rota (home = null: scrollbar/cursor neutros). */
+export function getAccentForPath(path: string): ContentPageId | null {
+  if (path === '/' || path === '') return null
+  const page = Object.values(PAGE_META).find((item) => item.path === path)
+  return page?.accent ?? null
 }

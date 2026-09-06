@@ -37,11 +37,13 @@
   --btn-shadow: #111111;
   --avatar-ring: #6e6e6e;
   --avatar-ring-shadow: #9a9a9a;
+  --avatar-fill: #1a1a1a;
   --avatar-shadow: rgba(0, 0, 0, 0.12);
   --scrollbar-thumb-hover: #cfcfcf;
   --scrollbar-thumb-active: #c4c4c4;
   --scrollbar-thumb: #bdbdbd;
   --scrollbar-track: var(--bg-outer);
+  --selection-fg: #ffffff;
   --icon-filter: none;
   --loader-work: #efe6a3;
   --loader-about: #bfe6cf;
@@ -57,6 +59,19 @@
   --accent-reading: #2f6ff0;
   --accent-contact: #e53e3e;
   --accent-hire: #7c4dff;
+  --accent-work-deep: #b45309;
+  --accent-work-pale: #f5c518;
+  --accent-about-deep: #0f7a3d;
+  --accent-about-pale: #4ade80;
+  --accent-reading-deep: #1d4ed8;
+  --accent-reading-pale: #67e8f9;
+  --accent-contact-deep: #b91c1c;
+  --accent-contact-pale: #fb7185;
+  --accent-hire-deep: #5b21b6;
+  --accent-hire-pale: #e9d5ff;
+  --accent-teal: #0d9488;
+  --accent-rose: #db2777;
+  --accent-lime: #65a30d;
   --stage-height: calc(100svh - (var(--respiro) * 2));
   --stage-radius: 5px;
 
@@ -65,20 +80,51 @@
   --font-ui: 'Inter', 'Inclusive Sans', sans-serif;
 
   /*
-    Uma escala só, do MENU ao popup.
-    display: títulos de página / hero / itens do menu
-    lead: subtítulo e título de card (popup)
-    body: parágrafos
-    ui: chrome, kicker, botão, SCROLL
+    Escala fluida (boa prática): sobe/desce com a tela, sem extremos.
+    display → títulos / hero / menu
+    lead → subtítulo / headline do gate
+    body → parágrafos
+    ui → chrome, kicker, botão, SCROLL
   */
-  --text-display: clamp(1.5rem, 1.05rem + 1.85vw, 2.35rem);
-  --text-lead: clamp(1.05rem, 0.92rem + 0.5vw, 1.35rem);
-  --text-body: clamp(0.95rem, 0.86rem + 0.38vw, 1.125rem);
-  --text-ui: clamp(0.8125rem, 0.74rem + 0.28vw, 1rem);
+  --text-display: clamp(1.28rem, 0.98rem + 1.2vw, 2.15rem);
+  --text-lead: clamp(0.95rem, 0.86rem + 0.35vw, 1.2rem);
+  --text-body: clamp(0.875rem, 0.82rem + 0.25vw, 1.0625rem);
+  --text-ui: clamp(0.75rem, 0.7rem + 0.2vw, 0.875rem);
 
-  /* Mídia do hero / páginas: acompanha a largura da tela */
-  --media-hero: clamp(160px, 23vw + 2rem, 420px);
-  --media-figure: clamp(132px, 19vw + 1.5rem, 300px);
+  /*
+    Controles / ícones / mídia: mesma lógica da tipografia.
+    Escala suave com a viewport, sem salto exagerado.
+  */
+  --fab-size: clamp(36px, 2rem + 0.85vw, 44px);
+  --fab-icon: clamp(15px, 0.85rem + 0.3vw, 19px);
+  --header-icon: clamp(18px, 1rem + 0.4vw, 24px);
+  --header-icon-sm: clamp(16px, 0.9rem + 0.3vw, 20px);
+  --social-icon: clamp(26px, 1.35rem + 0.75vw, 36px);
+  --menu-preview: clamp(200px, 28vw, 360px);
+  --tools-lang: clamp(22px, 1.15rem + 0.45vw, 28px);
+  --tools-switch-w: clamp(26px, 1.35rem + 0.35vw, 30px);
+  --tools-switch-h: clamp(14px, 0.7rem + 0.2vw, 16px);
+  --tools-switch-thumb: clamp(10px, 0.55rem + 0.15vw, 12px);
+  --btn-height: clamp(34px, 1.85rem + 0.45vw, 40px);
+  --btn-min-width: clamp(108px, 5.5rem + 2vw, 136px);
+  --btn-pad-x: clamp(10px, 0.5rem + 0.35vw, 14px);
+  --control-gap: clamp(8px, 0.4rem + 0.35vw, 12px);
+  --control-gap-tight: clamp(5px, 0.28rem + 0.15vw, 8px);
+
+  /* Linhas decorativas / dots / loader */
+  --accent-rule: clamp(56px, 3.5rem + 2vw, 83px);
+  --accent-rule-thick: clamp(60px, 3.8rem + 2.2vw, 88px);
+  --menu-footer-rule: clamp(22px, 1.2rem + 0.6vw, 32px);
+  --copyright-line: clamp(20px, 1.1rem + 0.5vw, 28px);
+  --gate-dot: clamp(6px, 0.35rem + 0.12vw, 8px);
+  --gate-dot-gap: clamp(5px, 0.28rem + 0.1vw, 7px);
+  --loader-dot-size: clamp(8px, 0.45rem + 0.35vw, 14px);
+  --loader-dot-gap: clamp(8px, 0.45rem + 0.35vw, 14px);
+
+  /* Mídia do hero / páginas / blocos */
+  --media-hero: clamp(150px, 18vw + 2.5rem, 400px);
+  --media-figure: clamp(120px, 15vw + 2rem, 280px);
+  --media-line: clamp(140px, 28vw, 220px);
 
   color: var(--text);
   background: var(--bg-outer);
@@ -107,6 +153,7 @@
   --btn-shadow: #f2f2f2;
   --avatar-ring: #f2f2f2;
   --avatar-ring-shadow: color-mix(in srgb, #ffffff 55%, transparent);
+  --avatar-fill: #1a1a1a;
   --avatar-shadow: rgba(0, 0, 0, 0.45);
   --scrollbar-thumb: #7a7a7a;
   --scrollbar-thumb-hover: #9a9a9a;
@@ -123,6 +170,19 @@
   --accent-reading: #78bfee;
   --accent-contact: #f0aaa5;
   --accent-hire: #c4b5fd;
+  --accent-work-deep: #fbbf24;
+  --accent-work-pale: #fde68a;
+  --accent-about-deep: #34d399;
+  --accent-about-pale: #bbf7d0;
+  --accent-reading-deep: #38bdf8;
+  --accent-reading-pale: #bae6fd;
+  --accent-contact-deep: #f87171;
+  --accent-contact-pale: #fecaca;
+  --accent-hire-deep: #a78bfa;
+  --accent-hire-pale: #ede9fe;
+  --accent-teal: #2dd4bf;
+  --accent-rose: #f472b6;
+  --accent-lime: #a3e635;
   color-scheme: dark;
 }
 
@@ -133,6 +193,19 @@
   --accent-reading: #2f6ff0;
   --accent-contact: #e53e3e;
   --accent-hire: #7c4dff;
+  --accent-work-deep: #b45309;
+  --accent-work-pale: #f5c518;
+  --accent-about-deep: #0f7a3d;
+  --accent-about-pale: #4ade80;
+  --accent-reading-deep: #1d4ed8;
+  --accent-reading-pale: #67e8f9;
+  --accent-contact-deep: #b91c1c;
+  --accent-contact-pale: #fb7185;
+  --accent-hire-deep: #5b21b6;
+  --accent-hire-pale: #e9d5ff;
+  --accent-teal: #0d9488;
+  --accent-rose: #db2777;
+  --accent-lime: #65a30d;
 }
 
 *,
@@ -182,4 +255,13 @@ a {
 img {
   display: block;
   max-width: 100%;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+svg,
+video,
+picture,
+.media-skel {
+  user-select: none;
 }
