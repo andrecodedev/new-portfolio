@@ -2,13 +2,18 @@ import {
   useEffect,
   useId,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
 } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
+import { GitHubCalendar } from 'react-github-calendar'
 import { AccentedText } from './components/accented-text'
+import { DepthCarousel } from './components/depth-carousel'
+import { LayoutGrid } from './components/layout-grid'
 import CodeRain from './components/CodeRain'
 import { SkeletonImage } from './components/skeleton-image'
 import {
@@ -20,20 +25,34 @@ import {
 import {
   ASSETS,
   PAGE_META,
-  SOCIAL_LINKS,
   getAccentForPath,
   getLoaderBgForPath,
   type ContentPageId,
 } from './data/site'
+import { SKILLS } from './data/about'
 import {
   LOCALE_FLAGS,
   LOCALE_LABELS,
   LOCALES,
+  type AchievementEntry,
+  type ExperienceEntry,
+  type HighlightEntry,
+  type Locale,
 } from './i18n/copy'
 import AdminAuth from './admin/admin-auth'
 import AdminDashboard from './admin/admin-dashboard'
 import { ADMIN_BASE_PATH, ADMIN_DASHBOARD_PATH } from './admin/admin-paths'
-import { CmsProvider, useCmsHero } from './cms/cms-provider'
+import {
+  CmsProvider,
+  useCmsChrome,
+  useCmsFooter,
+  useCmsHeader,
+  useCmsHero,
+} from './cms/cms-provider'
+import { fabStyleCss } from './cms/chrome-content'
+import { headerChromeCss } from './cms/header-content'
+import { SiteIcon } from './cms/icon-registry'
+import { buttonStyleCss, textStyleCss } from './cms/style-tokens'
 import GatePopup from './cms/gate-popup'
 import { HeroModulesView } from './cms/hero-stack'
 import { LocaleProvider, useLocale } from './i18n/LocaleProvider'
@@ -149,10 +168,13 @@ type IconProps = {
   src: string
   alt?: string
   className?: string
+  style?: CSSProperties
 }
 
-function Icon({ src, alt = '', className = 'header__icon' }: IconProps) {
-  return <img className={className} src={src} alt={alt} draggable={false} />
+function Icon({ src, alt = '', className = 'header__icon', style }: IconProps) {
+  return (
+    <img className={className} src={src} alt={alt} style={style} draggable={false} />
+  )
 }
 
 type HeaderProps = {
@@ -161,7 +183,7 @@ type HeaderProps = {
   pinned?: boolean
   onToggleMenu: () => void
   onGoHome: () => void
-  onHireMe: () => void
+  onHireMe: (path: string) => void
 }
 
 function Header({
@@ -173,10 +195,15 @@ function Header({
   onHireMe,
 }: HeaderProps) {
   const { show } = useEntrance()
-  const { t } = useLocale()
+  const { locale, t } = useLocale()
+  const header = useCmsHeader()
   const reduce = Boolean(useReducedMotion())
   const [away, setAway] = useState(false)
   const lastTop = useRef(0)
+  const menuLabel = menuOpen
+    ? header.menuClose[locale] || t.chrome.close
+    : header.menuOpen[locale] || t.chrome.menu
+  const ctaLabel = header.ctaLabel[locale] || t.chrome.hireMe
 
   useEffect(() => {
     if (pinned) {
@@ -226,64 +253,91 @@ function Header({
 
   const hide = away && !pinned && !reduce
 
+  const chromeCss = headerChromeCss(header.chromeStyle)
+
   return (
     <motion.header
       className={`header${hide ? ' header--away' : ''}`}
+      style={chromeCss}
       initial="hidden"
       animate={show ? 'show' : 'hidden'}
       variants={headerStagger}
     >
       <motion.div className="header__cluster" variants={headerFromTop}>
-        <a
-          className="header__home"
-          href="/"
-          aria-label="Home"
-          onClick={(event) => {
-            event.preventDefault()
-            onGoHome()
-          }}
-        >
-          <Icon src={ASSETS.logo} alt="" />
-        </a>
-        <span className="header__sep" aria-hidden="true" />
-        <button
-          type="button"
-          className="header__menu"
-          aria-label={menuOpen ? t.chrome.closeMenu : t.chrome.openMenu}
-          aria-expanded={menuOpen}
-          aria-controls={menuId}
-          onClick={onToggleMenu}
-        >
-          <span className="header__menu-label">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.span
-                key={menuOpen ? 'close' : 'menu'}
-                className="header__menu-text"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.22, ease: easeOutExpo }}
-              >
-                {menuOpen ? t.chrome.close : t.chrome.menu}
-              </motion.span>
-            </AnimatePresence>
-          </span>
-        </button>
+        {header.modulesOrder.includes('logo') && header.logoEnabled ? (
+          <a
+            className="header__home"
+            href="/"
+            aria-label="Home"
+            onClick={(event) => {
+              event.preventDefault()
+              onGoHome()
+            }}
+          >
+            <Icon
+              src={header.logoUrl || ASSETS.logo}
+              alt=""
+              className="header__icon"
+              style={
+                header.logoHeight > 0
+                  ? { width: header.logoHeight, height: header.logoHeight }
+                  : undefined
+              }
+            />
+          </a>
+        ) : null}
+        {header.modulesOrder.includes('logo') &&
+        header.logoEnabled &&
+        header.modulesOrder.includes('menu') &&
+        header.menuEnabled ? (
+          <span className="header__sep" aria-hidden="true" />
+        ) : null}
+        {header.modulesOrder.includes('menu') && header.menuEnabled ? (
+          <button
+            type="button"
+            className="header__menu"
+            aria-label={menuOpen ? t.chrome.closeMenu : t.chrome.openMenu}
+            aria-expanded={menuOpen}
+            aria-controls={menuId}
+            onClick={onToggleMenu}
+          >
+            <span className="header__menu-label">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={menuOpen ? 'close' : 'menu'}
+                  className="header__menu-text"
+                  style={textStyleCss(
+                    menuOpen ? header.menuCloseStyle : header.menuOpenStyle,
+                  )}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.22, ease: easeOutExpo }}
+                >
+                  {menuLabel}
+                </motion.span>
+              </AnimatePresence>
+            </span>
+          </button>
+        ) : null}
       </motion.div>
 
-      <motion.a
-        className="header__btn"
-        href={PAGE_META.contact.path}
-        aria-label={t.chrome.hireMe}
-        variants={headerFromRight}
-        onClick={(event) => {
-          event.preventDefault()
-          onHireMe()
-        }}
-      >
-        <Icon src={ASSETS.hireMe} alt="" />
-        <span>{t.chrome.hireMe}</span>
-      </motion.a>
+      {header.modulesOrder.includes('cta') && header.ctaEnabled ? (
+        <motion.a
+          className="header__btn"
+          href={header.ctaTo || PAGE_META.contact.path}
+          aria-label={ctaLabel}
+          style={buttonStyleCss(header.ctaButtonStyle)}
+          variants={headerFromRight}
+          onClick={(event) => {
+            event.preventDefault()
+            onHireMe(header.ctaTo || PAGE_META.contact.path)
+          }}
+        >
+          <SiteIcon id={header.ctaIconId || 'external'} className="header__icon" />
+          <span style={textStyleCss(header.ctaLabelStyle)}>{ctaLabel}</span>
+        </motion.a>
+      ) : null}
     </motion.header>
   )
 }
@@ -292,9 +346,15 @@ function BackToTop() {
   const [visible, setVisible] = useState(false)
   const { show } = useEntrance()
   const { t } = useLocale()
+  const chrome = useCmsChrome()
   const reduce = Boolean(useReducedMotion())
 
   useEffect(() => {
+    if (!chrome.blocksOrder.includes('backTop') || !chrome.showBackToTop) {
+      setVisible(false)
+      return
+    }
+
     const sync = () => {
       const threshold = Math.min(420, getScrollRootClientHeight() * 0.55)
       setVisible(getScrollRootTop() > threshold)
@@ -322,7 +382,12 @@ function BackToTop() {
       unbind()
       window.removeEventListener('resize', sync)
     }
-  }, [])
+  }, [chrome.blocksOrder, chrome.showBackToTop])
+
+  if (!chrome.blocksOrder.includes('backTop') || !chrome.showBackToTop) {
+    return null
+  }
+  const fabStyle = fabStyleCss(chrome.backToTop)
 
   return (
     <AnimatePresence>
@@ -330,6 +395,7 @@ function BackToTop() {
         <motion.button
           type="button"
           className="back-top"
+          style={fabStyle}
           aria-label={t.chrome.backToTop}
           title={t.chrome.backToTop}
           initial={reduce ? false : { opacity: 0, scale: 0.7, y: 12 }}
@@ -345,21 +411,10 @@ function BackToTop() {
             scrollRootToTop(reduce ? 'auto' : 'smooth')
           }}
         >
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M12 19V5"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-            />
-            <path
-              d="M6.5 10.5 12 5l5.5 5.5"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <SiteIcon
+            id={chrome.backToTop.iconId || 'arrow-up'}
+            className="header__icon"
+          />
         </motion.button>
       ) : null}
     </AnimatePresence>
@@ -378,6 +433,10 @@ function SideTools({ theme, onToggleTheme }: SideToolsProps) {
   const [touchMode, setTouchMode] = useState(false)
   const { show } = useEntrance()
   const { locale, setLocale, t } = useLocale()
+  const chrome = useCmsChrome()
+  const showLanguage =
+    chrome.blocksOrder.includes('language') && chrome.showLanguage
+  const showTheme = chrome.blocksOrder.includes('theme') && chrome.showTheme
 
   useEffect(() => {
     const media = window.matchMedia('(hover: none), (max-width: 1024px)')
@@ -402,6 +461,8 @@ function SideTools({ theme, onToggleTheme }: SideToolsProps) {
     return () => document.removeEventListener('pointerdown', onPointerDown)
   }, [open, touchMode])
 
+  if (!showLanguage && !showTheme) return null
+
   return (
     <motion.aside
       ref={rootRef}
@@ -420,51 +481,66 @@ function SideTools({ theme, onToggleTheme }: SideToolsProps) {
           id="side-tools-panel"
           inert={!open ? true : undefined}
         >
-          <div className="side-tools__langs" role="group" aria-label={t.chrome.language}>
-            {LOCALES.map((code) => (
+          {showLanguage ? (
+            <div className="side-tools__langs" role="group" aria-label={t.chrome.language}>
+              {chrome.locales
+                .filter((item) => item.enabled)
+                .map((item) => (
+                  <button
+                    key={item.code}
+                    type="button"
+                    className={`side-tools__lang${locale === item.code ? ' side-tools__lang--active' : ''}`}
+                    aria-label={item.label || item.code}
+                    aria-pressed={locale === item.code}
+                    title={item.label || item.code}
+                    onClick={() => setLocale(item.code)}
+                  >
+                    <span className="side-tools__flag" aria-hidden="true">
+                      {chrome.languageMode === 'image' && item.imageUrl ? (
+                        <img src={item.imageUrl} alt="" />
+                      ) : (
+                        item.flagEmoji ||
+                        LOCALE_FLAGS[item.code as Locale] ||
+                        item.code.toUpperCase()
+                      )}
+                    </span>
+                  </button>
+                ))}
+            </div>
+          ) : null}
+
+          {showLanguage && showTheme ? (
+            <span className="side-tools__divider" aria-hidden="true" />
+          ) : null}
+
+          {showTheme ? (
+            <div className="side-tools__theme">
               <button
-                key={code}
                 type="button"
-                className={`side-tools__lang${locale === code ? ' side-tools__lang--active' : ''}`}
-                aria-label={LOCALE_LABELS[code]}
-                aria-pressed={locale === code}
-                title={LOCALE_LABELS[code]}
-                onClick={() => setLocale(code)}
+                className="side-tools__theme-toggle"
+                title={isDark ? t.chrome.themeLight : t.chrome.themeDark}
+                aria-label={isDark ? t.chrome.themeLight : t.chrome.themeDark}
+                aria-pressed={isDark}
+                onClick={onToggleTheme}
               >
-                <span className="side-tools__flag" aria-hidden="true">
-                  {LOCALE_FLAGS[code]}
+                <span className="side-tools__theme-label" aria-hidden="true">
+                  <ThemeIcon theme={isDark ? 'light' : 'dark'} />
+                </span>
+                <span
+                  className={`side-tools__switch${isDark ? ' side-tools__switch--dark' : ''}`}
+                  aria-hidden="true"
+                >
+                  <span className="side-tools__switch-thumb" />
                 </span>
               </button>
-            ))}
-          </div>
-
-          <span className="side-tools__divider" aria-hidden="true" />
-
-          <div className="side-tools__theme">
-            <button
-              type="button"
-              className="side-tools__theme-toggle"
-              title={isDark ? t.chrome.themeLight : t.chrome.themeDark}
-              aria-label={isDark ? t.chrome.themeLight : t.chrome.themeDark}
-              aria-pressed={isDark}
-              onClick={onToggleTheme}
-            >
-              <span className="side-tools__theme-label" aria-hidden="true">
-                <ThemeIcon theme={isDark ? 'light' : 'dark'} />
-              </span>
-              <span
-                className={`side-tools__switch${isDark ? ' side-tools__switch--dark' : ''}`}
-                aria-hidden="true"
-              >
-                <span className="side-tools__switch-thumb" />
-              </span>
-            </button>
-          </div>
+            </div>
+          ) : null}
         </div>
 
-        <button
+                <button
           type="button"
           className="side-tools__fab"
+          style={fabStyleCss(chrome.themeFab)}
           aria-label={t.chrome.openSettings}
           aria-expanded={open}
           aria-controls="side-tools-panel"
@@ -475,19 +551,10 @@ function SideTools({ theme, onToggleTheme }: SideToolsProps) {
             if (touchMode) setOpen((current) => !current)
           }}
         >
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            />
-            <path
-              d="M19.4 13a7.8 7.8 0 0 0 .05-2l2.02-1.57-2-3.46-2.42.98a7.9 7.9 0 0 0-1.73-1L15 2.5h-6l-.32 2.45a7.9 7.9 0 0 0-1.73 1l-2.42-.98-2 3.46L4.55 11a7.8 7.8 0 0 0 0 2l-2.02 1.57 2 3.46 2.42-.98c.54.42 1.12.76 1.73 1L9 21.5h6l.32-2.45c.61-.24 1.19-.58 1.73-1l2.42.98 2-3.46L19.4 13Z"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <SiteIcon
+            id={chrome.themeFab.iconId || 'settings'}
+            className="header__icon"
+          />
         </button>
       </div>
     </motion.aside>
@@ -497,8 +564,19 @@ function SideTools({ theme, onToggleTheme }: SideToolsProps) {
 function Copyright() {
   const { show, reduce } = useEntrance()
   const menuOpen = useMenuOpen()
-  const { t } = useLocale()
-  const visible = show && !menuOpen
+  const { locale, t } = useLocale()
+  const footer = useCmsFooter()
+  const visible = show && !menuOpen && footer.enabled
+  const line1 =
+    footer.slots.includes('line1') && footer.showLine1
+      ? footer.line1[locale] || t.chrome.copyrightLine1
+      : ''
+  const line2 =
+    footer.slots.includes('line2') && footer.showLine2
+      ? footer.line2[locale] || t.chrome.copyrightLine2
+      : ''
+
+  if (!footer.enabled || (!line1 && !line2)) return null
 
   return (
     <motion.aside
@@ -517,8 +595,12 @@ function Copyright() {
       <div className="copyright__group">
         <span className="copyright__line" aria-hidden="true" />
         <p className="copyright__text">
-          <span>{t.chrome.copyrightLine1}</span>
-          <span>{t.chrome.copyrightLine2}</span>
+          {line1 ? (
+            <span style={textStyleCss(footer.line1Style)}>{line1}</span>
+          ) : null}
+          {line2 ? (
+            <span style={textStyleCss(footer.line2Style)}>{line2}</span>
+          ) : null}
         </p>
       </div>
     </motion.aside>
@@ -575,6 +657,8 @@ type NewsFabProps = {
 function NewsFab({ onOpen }: NewsFabProps) {
   const { show } = useEntrance()
   const { t } = useLocale()
+  const chrome = useCmsChrome()
+  if (!chrome.blocksOrder.includes('news') || !chrome.showNewsFab) return null
 
   return (
     <motion.div
@@ -586,34 +670,15 @@ function NewsFab({ onOpen }: NewsFabProps) {
       <button
         type="button"
         className="side-tools__fab"
+        style={fabStyleCss(chrome.newsFab)}
         aria-label={t.chrome.openNews}
         title={t.chrome.news}
         onClick={onOpen}
       >
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <rect
-            x="3.5"
-            y="3.5"
-            width="17"
-            height="17"
-            rx="3.2"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          />
-          <path
-            d="M10.2 13.8 15.6 8.4"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-          <path
-            d="M11.8 8.4h3.8v3.8"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <SiteIcon
+          id={chrome.newsFab.iconId || 'news'}
+          className="header__icon"
+        />
       </button>
     </motion.div>
   )
@@ -622,7 +687,8 @@ function NewsFab({ onOpen }: NewsFabProps) {
 function Menu({ id, open, onNavigate }: MenuProps) {
   const reduce = Boolean(useReducedMotion())
   const state = open ? 'show' : 'hidden'
-  const { t } = useLocale()
+  const { locale } = useLocale()
+  const header = useCmsHeader()
   const [paused, setPaused] = useState(false)
   const [hotPath, setHotPath] = useState<string | null>(null)
   const listRef = useRef<HTMLUListElement>(null)
@@ -667,56 +733,25 @@ function Menu({ id, open, onNavigate }: MenuProps) {
     setPaused(false)
   }
 
-  const navLinks = [
-    {
-      label: t.navHome.label,
-      path: '/',
-      description: t.navHome.description,
-      accents: t.navHome.accents,
-      accent: null as ContentPageId | null,
-      image: ASSETS.home as string | null,
-    },
-    {
-      label: t.pages.work.menuLabel,
-      path: PAGE_META.work.path,
-      description: t.pages.work.menuDescription,
-      accents: t.pages.work.menuAccents,
-      accent: 'work' as const,
-      image: PAGE_META.work.image,
-    },
-    {
-      label: t.pages.about.menuLabel,
-      path: PAGE_META.about.path,
-      description: t.pages.about.menuDescription,
-      accents: t.pages.about.menuAccents,
-      accent: 'about' as const,
-      image: PAGE_META.about.image,
-    },
-    {
-      label: t.pages.reading.menuLabel,
-      path: PAGE_META.reading.path,
-      description: t.pages.reading.menuDescription,
-      accents: t.pages.reading.menuAccents,
-      accent: 'reading' as const,
-      image: PAGE_META.reading.image,
-    },
-    {
-      label: t.pages.hire.menuLabel,
-      path: PAGE_META.hire.path,
-      description: t.pages.hire.menuDescription,
-      accents: t.pages.hire.menuAccents,
-      accent: 'hire' as const,
-      image: PAGE_META.hire.image,
-    },
-    {
-      label: t.pages.contact.menuLabel,
-      path: PAGE_META.contact.path,
-      description: t.pages.contact.menuDescription,
-      accents: t.pages.contact.menuAccents,
-      accent: 'contact' as const,
-      image: PAGE_META.contact.image,
-    },
-  ]
+  const navLinks = header.modulesOrder.includes('nav')
+    ? header.navItems
+        .filter((item) => item.enabled)
+        .map((item) => ({
+          id: item.id,
+          label: item.label[locale] || item.name,
+          path: item.path,
+          description: item.description[locale],
+          accents: item.accents[locale],
+          accent: (item.accent as ContentPageId | null) ?? null,
+          image: item.imageUrl || null,
+          labelStyle: item.labelStyle,
+          descriptionStyle: item.descriptionStyle,
+        }))
+    : []
+
+  const socials = header.modulesOrder.includes('social')
+    ? header.socials.filter((item) => item.enabled)
+    : []
 
   const previewItem = navLinks.find((item) => item.path === hotPath)
   const previewSrc = previewItem?.image ?? null
@@ -744,7 +779,7 @@ function Menu({ id, open, onNavigate }: MenuProps) {
         >
           {navLinks.map((item) => (
             <motion.li
-              key={item.path}
+              key={item.id}
               className="menu__item"
               variants={reduce ? undefined : menuItem}
             >
@@ -762,6 +797,23 @@ function Menu({ id, open, onNavigate }: MenuProps) {
               >
                 <motion.span
                   className="menu__link-label"
+                  style={{
+                    ...(header.navGroupStyle.textColor
+                      ? { color: header.navGroupStyle.textColor }
+                      : {}),
+                    ...textStyleCss({
+                      ...header.navGroupStyle.textStyle,
+                      ...item.labelStyle,
+                      color:
+                        item.labelStyle.color ||
+                        header.navGroupStyle.textStyle.color ||
+                        '',
+                      size:
+                        item.labelStyle.size !== 'md'
+                          ? item.labelStyle.size
+                          : header.navGroupStyle.textStyle.size,
+                    }),
+                  }}
                   variants={reduce ? undefined : menuLabel}
                 >
                   {item.label}
@@ -771,6 +823,12 @@ function Menu({ id, open, onNavigate }: MenuProps) {
                 </motion.span>
                 <motion.span
                   className="menu__link-desc"
+                  style={{
+                    ...(header.navGroupStyle.textColor
+                      ? { color: header.navGroupStyle.textColor }
+                      : {}),
+                    ...textStyleCss(item.descriptionStyle),
+                  }}
                   variants={reduce ? undefined : menuDesc}
                 >
                   <AccentedText body={item.description} accents={item.accents} />
@@ -823,9 +881,9 @@ function Menu({ id, open, onNavigate }: MenuProps) {
         animate={reduce && open ? 'show' : state}
         variants={menuFooter}
       >
-        {SOCIAL_LINKS.map((item) => (
+        {socials.map((item) => (
           <motion.a
-            key={item.label}
+            key={item.id}
             className="menu__social"
             href={item.href}
             aria-label={item.label}
@@ -833,10 +891,27 @@ function Menu({ id, open, onNavigate }: MenuProps) {
             rel={item.href.startsWith('http') ? 'noreferrer' : undefined}
             variants={reduce ? undefined : menuSocial}
           >
-            <span className="menu__social-tip" aria-hidden="true">
+            <span
+              className="menu__social-tip"
+              aria-hidden="true"
+              style={{
+                ...(header.socialGroupStyle.textColor
+                  ? { color: header.socialGroupStyle.textColor }
+                  : {}),
+                ...textStyleCss(item.labelStyle),
+              }}
+            >
               {item.label}
             </span>
-            <Icon src={item.src} alt="" className="menu__social-icon" />
+            <SiteIcon
+              id={item.iconId || 'external'}
+              className="menu__social-icon"
+              style={
+                header.socialGroupStyle.iconColor
+                  ? { color: header.socialGroupStyle.iconColor }
+                  : undefined
+              }
+            />
           </motion.a>
         ))}
         <motion.span
@@ -1037,7 +1112,15 @@ function Spot({
   )
 }
 
-function ContentPage({ pageId }: { pageId: ContentPageId }) {
+function ContentPage({
+  pageId,
+  actions,
+  children,
+}: {
+  pageId: ContentPageId
+  actions?: ReactNode
+  children?: ReactNode
+}) {
   const { t } = useLocale()
   const page = t.pages[pageId]
   const meta = PAGE_META[pageId]
@@ -1073,6 +1156,7 @@ function ContentPage({ pageId }: { pageId: ContentPageId }) {
             <p className="hero__subtitle hero__subtitle--page">
               <AccentedText body={page.body} accents={page.accents} />
             </p>
+            {actions}
           </motion.div>
           <motion.div className="hero__media" variants={rise}>
             <div className="hero__figure">
@@ -1086,8 +1170,453 @@ function ContentPage({ pageId }: { pageId: ContentPageId }) {
         </motion.div>
       </section>
       <ScrollCue />
+      {children}
       <Copyright />
     </>
+  )
+}
+
+function AboutHeroActions({ onNavigate }: NavigateProps) {
+  const { t } = useLocale()
+  const hero = t.pages.about.hero
+
+  return (
+    <div className="about-hero__actions">
+      <button
+        type="button"
+        className="works__btn"
+        onClick={() => onNavigate(PAGE_META.work.path)}
+      >
+        {hero.projectsCta}
+      </button>
+      <a className="works__btn" href="/cv/curriculoAndreVitor.pdf" download>
+        {hero.cvCta}
+      </a>
+    </div>
+  )
+}
+
+function AboutExtras() {
+  return <AboutJourney />
+}
+
+function WorkExtras() {
+  const { t } = useLocale()
+  const stats = t.pages.work.stats
+
+  return (
+    <>
+      <WorkSkillsMarquee />
+      <WorkGithub />
+
+      <section className="work-stats">
+        <ul className="work-stats__grid">
+          {stats.map((stat) => (
+            <li className="work-stats__item" key={stat.label}>
+              <p className="work-stats__value">{stat.value}</p>
+              <p className="work-stats__label">
+                {stat.label}
+                <span className="work-stats__hint">{stat.hint}</span>
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </>
+  )
+}
+
+function useDocumentTheme(): Theme {
+  const [theme, setTheme] = useState<Theme>(readDocumentTheme)
+
+  useEffect(() => {
+    const el = document.documentElement
+    const observer = new MutationObserver(() => setTheme(readDocumentTheme()))
+    observer.observe(el, { attributes: true, attributeFilter: ['data-theme'] })
+    return () => observer.disconnect()
+  }, [])
+
+  return theme
+}
+
+const GITHUB_USERNAME = 'andrecodedev'
+const GITHUB_YEARS = ['last', 2026, 2025, 2024] as const
+type GithubYear = (typeof GITHUB_YEARS)[number]
+
+function githubStatsUrl(title: string, locale: Locale, dark: boolean) {
+  const loc = locale === 'en' ? 'en' : locale === 'es' ? 'es' : 'pt-br'
+  const themeParams = dark
+    ? 'title_color=ffffff&text_color=a3a3a3&icon_color=26a641&theme=dark'
+    : 'title_color=1f2937&text_color=4b5563&icon_color=216e39&theme=light'
+  return `https://github-readme-stats-eight-theta.vercel.app/api?username=${GITHUB_USERNAME}&show_icons=true&include_all_commits=true&count_private=true&hide_border=true&custom_title=${encodeURIComponent(title)}&locale=${loc}&${themeParams}&bg_color=00000000`
+}
+
+function githubLangsUrl(title: string, locale: Locale, dark: boolean) {
+  const loc = locale === 'en' ? 'en' : locale === 'es' ? 'es' : 'pt-br'
+  const themeParams = dark
+    ? 'title_color=ffffff&text_color=a3a3a3&theme=dark'
+    : 'title_color=1f2937&text_color=4b5563&theme=light'
+  return `https://github-readme-stats-eight-theta.vercel.app/api/top-langs/?username=${GITHUB_USERNAME}&layout=compact&langs_count=12&hide_border=true&custom_title=${encodeURIComponent(title)}&locale=${loc}&${themeParams}&bg_color=00000000`
+}
+
+function WorkGithub() {
+  const { t, locale } = useLocale()
+  const copy = t.pages.work.github
+  const theme = useDocumentTheme()
+  const dark = theme === 'dark'
+  const [year, setYear] = useState<GithubYear>('last')
+
+  return (
+    <section className="work-github" data-accent="work">
+      <div className="work-github__card">
+        <div className="work-github__head">
+          <span className="work-github__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+            </svg>
+          </span>
+          <h2 className="work-github__title">{copy.heading}</h2>
+        </div>
+
+        <div className="work-github__years">
+          {GITHUB_YEARS.map((y) => (
+            <button
+              key={y}
+              type="button"
+              className={`work-github__year${year === y ? ' is-active' : ''}`}
+              onClick={() => setYear(y)}
+            >
+              {y === 'last' ? copy.yearLast : y}
+            </button>
+          ))}
+        </div>
+
+        <div className="work-github__calendar">
+          <GitHubCalendar
+            username={GITHUB_USERNAME}
+            year={year}
+            colorScheme={dark ? 'dark' : 'light'}
+            theme={{
+              light: ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'],
+              dark: ['var(--btn-bg)', '#0e4429', '#006d32', '#26a641', '#39d353'],
+            }}
+            blockRadius={2}
+            blockMargin={3}
+            blockSize={10}
+            labels={{
+              legend: { less: copy.legendLess, more: copy.legendMore },
+            }}
+            tooltips={{
+              activity: {
+                text: (activity) => `${activity.count} · ${activity.date}`,
+              },
+            }}
+          />
+        </div>
+
+        <div className="work-github__stats">
+          <SkeletonImage
+            frameClassName="work-github__stats-frame"
+            className="work-github__stats-img"
+            src={githubStatsUrl(copy.statsAlt, locale, dark)}
+            alt={copy.statsAlt}
+          />
+          <SkeletonImage
+            frameClassName="work-github__stats-frame"
+            className="work-github__stats-img"
+            src={githubLangsUrl(copy.langsAlt, locale, dark)}
+            alt={copy.langsAlt}
+          />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+const PITCH_VIDEO_ID = 'v2vE1Ac-NxE'
+
+function AboutVideo() {
+  const { t } = useLocale()
+  const [loaded, setLoaded] = useState(false)
+  const [thumb, setThumb] = useState(`https://i.ytimg.com/vi/${PITCH_VIDEO_ID}/maxresdefault.jpg`)
+
+  return (
+    <section className="about-video">
+      <div className="about-video__frame">
+        {loaded ? (
+          <iframe
+            className="about-video__iframe"
+            src={`https://www.youtube.com/embed/${PITCH_VIDEO_ID}?autoplay=1`}
+            title={t.pages.about.videoAriaLabel}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        ) : (
+          <button
+            type="button"
+            className="about-video__facade"
+            aria-label={t.pages.about.videoAriaLabel}
+            onClick={() => setLoaded(true)}
+          >
+            <SkeletonImage
+              frameClassName="about-video__thumb-frame"
+              className="about-video__thumb"
+              src={thumb}
+              alt=""
+              onLoad={(e) => {
+                // maxresdefault nem sempre existe: quando falta, o YouTube devolve
+                // um placeholder cinza 120x90 (sem erro HTTP) em vez de 404.
+                if (e.currentTarget.naturalWidth <= 120) {
+                  setThumb(`https://i.ytimg.com/vi/${PITCH_VIDEO_ID}/hqdefault.jpg`)
+                }
+              }}
+              onError={() => setThumb(`https://i.ytimg.com/vi/${PITCH_VIDEO_ID}/hqdefault.jpg`)}
+            />
+            <span className="about-video__play" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="28" height="28">
+                <path d="M8 5v14l11-7z" fill="currentColor" />
+              </svg>
+            </span>
+          </button>
+        )}
+      </div>
+    </section>
+  )
+}
+
+/** px/s: velocidade do scroll do marquee (mais baixo = mais lento). */
+const SKILLS_MARQUEE_SPEED = 95
+/** Raio (px) de influência do efeito de onda ao redor do centro do viewport. */
+const SKILLS_WAVE_RADIUS = 340
+const SKILLS_WAVE_MIN_SCALE = 0.85
+const SKILLS_WAVE_MAX_SCALE = 1.16
+const SKILLS_WAVE_MAX_LIFT = 6
+
+/** Curva suave 0→1→0 nas bordas do raio (smoothstep), evita degrau no efeito. */
+function waveFactor(distance: number) {
+  const t = Math.max(0, 1 - Math.abs(distance) / SKILLS_WAVE_RADIUS)
+  return t * t * (3 - 2 * t)
+}
+
+function WorkSkillsMarquee() {
+  const reduce = Boolean(useReducedMotion())
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([])
+  const items = reduce ? SKILLS : [...SKILLS, ...SKILLS]
+
+  useEffect(() => {
+    if (reduce) return
+    const track = trackRef.current
+    const viewport = viewportRef.current
+    if (!track || !viewport) return
+
+    let centers: number[] = []
+    let halfWidth = 0
+
+    const measure = () => {
+      centers = itemRefs.current.map((el) =>
+        el ? el.offsetLeft + el.offsetWidth / 2 : 0,
+      )
+      halfWidth = track.scrollWidth / 2
+    }
+    measure()
+
+    const resizeObserver = new ResizeObserver(measure)
+    resizeObserver.observe(track)
+
+    let x = 0
+    let last = performance.now()
+    let raf = 0
+
+    const tick = (now: number) => {
+      const dt = Math.min(0.05, (now - last) / 1000)
+      last = now
+      x -= SKILLS_MARQUEE_SPEED * dt
+      if (halfWidth > 0 && x <= -halfWidth) x += halfWidth
+      track.style.transform = `translateX(${x}px)`
+
+      const trackLeft = track.getBoundingClientRect().left
+      const viewportRect = viewport.getBoundingClientRect()
+      const centerX = viewportRect.left + viewportRect.width / 2
+
+      itemRefs.current.forEach((el, index) => {
+        if (!el) return
+        const distance = trackLeft + centers[index] - centerX
+        const factor = waveFactor(distance)
+        const scale =
+          SKILLS_WAVE_MIN_SCALE +
+          (SKILLS_WAVE_MAX_SCALE - SKILLS_WAVE_MIN_SCALE) * factor
+        const lift = (1 - factor) * SKILLS_WAVE_MAX_LIFT
+        el.style.transform = `translateY(${lift}px) scale(${scale})`
+      })
+
+      raf = requestAnimationFrame(tick)
+    }
+
+    raf = requestAnimationFrame(tick)
+
+    return () => {
+      cancelAnimationFrame(raf)
+      resizeObserver.disconnect()
+    }
+  }, [reduce])
+
+  return (
+    <section className="work-skills" aria-hidden="true">
+      <div className="work-skills__viewport" ref={viewportRef}>
+        <div
+          className={`work-skills__track${reduce ? ' work-skills__track--static' : ''}`}
+          ref={trackRef}
+        >
+          {items.map((skill, index) => (
+            <div
+              className="work-skills__item"
+              key={`${skill.name}-${index}`}
+              ref={(el) => {
+                itemRefs.current[index] = el
+              }}
+            >
+              <img src={skill.icon} alt="" loading="lazy" draggable={false} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function AboutAchievements({ items }: { items: readonly AchievementEntry[] }) {
+  const carouselItems = useMemo(
+    () => items.map((item) => ({ image: item.image, alt: item.title })),
+    [items],
+  )
+
+  return (
+    <div className="about-achievements">
+      <div className="about-achievements__stage">
+        <DepthCarousel
+          items={carouselItems}
+          cardWidth={340}
+          cardHeight={420}
+          radius={10}
+          tint="var(--bg-outer)"
+          depth={220}
+          spread={110}
+          tilt={20}
+          visibleCards={3}
+          falloff={0.28}
+          blur={5}
+          duration={650}
+          renderBack={(_, i) => (
+            <>
+              <h3 className="about-achievements__back-title">{items[i]?.title}</h3>
+              <p className="about-achievements__back-text">{items[i]?.description}</p>
+            </>
+          )}
+        />
+      </div>
+    </div>
+  )
+}
+
+function AboutExperienceList({ items }: { items: readonly ExperienceEntry[] }) {
+  return (
+    <div className="about-experience">
+      <LayoutGrid items={items} />
+    </div>
+  )
+}
+
+function AboutHighlightsPanel({
+  subtitle,
+  items,
+}: {
+  subtitle: string
+  items: readonly HighlightEntry[]
+}) {
+  const [active, setActive] = useState(items[0]?.id ?? '')
+  const current = items.find((item) => item.id === active) ?? items[0]
+
+  return (
+    <div className="about-highlights">
+      <p className="about-highlights__subtitle">{subtitle}</p>
+      <div className="about-highlights__layout">
+        <div className="about-highlights__list">
+          {items.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`about-highlights__item${item.id === active ? ' is-active' : ''}`}
+              onClick={() => setActive(item.id)}
+            >
+              {item.title}
+            </button>
+          ))}
+        </div>
+        {current ? (
+          <div className="about-highlights__panel">
+            <div className="about-highlights__panel-content" key={current.id}>
+              <h3 className="about-highlights__panel-title">{current.title}</h3>
+              {current.description.split('\n\n').map((paragraph, index) => (
+                <p className="about-highlights__panel-text" key={index}>
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+type AboutTabKey = 'achievements' | 'video' | 'experience' | 'details'
+
+function AboutJourney() {
+  const { t } = useLocale()
+  const page = t.pages.about
+  const [tab, setTab] = useState<AboutTabKey>('achievements')
+
+  const tabs: Array<{ key: AboutTabKey; label: string }> = [
+    { key: 'achievements', label: page.tabs.achievements },
+    { key: 'video', label: page.tabs.video },
+    { key: 'experience', label: page.tabs.experience },
+    { key: 'details', label: page.tabs.details },
+  ]
+  const activeLabel = tabs.find((item) => item.key === tab)?.label
+
+  return (
+    <section className="about-journey" data-accent="about">
+      <div className="about-journey__tabs" role="tablist">
+        {tabs.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            role="tab"
+            aria-selected={tab === item.key}
+            className={`about-journey__tab${tab === item.key ? ' is-active' : ''}`}
+            onClick={() => setTab(item.key)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="about-journey__panel">
+        <h2 className="about-journey__title">{activeLabel}</h2>
+
+        {tab === 'achievements' ? (
+          <AboutAchievements items={page.achievements} />
+        ) : tab === 'video' ? (
+          <AboutVideo />
+        ) : tab === 'experience' ? (
+          <AboutExperienceList items={page.experience} />
+        ) : (
+          <AboutHighlightsPanel subtitle={page.highlights.subtitle} items={page.highlights.items} />
+        )}
+      </div>
+    </section>
   )
 }
 
@@ -1174,6 +1703,7 @@ function HomePage({ onNavigate }: NavigateProps) {
 function PortfolioShell() {
   const menuId = useId()
   const location = useLocation()
+  const chrome = useCmsChrome()
   const pageAccent = getAccentForPath(location.pathname)
   const scrollRef = useRef<HTMLDivElement>(null)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -1429,7 +1959,13 @@ function PortfolioShell() {
               pinned={menuOpen || gateOpen}
               onToggleMenu={() => setMenuOpen((open) => !open)}
               onGoHome={() => navigateTo('/')}
-              onHireMe={() => navigateTo(PAGE_META.contact.path)}
+              onHireMe={(path) => {
+                if (/^(https?:\/\/|mailto:|tel:)/i.test(path.trim())) {
+                  window.open(path, '_blank', 'noopener,noreferrer')
+                  return
+                }
+                navigateTo(path)
+              }}
             />
           </div>
           <div className="corner-tools">
@@ -1457,7 +1993,9 @@ function PortfolioShell() {
           </div>
           <div className="stage" aria-hidden="true">
             <div className="stage__rain">
-              <CodeRain />
+              {chrome.blocksOrder.includes('rain') ? (
+                <CodeRain config={chrome.rain} />
+              ) : null}
             </div>
           </div>
           <ScrollRootContext.Provider value={scrollRef}>
@@ -1469,11 +2007,22 @@ function PortfolioShell() {
                 />
                 <Route
                   path={PAGE_META.work.path}
-                  element={<ContentPage pageId="work" />}
+                  element={
+                    <ContentPage pageId="work">
+                      <WorkExtras />
+                    </ContentPage>
+                  }
                 />
                 <Route
                   path={PAGE_META.about.path}
-                  element={<ContentPage pageId="about" />}
+                  element={
+                    <ContentPage
+                      pageId="about"
+                      actions={<AboutHeroActions onNavigate={navigateTo} />}
+                    >
+                      <AboutExtras />
+                    </ContentPage>
+                  }
                 />
                 <Route
                   path={PAGE_META.reading.path}

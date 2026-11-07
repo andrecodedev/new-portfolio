@@ -1,116 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-
-const TECH_CHARS = [
-  '0',
-  '1',
-  '{',
-  '}',
-  '/',
-  '/>',
-  '(',
-  ')',
-  ';',
-  '[',
-  ']',
-  '<',
-  '>',
-  '&&',
-  '||',
-  '!=',
-  '==',
-  'const',
-  'let',
-  'var',
-  'return',
-  'if',
-  'else',
-  'switch',
-  'case',
-  'break',
-  'async',
-  'await',
-  'try',
-  'catch',
-  'finally',
-  'function',
-  '=>',
-  'this',
-  'typeof',
-  'instanceof',
-  'new',
-  'true',
-  'false',
-  'null',
-  'undefined',
-  'NaN',
-  'API',
-  'JSON',
-  'HTML',
-  'CSS',
-  'JS',
-  'DOM',
-  'Web',
-  'React',
-  'Next',
-  'Vue',
-  'Vite',
-  'Tailwind',
-  'Sass',
-  'UI',
-  'UX',
-  'SPA',
-  'SSR',
-  'CSR',
-  'Responsive',
-  'Flex',
-  'Grid',
-  'node',
-  'Express',
-  'REST',
-  'GraphQL',
-  'Server',
-  'Auth',
-  'JWT',
-  'Middleware',
-  'SQL',
-  'NoSQL',
-  'MongoDB',
-  'Postgres',
-  'MySQL',
-  'Redis',
-  'npm',
-  'yarn',
-  'Git',
-  'Docker',
-  'CI/CD',
-  'Linux',
-  'Bash',
-  'CLI',
-  'Deploy',
-  'Vercel',
-  'Netlify',
-  'Clean Code',
-  'SOLID',
-  'DRY',
-  'KISS',
-  'Refactor',
-  'Performance',
-  'Testing',
-  'Debug',
-  '</>',
-  '<div>',
-  '<script>',
-  '404',
-  '200 OK',
-] as const
+import {
+  DEFAULT_RAIN_TEXTS,
+  rainActiveTexts,
+  type RainConfig,
+} from '../cms/rain-content'
 
 type CodeRainProps = {
   className?: string
+  config?: RainConfig | null
 }
 
-function pickChar() {
-  return TECH_CHARS[Math.floor(Math.random() * TECH_CHARS.length)]
+function pickChar(words: readonly string[]) {
+  if (words.length === 0) return DEFAULT_RAIN_TEXTS[0]
+  return words[Math.floor(Math.random() * words.length)]
 }
 
 /** Opacidade por stream: uns mais fracos, outros mais fortes. */
@@ -119,7 +22,6 @@ function randomRainOpacity(isMobile: boolean) {
   const max = isMobile ? 0.34 : 0.42
   const roll = Math.random()
 
-  // 30% quase sumidos, 40% no meio, 30% bem visíveis
   if (roll < 0.3) {
     return min + Math.random() * (max - min) * 0.35
   }
@@ -129,12 +31,18 @@ function randomRainOpacity(isMobile: boolean) {
   return min + (max - min) * (0.65 + Math.random() * 0.35)
 }
 
-function CodeRain({ className = 'code-rain' }: CodeRainProps) {
+function CodeRain({ className = 'code-rain', config }: CodeRainProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const [areaHeight, setAreaHeight] = useState(800)
   const [isMobile, setIsMobile] = useState(false)
-  /* Layout empilhado (≤1024): vw pequeno deixa a chuva ilegível */
   const [isCompact, setIsCompact] = useState(false)
+
+  const enabled = config?.enabled !== false
+  const color = config?.color?.trim() || ''
+  const words = useMemo(
+    () => (config ? rainActiveTexts(config) : [...DEFAULT_RAIN_TEXTS]),
+    [config],
+  )
 
   useEffect(() => {
     const root = rootRef.current
@@ -163,6 +71,7 @@ function CodeRain({ className = 'code-rain' }: CodeRainProps) {
   }, [])
 
   const streams = useMemo(() => {
+    if (!enabled) return []
     const height = Math.max(areaHeight, 600)
     const topBand = Math.min(window.innerHeight || 800, height)
     const density = isMobile ? 72 : 52
@@ -170,7 +79,6 @@ function CodeRain({ className = 'code-rain' }: CodeRainProps) {
       Math.max(Math.round(height / density), 24),
       isMobile ? 64 : 96,
     )
-    // Faixa extra no topo: mantém chuva viva na 1ª dobra
     const topCount = isMobile ? 16 : 22
 
     const makeStream = (
@@ -185,7 +93,6 @@ function CodeRain({ className = 'code-rain' }: CodeRainProps) {
         : 20 + Math.random() * 14
       const duration = Math.max(distance / pixelsPerSecond, 18)
 
-      /* Compacto: um passo acima do desktop antigo, ainda discreto */
       const fontSizeVw = isCompact
         ? 1.05 + Math.random() * 0.55
         : 0.6 + Math.random() * 0.35
@@ -198,7 +105,7 @@ function CodeRain({ className = 'code-rain' }: CodeRainProps) {
         endY,
         duration,
         delay: -phase * duration,
-        char: pickChar(),
+        char: pickChar(words),
         fontSize: `max(${fontSizeMinRem}rem, ${fontSizeVw}vw)`,
         opacity: randomRainOpacity(isMobile || isCompact),
       }
@@ -219,10 +126,17 @@ function CodeRain({ className = 'code-rain' }: CodeRainProps) {
     })
 
     return [...fullStreams, ...topStreams]
-  }, [areaHeight, isMobile, isCompact])
+  }, [areaHeight, isMobile, isCompact, enabled, words])
+
+  if (!enabled) return null
 
   return (
-    <div ref={rootRef} className={className} aria-hidden="true">
+    <div
+      ref={rootRef}
+      className={className}
+      aria-hidden="true"
+      style={color ? { color } : undefined}
+    >
       {streams.map((stream) => (
         <motion.span
           key={stream.id}

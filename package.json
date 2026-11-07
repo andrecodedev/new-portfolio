@@ -12,8 +12,10 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.112.3",
     "framer-motion": "^13.0.0",
+    "gsap": "^3.15.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-github-calendar": "^5.0.9",
     "react-router-dom": "^7.18.2"
   },
   "devDependencies": {

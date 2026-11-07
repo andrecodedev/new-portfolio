@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useLocale } from '../i18n/LocaleProvider'
 import { easeOutSoft } from '../motion/reveal'
 import { useCmsGate } from './cms-provider'
+import { cmsEditAttrs, cmsEditClass } from './cms-edit'
 import {
   slideToView,
   type CmsGatePayload,
@@ -10,6 +11,7 @@ import {
 } from './gate-content'
 import type { PreviewDevice } from './hero-stack'
 import { openHeroLink } from './hero-content'
+import { buttonStyleCss, textStyleCss } from './style-tokens'
 
 type ViewSlide = ReturnType<typeof slideToView>
 
@@ -97,17 +99,42 @@ function GateSlideFace({
   footer?: ReactNode
 }) {
   return (
-    <div className="gate__spread" data-accent={slide.accent}>
-      <GateVisual slide={slide} reduce={reduce} />
+    <div
+      className={`gate__spread${slide.showMedia ? '' : ' gate__spread--text'}`}
+      data-accent={slide.accent}
+    >
+      {slide.showMedia ? <GateVisual slide={slide} reduce={reduce} /> : null}
       <div className="gate__copy">
         <div className="gate__copy-main">
-          {slide.kicker ? <p className="gate__kicker">{slide.kicker}</p> : null}
-          {slide.title ? <h2 className="gate__headline">{slide.title}</h2> : null}
-          {slide.body ? <p className="gate__body">{slide.body}</p> : null}
+          {slide.kicker ? (
+            <p
+              className="gate__kicker"
+              style={textStyleCss(slide.textStyles.kicker)}
+            >
+              {slide.kicker}
+            </p>
+          ) : null}
+          {slide.title ? (
+            <h2
+              className="gate__headline"
+              style={textStyleCss(slide.textStyles.title)}
+            >
+              {slide.title}
+            </h2>
+          ) : null}
+          {slide.body ? (
+            <p className="gate__body" style={textStyleCss(slide.textStyles.body)}>
+              {slide.body}
+            </p>
+          ) : null}
           {slide.buttons.length > 0 ? (
             <div className="gate__cta-row">
               {slide.buttons.map((button) => {
                 const isLink = /^(https?:\/\/|mailto:|tel:)/i.test(button.to)
+                const style = {
+                  ...buttonStyleCss(button.buttonStyle),
+                  ...textStyleCss(button.labelStyle),
+                }
                 if (isLink) {
                   return (
                     <a
@@ -116,6 +143,7 @@ function GateSlideFace({
                       href={button.to}
                       target="_blank"
                       rel="noreferrer"
+                      style={style}
                       onClick={onClose}
                     >
                       {button.label}
@@ -127,6 +155,7 @@ function GateSlideFace({
                     key={button.id}
                     type="button"
                     className="spot__btn gate__cta"
+                    style={style}
                     onClick={() => {
                       onClose?.()
                       openHeroLink(button.to, onNavigate)
@@ -263,38 +292,56 @@ export function GatePreview({
   locale,
   slideId,
   previewDevice,
+  editMode,
+  editSelectedId,
 }: {
   payload: CmsGatePayload
   locale: ReturnType<typeof useLocale>['locale']
   slideId?: string | null
   previewDevice?: PreviewDevice
+  editMode?: boolean
+  editSelectedId?: string | null
 }) {
   const reduce = Boolean(useReducedMotion())
   const { t } = useLocale()
-  const slides = slideId
-    ? payload.slides
-        .filter((slide) => slide.id === slideId)
-        .map((slide) => ({ ...slide, enabled: true }))
-    : payload.slides.filter((slide) => slide.enabled)
+  const rootId = slideId?.split('::')[0] ?? null
+  const slides = payload.slides.filter((slide) => slide.enabled || editMode)
   const [index, setIndex] = useState(0)
 
   useEffect(() => {
-    setIndex(0)
-  }, [slideId])
+    if (!rootId) return
+    const next = slides.findIndex((slide) => slide.id === rootId)
+    if (next >= 0) setIndex(next)
+    // Só reagimos ao slide selecionado no admin
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rootId])
+
+  const currentId = slides[Math.min(index, Math.max(0, slides.length - 1))]?.id
 
   return (
     <div className="gate gate--preview" data-preview-device={previewDevice}>
-      <GateCarousel
-        slides={slides}
-        locale={locale}
-        index={index}
-        onIndex={setIndex}
-        nextLabel={t.gate.next}
-        prevLabel={t.gate.prev}
-        closeLabel={t.chrome.close}
-        showClose={false}
-        reduce={reduce}
-      />
+      <div
+        className={
+          editMode && currentId
+            ? cmsEditClass(editSelectedId, currentId)
+            : undefined
+        }
+        {...(editMode && currentId
+          ? cmsEditAttrs(currentId, 'Slide', editSelectedId)
+          : {})}
+      >
+        <GateCarousel
+          slides={slides}
+          locale={locale}
+          index={index}
+          onIndex={setIndex}
+          nextLabel={t.gate.next}
+          prevLabel={t.gate.prev}
+          closeLabel={t.chrome.close}
+          showClose={false}
+          reduce={reduce}
+        />
+      </div>
     </div>
   )
 }

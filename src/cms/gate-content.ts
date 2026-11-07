@@ -2,6 +2,15 @@ import { ASSETS, PAGE_META } from '../data/site'
 import { DICTIONARIES, type Locale } from '../i18n/copy'
 import { supabase } from '../lib/supabase-client'
 import { isAccentSwatch, type AccentSwatchId } from './accent-swatches'
+import { parseSlotList } from './hero-content'
+import {
+  defaultButtonStyle,
+  defaultTextStyle,
+  parseButtonStyle,
+  parseTextStyle,
+  type ButtonStyle,
+  type TextStyle,
+} from './style-tokens'
 
 export const CMS_GATE_KEY = 'home_gate'
 
@@ -10,14 +19,41 @@ type LocaleMap<T> = Record<Locale, T>
 export type GateAccent = AccentSwatchId
 export type GateMediaKind = 'image' | 'video'
 
+export const GATE_SLOT_IDS = [
+  'kicker',
+  'title',
+  'body',
+  'media',
+  'buttons',
+] as const
+
+export type GateSlotId = (typeof GATE_SLOT_IDS)[number]
+
 export type GateButton = {
   id: string
   label: LocaleMap<string>
   to: string
+  labelStyle: TextStyle
+  buttonStyle: ButtonStyle
+}
+
+export type GateVisible = {
+  kicker: boolean
+  title: boolean
+  body: boolean
+  media: boolean
+  buttons: boolean
+}
+
+export type GateTextStyles = {
+  kicker: TextStyle
+  title: TextStyle
+  body: TextStyle
 }
 
 export type GateSlide = {
   id: string
+  name: string
   enabled: boolean
   accent: GateAccent
   mediaKind: GateMediaKind
@@ -27,11 +63,31 @@ export type GateSlide = {
   title: LocaleMap<string>
   body: LocaleMap<string>
   buttons: GateButton[]
+  slots: GateSlotId[]
+  visible: GateVisible
+  textStyles: GateTextStyles
+}
+
+export function defaultGateSlots(): GateSlotId[] {
+  return [...GATE_SLOT_IDS]
+}
+
+export function gateHasSlot(slide: GateSlide, slot: GateSlotId) {
+  return slide.slots.includes(slot)
 }
 
 export type CmsGatePayload = {
-  version: 1
+  version: 2
+  sectionName: string
   slides: GateSlide[]
+}
+
+function defaultGateTextStyles(): GateTextStyles {
+  return {
+    kicker: defaultTextStyle(),
+    title: defaultTextStyle(),
+    body: defaultTextStyle(),
+  }
 }
 
 function newId() {
@@ -62,12 +118,45 @@ export function createGateButton(
   label: LocaleMap<string> = emptyMap(),
   to = PAGE_META.hire.path,
 ): GateButton {
-  return { id: newId(), label, to }
+  return {
+    id: newId(),
+    label,
+    to,
+    labelStyle: defaultTextStyle(),
+    buttonStyle: defaultButtonStyle(),
+  }
+}
+
+function defaultGateVisible(): GateVisible {
+  return {
+    kicker: true,
+    title: true,
+    body: true,
+    media: true,
+    buttons: true,
+  }
+}
+
+function asBool(value: unknown, fallback: boolean) {
+  return typeof value === 'boolean' ? value : fallback
+}
+
+function parseGateVisible(value: unknown): GateVisible {
+  const row =
+    value && typeof value === 'object' ? (value as Partial<GateVisible>) : {}
+  return {
+    kicker: asBool(row.kicker, true),
+    title: asBool(row.title, true),
+    body: asBool(row.body, true),
+    media: asBool(row.media, true),
+    buttons: asBool(row.buttons, true),
+  }
 }
 
 export function createGateSlide(): GateSlide {
   return {
     id: newId(),
+    name: '',
     enabled: true,
     accent: 'hire',
     mediaKind: 'image',
@@ -77,6 +166,9 @@ export function createGateSlide(): GateSlide {
     title: emptyMap(),
     body: emptyMap(),
     buttons: [createGateButton()],
+    slots: defaultGateSlots(),
+    visible: defaultGateVisible(),
+    textStyles: defaultGateTextStyles(),
   }
 }
 
@@ -86,10 +178,12 @@ export function defaultGatePayload(): CmsGatePayload {
   const es = DICTIONARIES.es.gate
 
   return {
-    version: 1,
+    version: 2,
+    sectionName: '',
     slides: [
       {
         id: newId(),
+        name: '',
         enabled: true,
         accent: 'hire',
         mediaKind: 'video',
@@ -108,9 +202,13 @@ export function defaultGatePayload(): CmsGatePayload {
             PAGE_META.hire.path,
           ),
         ],
+        slots: defaultGateSlots(),
+        visible: defaultGateVisible(),
+        textStyles: defaultGateTextStyles(),
       },
       {
         id: newId(),
+        name: '',
         enabled: true,
         accent: 'reading',
         mediaKind: 'image',
@@ -141,6 +239,9 @@ export function defaultGatePayload(): CmsGatePayload {
             PAGE_META.reading.path,
           ),
         ],
+        slots: defaultGateSlots(),
+        visible: defaultGateVisible(),
+        textStyles: defaultGateTextStyles(),
       },
     ],
   }
@@ -156,8 +257,21 @@ function parseButtons(value: unknown): GateButton[] {
         id: typeof row.id === 'string' ? row.id : newId(),
         label: asStringMap(row.label, emptyMap()),
         to: typeof row.to === 'string' ? row.to : PAGE_META.hire.path,
+        labelStyle: parseTextStyle(row.labelStyle),
+        buttonStyle: parseButtonStyle(row.buttonStyle),
       }
     })
+}
+
+function parseGateTextStyles(value: unknown): GateTextStyles {
+  const fallback = defaultGateTextStyles()
+  if (!value || typeof value !== 'object') return fallback
+  const row = value as Partial<Record<keyof GateTextStyles, unknown>>
+  return {
+    kicker: parseTextStyle(row.kicker, fallback.kicker),
+    title: parseTextStyle(row.title, fallback.title),
+    body: parseTextStyle(row.body, fallback.body),
+  }
 }
 
 function parseSlide(value: unknown): GateSlide | null {
@@ -167,6 +281,7 @@ function parseSlide(value: unknown): GateSlide | null {
   const mediaKind = row.mediaKind === 'video' ? 'video' : 'image'
   return {
     id: typeof row.id === 'string' ? row.id : newId(),
+    name: typeof row.name === 'string' ? row.name : '',
     enabled: row.enabled !== false,
     accent: isAccentSwatch(row.accent) ? row.accent : 'hire',
     mediaKind,
@@ -176,6 +291,9 @@ function parseSlide(value: unknown): GateSlide | null {
     title: asStringMap(row.title, fallback.title),
     body: asStringMap(row.body, fallback.body),
     buttons: parseButtons(row.buttons),
+    slots: parseSlotList(row.slots, GATE_SLOT_IDS, defaultGateSlots()),
+    visible: parseGateVisible(row.visible),
+    textStyles: parseGateTextStyles(row.textStyles),
   }
 }
 
@@ -187,7 +305,11 @@ export function parseGatePayload(payload: unknown): CmsGatePayload {
   const slides = row.slides
     .map(parseSlide)
     .filter((slide): slide is GateSlide => slide !== null)
-  return { version: 1, slides: slides.length > 0 ? slides : fallback.slides }
+  return {
+    version: 2,
+    sectionName: typeof row.sectionName === 'string' ? row.sectionName : '',
+    slides: slides.length > 0 ? slides : fallback.slides,
+  }
 }
 
 function looksLikeVideoUrl(url: string) {
@@ -199,7 +321,8 @@ function looksLikeImageUrl(url: string) {
 }
 
 export function slideToView(slide: GateSlide, locale: Locale) {
-  const mediaUrl = slide.mediaUrl.trim()
+  const showMedia = gateHasSlot(slide, 'media') && slide.visible.media
+  const mediaUrl = showMedia ? slide.mediaUrl.trim() : ''
   const video =
     slide.mediaKind === 'video' && mediaUrl && !looksLikeImageUrl(mediaUrl)
       ? mediaUrl
@@ -212,19 +335,35 @@ export function slideToView(slide: GateSlide, locale: Locale) {
   return {
     id: slide.id,
     accent: slide.accent,
+    showMedia,
     video,
     image,
     imageAlt: slide.imageAlt[locale],
-    kicker: slide.kicker[locale],
-    title: slide.title[locale],
-    body: slide.body[locale],
-    buttons: slide.buttons
-      .map((button) => ({
-        id: button.id,
-        label: button.label[locale].trim(),
-        to: button.to,
-      }))
-      .filter((button) => button.label.length > 0),
+    kicker:
+      gateHasSlot(slide, 'kicker') && slide.visible.kicker
+        ? slide.kicker[locale]
+        : '',
+    title:
+      gateHasSlot(slide, 'title') && slide.visible.title
+        ? slide.title[locale]
+        : '',
+    body:
+      gateHasSlot(slide, 'body') && slide.visible.body
+        ? slide.body[locale]
+        : '',
+    textStyles: slide.textStyles,
+    buttons:
+      gateHasSlot(slide, 'buttons') && slide.visible.buttons
+        ? slide.buttons
+            .map((button) => ({
+              id: button.id,
+              label: button.label[locale].trim(),
+              to: button.to,
+              labelStyle: button.labelStyle,
+              buttonStyle: button.buttonStyle,
+            }))
+            .filter((button) => button.label.length > 0)
+        : [],
   }
 }
 

@@ -28,6 +28,7 @@ export default function AdminAuth() {
 
   const handleLogin = async (event: FormEvent) => {
     event.preventDefault()
+
     if (!supabase) {
       setError(copy.missing)
       return

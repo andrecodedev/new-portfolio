@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactEventHandler } from 'react'
 
 type SkeletonImageProps = {
   src: string
   alt?: string
   className?: string
   frameClassName?: string
+  onLoad?: ReactEventHandler<HTMLImageElement>
+  onError?: ReactEventHandler<HTMLImageElement>
 }
 
 /**
@@ -16,6 +18,8 @@ export function SkeletonImage({
   alt = '',
   className = '',
   frameClassName = '',
+  onLoad,
+  onError,
 }: SkeletonImageProps) {
   const [ready, setReady] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -44,8 +48,14 @@ export function SkeletonImage({
         src={src}
         alt={alt}
         draggable={false}
-        onLoad={() => setReady(true)}
-        onError={() => setFailed(true)}
+        onLoad={(e) => {
+          setReady(true)
+          onLoad?.(e)
+        }}
+        onError={(e) => {
+          setFailed(true)
+          onError?.(e)
+        }}
         ref={(node) => {
           if (!node) return
           if (node.complete && node.naturalWidth > 0) setReady(true)

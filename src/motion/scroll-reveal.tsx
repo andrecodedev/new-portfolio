@@ -5,6 +5,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
   type RefObject,
 } from 'react'
@@ -345,6 +346,7 @@ type RevealCopyProps = {
   className?: string
   kind?: BodySlide
   side?: SectionSide
+  style?: CSSProperties
   children: ReactNode
 }
 
@@ -352,6 +354,7 @@ export function RevealCopy({
   className = '',
   kind = 'up',
   side,
+  style,
   children,
 }: RevealCopyProps) {
   const reduce = Boolean(useReducedMotion())
@@ -359,6 +362,7 @@ export function RevealCopy({
   return (
     <motion.p
       className={className}
+      style={style}
       variants={
         reduce
           ? { hidden: { opacity: 1, x: 0 }, show: { opacity: 1, x: 0 } }
@@ -376,6 +380,7 @@ type RevealButtonProps = {
   className?: string
   kind?: ButtonPunch
   side?: SectionSide
+  style?: CSSProperties
   onClick: () => void
   children: ReactNode
 }
@@ -384,6 +389,7 @@ export function RevealButton({
   className = '',
   kind = 'lift',
   side,
+  style,
   onClick,
   children,
 }: RevealButtonProps) {
@@ -393,6 +399,7 @@ export function RevealButton({
     <motion.button
       type="button"
       className={className}
+      style={style}
       onClick={onClick}
       variants={
         reduce

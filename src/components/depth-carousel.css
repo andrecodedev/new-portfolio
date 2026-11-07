@@ -1,0 +1,235 @@
+.depth-carousel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: var(--dc-perspective, 1400px);
+  perspective-origin: 50% 50%;
+  touch-action: pan-y;
+  outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+
+.depth-carousel:active {
+  cursor: grabbing;
+}
+
+.depth-carousel:focus-visible {
+  outline: 2px solid var(--section-accent, var(--text));
+  outline-offset: 4px;
+  border-radius: var(--stage-radius);
+}
+
+.depth-carousel__stage {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.depth-carousel__card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center center;
+  /* Sem overflow:hidden aqui: clipar o card inteiro quebra o rotateY 3D do
+     flip (backface-visibility some/estica). O clip de cantos arredondados
+     fica em cada face (.depth-carousel__face), não aqui. */
+  perspective: 1200px;
+  background: var(--bg-outer);
+  border: 1.5px solid var(--text);
+  box-shadow:
+    0 30px 60px -20px rgba(0, 0, 0, 0.5),
+    0 8px 20px -10px rgba(0, 0, 0, 0.4);
+  will-change: transform, opacity, filter;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
+
+.depth-carousel__img-frame {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--dc-radius, 0);
+}
+
+.depth-carousel__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: var(--dc-radius, 0);
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+.depth-carousel__tint {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.depth-carousel__flip {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s ease;
+}
+
+.depth-carousel__flip.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.depth-carousel__face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: var(--dc-radius, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Com flip: a moldura (borda/sombra) mora em cada face, não no card de fora,
+   senão ela fica parada enquanto só o miolo gira. */
+.depth-carousel__card--flip {
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+.depth-carousel__card--flip .depth-carousel__face {
+  background: var(--bg-outer);
+  border: 1.5px solid var(--text);
+  box-shadow:
+    0 30px 60px -20px rgba(0, 0, 0, 0.5),
+    0 8px 20px -10px rgba(0, 0, 0, 0.4);
+}
+
+.depth-carousel__card--flip .depth-carousel__face--back {
+  background: var(--btn-bg);
+}
+
+.depth-carousel__face--back {
+  transform: rotateY(180deg);
+  background: var(--btn-bg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.75rem;
+  text-align: center;
+  overflow-y: auto;
+}
+
+.depth-carousel__flip-hint {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, #000 55%, transparent);
+  color: #fff;
+  animation: depth-carousel-hint-spin 3.2s ease-in-out infinite;
+}
+
+@keyframes depth-carousel-hint-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  28% {
+    transform: rotate(-360deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .depth-carousel__flip-hint {
+    animation: none;
+  }
+}
+
+.depth-carousel__nav {
+  position: absolute;
+  top: calc(50% - (var(--dc-card-h, 380px) / 2) - 52px);
+  left: calc(50% + (var(--dc-card-w, 300px) / 2) + 64px);
+  z-index: 3000;
+  display: flex;
+  gap: 10px;
+}
+
+.depth-carousel__arrow {
+  flex: none;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--text);
+  border-radius: var(--stage-radius);
+  background: var(--btn-bg);
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.depth-carousel__arrow:hover {
+  background: var(--btn-bg-hover);
+}
+
+.depth-carousel__arrow:active {
+  transform: scale(0.94);
+}
+
+.depth-carousel__dots {
+  position: absolute;
+  top: calc(50% + (var(--dc-card-h, 380px) / 2) + 20px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+}
+
+.depth-carousel__dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: none;
+  border-radius: 2px;
+  background: var(--muted);
+  opacity: 0.6;
+  cursor: pointer;
+  transition:
+    width 0.25s ease,
+    opacity 0.25s ease,
+    background-color 0.25s ease;
+}
+
+.depth-carousel__dot.is-active {
+  width: 20px;
+  opacity: 1;
+  background: var(--section-accent, var(--text));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .depth-carousel__card {
+    will-change: auto;
+  }
+  .depth-carousel__arrow,
+  .depth-carousel__dot {
+    transition: none;
+  }
+}

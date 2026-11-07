@@ -1,0 +1,90 @@
+/** Assets da página Sobre que não variam por idioma. */
+
+export const ACHIEVEMENT_IMAGES = {
+  prouni: '/about/achievements/prouni.jpg',
+  mentoria: '/about/achievements/mentoria.jpg',
+  onebitcode: '/about/achievements/onebitcode.jpg',
+  dio: '/about/achievements/dio.jpg',
+  origamid: '/about/achievements/origamid.jpg',
+  udemy: '/about/achievements/udemy.jpg',
+  portugues: '/about/achievements/portugues.jpg',
+  ingles: '/about/achievements/ingles.jpg',
+  english4tech: '/about/achievements/english4tech.jpg',
+  espanhol: '/about/achievements/espanhol.jpg',
+  senai: '/about/achievements/senai.jpg',
+  etec: '/about/achievements/etec.jpg',
+  one: '/about/achievements/one.jpg',
+  tec4u: '/about/achievements/tec4u.jpg',
+} as const
+
+export const EXPERIENCE_LOGOS = {
+  tec4u: '/about/experience/tec4u.svg',
+  facens: '/about/experience/facens.svg',
+  viladonpatto: '/about/experience/viladonpatto.svg',
+  pernambucanas: '/about/experience/pernambucanas.svg',
+  agropaineiras: '/about/experience/agropaineiras.svg',
+} as const
+
+export type SkillIcon = {
+  name: string
+  icon: string
+}
+
+const SKILL_BASE = '/about/skills'
+
+export const SKILLS: readonly SkillIcon[] = [
+  { name: 'HTML5', icon: `${SKILL_BASE}/html.svg` },
+  { name: 'CSS3', icon: `${SKILL_BASE}/css.svg` },
+  { name: 'JavaScript', icon: `${SKILL_BASE}/javascript.svg` },
+  { name: 'TypeScript', icon: `${SKILL_BASE}/typescript.svg` },
+  { name: 'Java', icon: `${SKILL_BASE}/java.svg` },
+  { name: 'C', icon: `${SKILL_BASE}/c.svg` },
+  { name: 'C++', icon: `${SKILL_BASE}/c++.svg` },
+  { name: 'C#', icon: `${SKILL_BASE}/csharp.svg` },
+  { name: 'SQL', icon: `${SKILL_BASE}/sql.svg` },
+  { name: 'Twig', icon: `${SKILL_BASE}/Twig.svg` },
+  { name: 'React', icon: `${SKILL_BASE}/react.svg` },
+  { name: 'Node.js', icon: `${SKILL_BASE}/nodejs.svg` },
+  { name: 'Tailwind CSS', icon: `${SKILL_BASE}/tailwind.svg` },
+  { name: 'Bootstrap', icon: `${SKILL_BASE}/bootstrap.svg` },
+  { name: 'Sass', icon: `${SKILL_BASE}/sass.svg` },
+  { name: 'Git', icon: `${SKILL_BASE}/git.svg` },
+  { name: 'Vite', icon: `${SKILL_BASE}/vite.svg` },
+  { name: 'Figma', icon: `${SKILL_BASE}/figma.svg` },
+  { name: 'Postman', icon: `${SKILL_BASE}/postman.svg` },
+  { name: 'Trello', icon: `${SKILL_BASE}/trello.svg` },
+  { name: 'Jira', icon: `${SKILL_BASE}/jira.svg` },
+  { name: 'Office', icon: `${SKILL_BASE}/office.svg` },
+  { name: 'Canva', icon: `${SKILL_BASE}/canva.svg` },
+  { name: 'GIMP', icon: `${SKILL_BASE}/gimp.svg` },
+  { name: 'Arduino', icon: `${SKILL_BASE}/arduino.svg` },
+  { name: 'FileZilla', icon: `${SKILL_BASE}/FileZilla.svg` },
+  { name: 'ClickUp', icon: `${SKILL_BASE}/ClickUp.svg` },
+  { name: 'Nuvemshop', icon: `${SKILL_BASE}/nuvemshop.svg` },
+  { name: 'Nuvemshop Partners', icon: `${SKILL_BASE}/nuvemshop-parceiros.svg` },
+  { name: 'PageSpeed', icon: `${SKILL_BASE}/PageSpeed.svg` },
+  { name: 'Obsidian', icon: `${SKILL_BASE}/obsidian.svg` },
+  { name: 'Render', icon: `${SKILL_BASE}/Render.svg` },
+  { name: 'VSCode', icon: `${SKILL_BASE}/vscode.svg` },
+  { name: 'Visual Studio', icon: `${SKILL_BASE}/visualstudy.svg` },
+  { name: 'Eclipse', icon: `${SKILL_BASE}/eclipse.svg` },
+  { name: 'IntelliJ', icon: `${SKILL_BASE}/intellij.svg` },
+  { name: 'NetBeans', icon: `${SKILL_BASE}/netbeens.svg` },
+  { name: 'Antigravity', icon: `${SKILL_BASE}/antigravity.svg` },
+  { name: 'Scrum', icon: `${SKILL_BASE}/scrum.svg` },
+  { name: 'Kanban', icon: `${SKILL_BASE}/kanban.svg` },
+  { name: 'MySQL', icon: `${SKILL_BASE}/mysql.svg` },
+  { name: 'SQL Server', icon: `${SKILL_BASE}/sqlServer.svg` },
+  { name: 'Supabase', icon: `${SKILL_BASE}/supabase.svg` },
+  { name: 'Linux', icon: `${SKILL_BASE}/linux.svg` },
+  { name: 'Windows', icon: `${SKILL_BASE}/Windows.svg` },
+  { name: 'Português', icon: `${SKILL_BASE}/portugues.svg` },
+  { name: 'English', icon: `${SKILL_BASE}/eua.svg` },
+  { name: 'Español', icon: `${SKILL_BASE}/spanish.svg` },
+  { name: 'ChatGPT', icon: `${SKILL_BASE}/chatgpt.svg` },
+  { name: 'Gemini', icon: `${SKILL_BASE}/gemini.svg` },
+  { name: 'DeepSeek', icon: `${SKILL_BASE}/DeepSeek.svg` },
+  { name: 'Perplexity', icon: `${SKILL_BASE}/Perplexity.svg` },
+  { name: 'AI Studio Google', icon: `${SKILL_BASE}/AIStudioGoogle.svg` },
+  { name: 'GitHub Copilot', icon: `${SKILL_BASE}/gitHubCopilot.svg` },
+]

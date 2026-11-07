@@ -2,6 +2,14 @@ import { ASSETS, PAGE_META } from '../data/site'
 import { DICTIONARIES, type Locale } from '../i18n/copy'
 import { supabase } from '../lib/supabase-client'
 import { isAccentSwatch, type AccentSwatchId } from './accent-swatches'
+import {
+  defaultButtonStyle,
+  defaultTextStyle,
+  parseButtonStyle,
+  parseTextStyle,
+  type ButtonStyle,
+  type TextStyle,
+} from './style-tokens'
 
 export const CMS_HERO_KEY = 'home_hero'
 
@@ -15,7 +23,54 @@ export type HeroLines = {
   subtitleLine2: string
 }
 
-type LocaleMap<T> = Record<Locale, T>
+type LocaleMap<T> = Record<string, T>
+
+export type IntroTextStyles = {
+  titleLine1: TextStyle
+  titleLine2: TextStyle
+  subtitleLine1: TextStyle
+  subtitleLine2: TextStyle
+}
+
+function defaultIntroTextStyles(): IntroTextStyles {
+  return {
+    titleLine1: defaultTextStyle(),
+    titleLine2: defaultTextStyle(),
+    subtitleLine1: defaultTextStyle(),
+    subtitleLine2: defaultTextStyle(),
+  }
+}
+
+function defaultLineTextStyles(): LineTextStyles {
+  return {
+    titleLine1: defaultTextStyle(),
+    titleLine2: defaultTextStyle(),
+    body: defaultTextStyle(),
+  }
+}
+
+function parseLineTextStyles(value: unknown): LineTextStyles {
+  const fallback = defaultLineTextStyles()
+  if (!value || typeof value !== 'object') return fallback
+  const row = value as Partial<LineTextStyles>
+  return {
+    titleLine1: parseTextStyle(row.titleLine1, fallback.titleLine1),
+    titleLine2: parseTextStyle(row.titleLine2, fallback.titleLine2),
+    body: parseTextStyle(row.body, fallback.body),
+  }
+}
+
+function parseIntroTextStyles(value: unknown): IntroTextStyles {
+  const fallback = defaultIntroTextStyles()
+  if (!value || typeof value !== 'object') return fallback
+  const row = value as Partial<IntroTextStyles>
+  return {
+    titleLine1: parseTextStyle(row.titleLine1, fallback.titleLine1),
+    titleLine2: parseTextStyle(row.titleLine2, fallback.titleLine2),
+    subtitleLine1: parseTextStyle(row.subtitleLine1, fallback.subtitleLine1),
+    subtitleLine2: parseTextStyle(row.subtitleLine2, fallback.subtitleLine2),
+  }
+}
 
 function newId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -77,6 +132,10 @@ function asBool(value: unknown, fallback: boolean) {
   return typeof value === 'boolean' ? value : fallback
 }
 
+function asName(value: unknown) {
+  return typeof value === 'string' ? value : ''
+}
+
 function asUrlList(value: unknown): string[] {
   if (!Array.isArray(value)) return []
   return value
@@ -91,20 +150,34 @@ export type IntroVisible = {
   subtitleLine2: boolean
 }
 
+/** Filhos presentes na árvore do Avatar (remover = sai da árvore; limite = rate limit) */
+export const INTRO_SLOT_IDS = [
+  'photo',
+  'title1',
+  'title2',
+  'sub1',
+  'sub2',
+] as const
+export type IntroSlotId = (typeof INTRO_SLOT_IDS)[number]
+
 export type DesktopTextSide = 'start' | 'end'
 export type MobileAvatarPlace = 'before' | 'after'
 
 export type IntroModule = {
   id: string
   kind: 'intro'
+  name: string
   enabled: boolean
   showAvatar: boolean
   gallery: string[]
   visible: IntroVisible
+  /** Ordem dos blocos filhos; ausente = não aparece na árvore nem no site */
+  slots: IntroSlotId[]
   desktopTextSide: DesktopTextSide
   mobileAvatar: MobileAvatarPlace
   mobileAlign: Align
   copy: LocaleMap<HeroLines>
+  textStyles: IntroTextStyles
 }
 
 export type LineVisible = {
@@ -115,15 +188,108 @@ export type LineVisible = {
   image: boolean
 }
 
+export const LINE_SLOT_IDS = [
+  'title1',
+  'title2',
+  'body',
+  'accents',
+  'buttons',
+  'image',
+] as const
+export type LineSlotId = (typeof LINE_SLOT_IDS)[number]
+
+export const SCROLL_SLOT_IDS = ['label'] as const
+export type ScrollSlotId = (typeof SCROLL_SLOT_IDS)[number]
+
+export function defaultIntroSlots(): IntroSlotId[] {
+  return [...INTRO_SLOT_IDS]
+}
+
+export function defaultLineSlots(): LineSlotId[] {
+  return [...LINE_SLOT_IDS]
+}
+
+export function defaultScrollSlots(): ScrollSlotId[] {
+  return [...SCROLL_SLOT_IDS]
+}
+
+export function parseSlotList<T extends string>(
+  value: unknown,
+  allowed: readonly T[],
+  fallback: T[],
+): T[] {
+  if (!Array.isArray(value)) return fallback
+  const allow = new Set<string>(allowed)
+  const seen = new Set<string>()
+  const ordered: T[] = []
+  for (const entry of value) {
+    if (typeof entry !== 'string' || !allow.has(entry) || seen.has(entry)) {
+      continue
+    }
+    seen.add(entry)
+    ordered.push(entry as T)
+  }
+  return ordered
+}
+
+export function introHasSlot(module: IntroModule, slot: IntroSlotId) {
+  return module.slots.includes(slot)
+}
+
+export function lineHasSlot(module: LineModule, slot: LineSlotId) {
+  return module.slots.includes(slot)
+}
+
+export function scrollHasSlot(module: ScrollModule, slot: ScrollSlotId) {
+  return module.slots.includes(slot)
+}
+
+/** Opções de add: photo×1, title×2, subtitle×2 */
+export function nextIntroSlot(
+  slots: readonly IntroSlotId[],
+  kind: 'photo' | 'title' | 'subtitle',
+): IntroSlotId | null {
+  if (kind === 'photo') return slots.includes('photo') ? null : 'photo'
+  if (kind === 'title') {
+    if (!slots.includes('title1')) return 'title1'
+    if (!slots.includes('title2')) return 'title2'
+    return null
+  }
+  if (!slots.includes('sub1')) return 'sub1'
+  if (!slots.includes('sub2')) return 'sub2'
+  return null
+}
+
+export function nextLineSlot(
+  slots: readonly LineSlotId[],
+  kind: LineSlotId | 'title',
+): LineSlotId | null {
+  if (kind === 'title') {
+    if (!slots.includes('title1')) return 'title1'
+    if (!slots.includes('title2')) return 'title2'
+    return null
+  }
+  return slots.includes(kind) ? null : kind
+}
+
 export type LineButton = {
   id: string
   label: LocaleMap<string>
   to: string
+  labelStyle: TextStyle
+  style: ButtonStyle
+}
+
+export type LineTextStyles = {
+  titleLine1: TextStyle
+  titleLine2: TextStyle
+  body: TextStyle
 }
 
 export type LineModule = {
   id: string
   kind: 'line'
+  name: string
   enabled: boolean
   alignDesktop: Align
   alignMobile: Align
@@ -134,20 +300,31 @@ export type LineModule = {
   buttons: LineButton[]
   gallery: string[]
   visible: LineVisible
+  slots: LineSlotId[]
   imageDesktop: DesktopTextSide
   imageMobile: MobileAvatarPlace
+  textStyles: LineTextStyles
 }
 
 export type ScrollAccent = HeroAccent | 'ink'
 
+export type ScrollVisible = {
+  label: boolean
+  line: boolean
+}
+
 export type ScrollModule = {
   id: string
   kind: 'scroll'
+  name: string
   enabled: boolean
   label: LocaleMap<string>
   accent: ScrollAccent
   alignDesktop: Align
   alignMobile: Align
+  visible: ScrollVisible
+  slots: ScrollSlotId[]
+  labelStyle: TextStyle
 }
 
 export type HeroModule = IntroModule | LineModule | ScrollModule
@@ -165,14 +342,17 @@ export function createIntroModule(
   return {
     id: newId(),
     kind: 'intro',
+    name: '',
     enabled: true,
     showAvatar,
     gallery,
     visible: defaultIntroVisible(),
+    slots: defaultIntroSlots(),
     desktopTextSide: 'start',
     mobileAvatar: 'before',
     mobileAlign: 'center',
     copy,
+    textStyles: defaultIntroTextStyles(),
   }
 }
 
@@ -194,6 +374,8 @@ export function createLineButton(
     id: newId(),
     label,
     to,
+    labelStyle: defaultTextStyle(),
+    style: defaultButtonStyle(),
   }
 }
 
@@ -201,6 +383,7 @@ export function createLineModule(): LineModule {
   return {
     id: newId(),
     kind: 'line',
+    name: '',
     enabled: true,
     alignDesktop: 'start',
     alignMobile: 'start',
@@ -211,8 +394,26 @@ export function createLineModule(): LineModule {
     buttons: [],
     gallery: [],
     visible: defaultLineVisible(),
+    slots: defaultLineSlots(),
     imageDesktop: 'end',
     imageMobile: 'after',
+    textStyles: defaultLineTextStyles(),
+  }
+}
+
+function defaultScrollVisible(): ScrollVisible {
+  return {
+    label: true,
+    line: true,
+  }
+}
+
+function parseScrollVisible(value: unknown): ScrollVisible {
+  const row =
+    value && typeof value === 'object' ? (value as Partial<ScrollVisible>) : {}
+  return {
+    label: asBool(row.label, true),
+    line: asBool(row.line, true),
   }
 }
 
@@ -220,11 +421,15 @@ export function createScrollModule(): ScrollModule {
   return {
     id: newId(),
     kind: 'scroll',
+    name: '',
     enabled: true,
     label: { pt: 'SCROLL', en: 'SCROLL', es: 'SCROLL' },
     accent: 'ink',
     alignDesktop: 'start',
     alignMobile: 'center',
+    visible: defaultScrollVisible(),
+    slots: defaultScrollSlots(),
+    labelStyle: defaultTextStyle(),
   }
 }
 
@@ -290,6 +495,8 @@ function parseLineButtons(row: Record<string, unknown>): LineButton[] {
           id: typeof button.id === 'string' ? button.id : newId(),
           label: asStringMap(button.label, emptyStringMap()),
           to: typeof button.to === 'string' ? button.to : PAGE_META.work.path,
+          labelStyle: parseTextStyle(button.labelStyle),
+          style: parseButtonStyle(button.style),
         }
       })
   }
@@ -323,13 +530,12 @@ function asStringMap(
   value: unknown,
   fallback: LocaleMap<string>,
 ): LocaleMap<string> {
-  const row =
-    value && typeof value === 'object' ? (value as Partial<LocaleMap<string>>) : {}
-  return {
-    pt: row.pt ?? fallback.pt,
-    en: row.en ?? fallback.en,
-    es: row.es ?? fallback.es,
+  const next: LocaleMap<string> = { ...fallback }
+  if (!value || typeof value !== 'object') return next
+  for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof val === 'string') next[key] = val
   }
+  return next
 }
 
 function asPairMap(
@@ -382,10 +588,12 @@ function parseIntroModule(value: unknown): IntroModule | null {
   return {
     id: typeof row.id === 'string' ? row.id : newId(),
     kind: 'intro',
+    name: asName(row.name),
     enabled: row.enabled !== false,
     showAvatar: row.showAvatar !== false,
     gallery: asUrlList(row.gallery),
     visible: parseIntroVisible(row.visible),
+    slots: parseSlotList(row.slots, INTRO_SLOT_IDS, defaultIntroSlots()),
     desktopTextSide: isDesktopTextSide(row.desktopTextSide)
       ? row.desktopTextSide
       : 'start',
@@ -394,6 +602,7 @@ function parseIntroModule(value: unknown): IntroModule | null {
       : 'before',
     mobileAlign: isAlign(row.mobileAlign) ? row.mobileAlign : 'center',
     copy: parseIntroCopy(row.copy),
+    textStyles: parseIntroTextStyles(row.textStyles),
   }
 }
 
@@ -404,6 +613,7 @@ function parseLineModule(value: unknown): LineModule | null {
   return {
     id: typeof row.id === 'string' ? row.id : newId(),
     kind: 'line',
+    name: asName(row.name),
     enabled: row.enabled !== false,
     alignDesktop: isAlign(row.alignDesktop) ? row.alignDesktop : 'start',
     alignMobile: isAlign(row.alignMobile) ? row.alignMobile : 'start',
@@ -414,8 +624,10 @@ function parseLineModule(value: unknown): LineModule | null {
     buttons: parseLineButtons(row),
     gallery: asUrlList(row.gallery),
     visible: parseLineVisible(row.visible),
+    slots: parseSlotList(row.slots, LINE_SLOT_IDS, defaultLineSlots()),
     imageDesktop: isDesktopTextSide(row.imageDesktop) ? row.imageDesktop : 'end',
     imageMobile: isMobileAvatarPlace(row.imageMobile) ? row.imageMobile : 'after',
+    textStyles: parseLineTextStyles(row.textStyles),
   }
 }
 
@@ -427,11 +639,15 @@ function parseScrollModule(value: unknown): ScrollModule | null {
   return {
     id: typeof row.id === 'string' ? row.id : newId(),
     kind: 'scroll',
+    name: asName(row.name),
     enabled: row.enabled !== false,
     label: asStringMap(row.label, fallback.label),
     accent: isScrollAccent(row.accent) ? row.accent : 'ink',
     alignDesktop: isAlign(row.alignDesktop) ? row.alignDesktop : 'start',
     alignMobile: isAlign(row.alignMobile) ? row.alignMobile : 'center',
+    visible: parseScrollVisible(row.visible),
+    slots: parseSlotList(row.slots, SCROLL_SLOT_IDS, defaultScrollSlots()),
+    labelStyle: parseTextStyle(row.labelStyle, fallback.labelStyle),
   }
 }
 

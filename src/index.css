@@ -21,57 +21,54 @@
   /* Em viewport baixa, corte menor: Hero mantém ar e o peek nao sobe no texto */
   --section-cut: clamp(24px, 5vh, 96px);
 
-  --bg-stage: #ededed;
-  --bg-loader: #dedede;
-  --bg-outer: #ffffff;
-  --text: #000000;
-  --muted: #2e2e2e;
-  --scroll-wave: #9a9a9a;
-  --scroll-shine-a: #1a1a1a;
-  --scroll-shine-b: #555555;
-  --scroll-shine-c: #9a9a9a;
-  --scroll-shine-d: #c8c8c8;
-  --rain: #141414;
-  --btn-bg: #f6f6f6;
-  --btn-bg-hover: #ffffff;
-  --btn-shadow: #111111;
-  --avatar-ring: #6e6e6e;
-  --avatar-ring-shadow: #9a9a9a;
+  /* Tema nativo: escuro. Claro só via data-theme=light. */
+  --bg-stage: #1c1c1c;
+  --bg-loader: #141414;
+  --bg-outer: #0a0a0a;
+  --text: #f2f2f2;
+  --muted: #b8b8b8;
+  --scroll-wave: #6e6e6e;
+  --scroll-shine-a: #f2f2f2;
+  --scroll-shine-b: #b0b0b0;
+  --scroll-shine-c: #787878;
+  --scroll-shine-d: #4a4a4a;
+  --rain: #b0b0b0;
+  --btn-bg: #262626;
+  --btn-bg-hover: #303030;
+  --btn-shadow: #f2f2f2;
+  --avatar-ring: #f2f2f2;
+  --avatar-ring-shadow: color-mix(in srgb, #ffffff 55%, transparent);
   --avatar-fill: #1a1a1a;
-  --avatar-shadow: rgba(0, 0, 0, 0.12);
-  --scrollbar-thumb-hover: #cfcfcf;
-  --scrollbar-thumb-active: #c4c4c4;
-  --scrollbar-thumb: #bdbdbd;
-  --scrollbar-track: var(--bg-outer);
+  --avatar-shadow: rgba(0, 0, 0, 0.45);
+  --scrollbar-thumb: #7a7a7a;
+  --scrollbar-thumb-hover: #9a9a9a;
+  --scrollbar-thumb-active: #b0b0b0;
+  --scrollbar-track: #121212;
   --selection-fg: #ffffff;
-  --icon-filter: none;
-  --loader-work: #efe6a3;
-  --loader-about: #bfe6cf;
-  --loader-reading: #b7d8ea;
-  --loader-contact: #f0bfbc;
-  --loader-hire: #d9c8f0;
-  /*
-    Accents no claro: saturados o bastante para ler a cor,
-    sem cair no pastel (some) nem no tom “sujo” (vira cinza).
-  */
-  --accent-work: #e0a100;
-  --accent-about: #12a954;
-  --accent-reading: #2f6ff0;
-  --accent-contact: #e53e3e;
-  --accent-hire: #7c4dff;
-  --accent-work-deep: #b45309;
-  --accent-work-pale: #f5c518;
-  --accent-about-deep: #0f7a3d;
-  --accent-about-pale: #4ade80;
-  --accent-reading-deep: #1d4ed8;
-  --accent-reading-pale: #67e8f9;
-  --accent-contact-deep: #b91c1c;
-  --accent-contact-pale: #fb7185;
-  --accent-hire-deep: #5b21b6;
-  --accent-hire-pale: #e9d5ff;
-  --accent-teal: #0d9488;
-  --accent-rose: #db2777;
-  --accent-lime: #65a30d;
+  --icon-filter: invert(1);
+  --loader-work: #3f3a1f;
+  --loader-about: #1f3328;
+  --loader-reading: #1e303a;
+  --loader-contact: #3a2424;
+  --loader-hire: #32284a;
+  --accent-work: #f0d45c;
+  --accent-about: #74d7a4;
+  --accent-reading: #78bfee;
+  --accent-contact: #f0aaa5;
+  --accent-hire: #c4b5fd;
+  --accent-work-deep: #fbbf24;
+  --accent-work-pale: #fde68a;
+  --accent-about-deep: #34d399;
+  --accent-about-pale: #bbf7d0;
+  --accent-reading-deep: #38bdf8;
+  --accent-reading-pale: #bae6fd;
+  --accent-contact-deep: #f87171;
+  --accent-contact-pale: #fecaca;
+  --accent-hire-deep: #a78bfa;
+  --accent-hire-pale: #ede9fe;
+  --accent-teal: #2dd4bf;
+  --accent-rose: #f472b6;
+  --accent-lime: #a3e635;
   --stage-height: calc(100svh - (var(--respiro) * 2));
   --stage-radius: 5px;
 
@@ -128,66 +125,47 @@
 
   color: var(--text);
   background: var(--bg-outer);
-  color-scheme: light;
-  font-family: var(--font-sans);
+  color-scheme: dark;
+  font-family: var(--font-body, var(--font-sans));
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-[data-theme='dark'] {
-  --bg-stage: #1c1c1c;
-  --bg-loader: #141414;
-  --bg-outer: #0a0a0a;
-  --text: #f2f2f2;
-  --muted: #b8b8b8;
-  --scroll-wave: #6e6e6e;
-  --scroll-shine-a: #f2f2f2;
-  --scroll-shine-b: #b0b0b0;
-  --scroll-shine-c: #787878;
-  --scroll-shine-d: #4a4a4a;
-  --rain: #b0b0b0;
-  --btn-bg: #262626;
-  --btn-bg-hover: #303030;
-  --btn-shadow: #f2f2f2;
-  --avatar-ring: #f2f2f2;
-  --avatar-ring-shadow: color-mix(in srgb, #ffffff 55%, transparent);
-  --avatar-fill: #1a1a1a;
-  --avatar-shadow: rgba(0, 0, 0, 0.45);
-  --scrollbar-thumb: #7a7a7a;
-  --scrollbar-thumb-hover: #9a9a9a;
-  --scrollbar-thumb-active: #b0b0b0;
-  --scrollbar-track: #121212;
-  --icon-filter: invert(1);
-  --loader-work: #3f3a1f;
-  --loader-about: #1f3328;
-  --loader-reading: #1e303a;
-  --loader-contact: #3a2424;
-  --loader-hire: #32284a;
-  --accent-work: #f0d45c;
-  --accent-about: #74d7a4;
-  --accent-reading: #78bfee;
-  --accent-contact: #f0aaa5;
-  --accent-hire: #c4b5fd;
-  --accent-work-deep: #fbbf24;
-  --accent-work-pale: #fde68a;
-  --accent-about-deep: #34d399;
-  --accent-about-pale: #bbf7d0;
-  --accent-reading-deep: #38bdf8;
-  --accent-reading-pale: #bae6fd;
-  --accent-contact-deep: #f87171;
-  --accent-contact-pale: #fecaca;
-  --accent-hire-deep: #a78bfa;
-  --accent-hire-pale: #ede9fe;
-  --accent-teal: #2dd4bf;
-  --accent-rose: #f472b6;
-  --accent-lime: #a3e635;
-  color-scheme: dark;
-}
-
-/* Força accents do claro mesmo com data-theme=light no <html> */
 [data-theme='light'] {
+  --bg-stage: #ededed;
+  --bg-loader: #dedede;
+  --bg-outer: #ffffff;
+  --text: #000000;
+  --muted: #2e2e2e;
+  --scroll-wave: #9a9a9a;
+  --scroll-shine-a: #1a1a1a;
+  --scroll-shine-b: #555555;
+  --scroll-shine-c: #9a9a9a;
+  --scroll-shine-d: #c8c8c8;
+  --rain: #141414;
+  --btn-bg: #f6f6f6;
+  --btn-bg-hover: #ffffff;
+  --btn-shadow: #111111;
+  --avatar-ring: #6e6e6e;
+  --avatar-ring-shadow: #9a9a9a;
+  --avatar-fill: #1a1a1a;
+  --avatar-shadow: rgba(0, 0, 0, 0.12);
+  --scrollbar-thumb-hover: #cfcfcf;
+  --scrollbar-thumb-active: #c4c4c4;
+  --scrollbar-thumb: #bdbdbd;
+  --scrollbar-track: var(--bg-outer);
+  --icon-filter: none;
+  --loader-work: #efe6a3;
+  --loader-about: #bfe6cf;
+  --loader-reading: #b7d8ea;
+  --loader-contact: #f0bfbc;
+  --loader-hire: #d9c8f0;
+  /*
+    Accents no claro: saturados o bastante para ler a cor,
+    sem cair no pastel (some) nem no tom “sujo” (vira cinza).
+  */
   --accent-work: #e0a100;
   --accent-about: #12a954;
   --accent-reading: #2f6ff0;
@@ -206,6 +184,7 @@
   --accent-teal: #0d9488;
   --accent-rose: #db2777;
   --accent-lime: #65a30d;
+  color-scheme: light;
 }
 
 *,

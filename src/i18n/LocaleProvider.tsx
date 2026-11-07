@@ -17,53 +17,63 @@ import {
 const STORAGE_KEY = 'portfolio-locale'
 
 type LocaleContextValue = {
-  locale: Locale
-  setLocale: (locale: Locale) => void
+  locale: string
+  setLocale: (locale: string) => void
   t: Dictionary
+  dictionaryLocale: Locale
 }
 
 const LocaleContext = createContext<LocaleContextValue | null>(null)
 
-function readStoredLocale(): Locale {
+function readStoredLocale(): string {
   if (typeof window === 'undefined') return 'pt'
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY)
-    if (isLocale(stored)) return stored
+    if (stored && stored.trim()) return stored.trim()
   } catch {
     // storage bloqueado: segue com pt
   }
   return 'pt'
 }
 
-function applyHtmlLang(locale: Locale) {
+function dictionaryFor(locale: string): Locale {
+  return isLocale(locale) ? locale : 'pt'
+}
+
+function applyHtmlLang(locale: string) {
   if (typeof document === 'undefined') return
-  document.documentElement.lang = DICTIONARIES[locale].htmlLang
+  const dictLocale = dictionaryFor(locale)
+  document.documentElement.lang = DICTIONARIES[dictLocale].htmlLang
 }
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(() => readStoredLocale())
+  const [locale, setLocaleState] = useState<string>(() => readStoredLocale())
 
   useEffect(() => {
     applyHtmlLang(locale)
   }, [locale])
 
-  const setLocale = useCallback((next: Locale) => {
-    setLocaleState(next)
-    applyHtmlLang(next)
+  const setLocale = useCallback((next: string) => {
+    const code = next.trim() || 'pt'
+    setLocaleState(code)
+    applyHtmlLang(code)
     try {
-      window.localStorage.setItem(STORAGE_KEY, next)
+      window.localStorage.setItem(STORAGE_KEY, code)
     } catch {
       // ignore
     }
   }, [])
 
+  const dictionaryLocale = dictionaryFor(locale)
+
   const value = useMemo(
     () => ({
       locale,
       setLocale,
-      t: DICTIONARIES[locale],
+      t: DICTIONARIES[dictionaryLocale],
+      dictionaryLocale,
     }),
-    [locale, setLocale],
+    [locale, setLocale, dictionaryLocale],
   )
 
   return (
