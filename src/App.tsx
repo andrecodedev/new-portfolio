@@ -16,12 +16,8 @@ import { DepthCarousel } from './components/depth-carousel'
 import { LayoutGrid } from './components/layout-grid'
 import CodeRain from './components/CodeRain'
 import { SkeletonImage } from './components/skeleton-image'
-import {
-  applyTheme,
-  readDocumentTheme,
-  ThemeIcon,
-  type Theme,
-} from './theme'
+import { Moon, Sun } from '@phosphor-icons/react'
+import { applyTheme, readDocumentTheme, type Theme } from './theme'
 import {
   ASSETS,
   PAGE_META,
@@ -334,7 +330,10 @@ function Header({
             onHireMe(header.ctaTo || PAGE_META.contact.path)
           }}
         >
-          <SiteIcon id={header.ctaIconId || 'external'} className="header__icon" />
+          <SiteIcon
+            id={header.ctaIconId || 'external'}
+            className="header__icon"
+          />
           <span style={textStyleCss(header.ctaLabelStyle)}>{ctaLabel}</span>
         </motion.a>
       ) : null}
@@ -414,6 +413,7 @@ function BackToTop() {
           <SiteIcon
             id={chrome.backToTop.iconId || 'arrow-up'}
             className="header__icon"
+            bare
           />
         </motion.button>
       ) : null}
@@ -515,24 +515,26 @@ function SideTools({ theme, onToggleTheme }: SideToolsProps) {
 
           {showTheme ? (
             <div className="side-tools__theme">
-              <button
-                type="button"
-                className="side-tools__theme-toggle"
+              <label
+                className="ui-switch"
                 title={isDark ? t.chrome.themeLight : t.chrome.themeDark}
-                aria-label={isDark ? t.chrome.themeLight : t.chrome.themeDark}
-                aria-pressed={isDark}
-                onClick={onToggleTheme}
               >
-                <span className="side-tools__theme-label" aria-hidden="true">
-                  <ThemeIcon theme={isDark ? 'light' : 'dark'} />
-                </span>
-                <span
-                  className={`side-tools__switch${isDark ? ' side-tools__switch--dark' : ''}`}
-                  aria-hidden="true"
-                >
-                  <span className="side-tools__switch-thumb" />
-                </span>
-              </button>
+                <input
+                  type="checkbox"
+                  checked={isDark}
+                  onChange={onToggleTheme}
+                  aria-label={isDark ? t.chrome.themeLight : t.chrome.themeDark}
+                />
+                <div className="slider">
+                  <div className="circle">
+                    {isDark ? (
+                      <Moon weight="bold" />
+                    ) : (
+                      <Sun weight="bold" />
+                    )}
+                  </div>
+                </div>
+              </label>
             </div>
           ) : null}
         </div>
@@ -554,6 +556,7 @@ function SideTools({ theme, onToggleTheme }: SideToolsProps) {
           <SiteIcon
             id={chrome.themeFab.iconId || 'settings'}
             className="header__icon"
+            bare
           />
         </button>
       </div>
@@ -678,6 +681,7 @@ function NewsFab({ onOpen }: NewsFabProps) {
         <SiteIcon
           id={chrome.newsFab.iconId || 'news'}
           className="header__icon"
+          bare
         />
       </button>
     </motion.div>

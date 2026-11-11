@@ -315,7 +315,11 @@ export default function AdminDashboard() {
   const openView = (view: Exclude<AdminView, 'menu'>) => {
     handleProtectedAction(() => {
       setEditingModuleId(
-        view === 'header' ? 'header' : view === 'design' ? 'design' : null,
+        view === 'header'
+          ? 'header'
+          : view === 'design'
+            ? 'typography'
+            : null,
       )
       setCurrentView(view)
     })

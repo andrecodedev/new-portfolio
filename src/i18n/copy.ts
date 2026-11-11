@@ -124,6 +124,7 @@ export type Dictionary = {
   home: {
     heroTitleLines: readonly [string, string]
     heroSubtitleLines: readonly [string, string]
+    heroSubtitleAccents: readonly string[]
     works: AccentedCopy & {
       titleLines: readonly [string, string]
       cta: string
@@ -189,6 +190,7 @@ const pt: Dictionary = {
       'Desenvolvedor web júnior,',
       'do código à experiência do usuário.',
     ],
+    heroSubtitleAccents: ['código', 'experiência'],
     works: {
       ariaLabel: 'Trabalhos',
       titleLines: ['Meus trabalhos e', 'estatísticas'],
@@ -520,6 +522,7 @@ const en: Dictionary = {
       'Junior web developer,',
       'from code to user experience.',
     ],
+    heroSubtitleAccents: ['code', 'experience'],
     works: {
       ariaLabel: 'Works',
       titleLines: ['My work and', 'stats'],
@@ -851,6 +854,7 @@ const es: Dictionary = {
       'Desarrollador web junior,',
       'del código a la experiencia del usuario.',
     ],
+    heroSubtitleAccents: ['código', 'experiencia'],
     works: {
       ariaLabel: 'Trabajos',
       titleLines: ['Mis trabajos y', 'estadísticas'],

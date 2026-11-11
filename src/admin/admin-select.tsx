@@ -3,6 +3,7 @@ import {
   useId,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
 } from 'react'
 import { ChevronRightIcon } from './icons'
@@ -12,6 +13,8 @@ export type AdminSelectOption<T extends string = string> = {
   label: string
   description?: string
   icon?: ReactNode
+  /** Ex.: preview da fonte no label */
+  previewStyle?: CSSProperties
 }
 
 type AdminSelectProps<T extends string> = {
@@ -70,7 +73,9 @@ export default function AdminSelect<T extends string>({
               {selected.icon}
             </span>
           ) : null}
-          <span className="admin-select__text">{display}</span>
+          <span className="admin-select__text" style={selected?.previewStyle}>
+            {display}
+          </span>
         </span>
         <span className="admin-select__chevron" aria-hidden="true">
           <ChevronRightIcon />
@@ -104,7 +109,10 @@ export default function AdminSelect<T extends string>({
                     </span>
                   ) : null}
                   <span className="admin-select__option-copy">
-                    <span className="admin-select__option-label">
+                    <span
+                      className="admin-select__option-label"
+                      style={option.previewStyle}
+                    >
                       {option.label}
                     </span>
                     {option.description ? (

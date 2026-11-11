@@ -2,6 +2,7 @@ import { useReducedMotion } from 'framer-motion'
 import { AccentedText } from '../components/accented-text'
 import { SkeletonImage } from '../components/skeleton-image'
 import { ASSETS } from '../data/site'
+import { useLocale } from '../i18n/LocaleProvider'
 import {
   MaskTitle,
   RevealButton,
@@ -60,7 +61,9 @@ function IntroView({
   editMode?: boolean
   editSelectedId?: string | null
 }) {
+  const { t } = useLocale()
   const copy = module.copy[locale] ?? module.copy.pt
+  const accents = t.home.heroSubtitleAccents
   const { visible, textStyles, slots } = module
   const has = (slot: (typeof slots)[number]) => slots.includes(slot)
   const showTitle1 = has('title1') && visible.titleLine1
@@ -141,7 +144,7 @@ function IntroView({
                     ? cmsEditAttrs(`${module.id}::sub1`, 'Subtítulo', editSelectedId)
                     : {})}
                 >
-                  {copy.subtitleLine1}
+                  <AccentedText body={copy.subtitleLine1} accents={accents} />
                 </span>
               ) : null}
               {showSub2 ? (
@@ -152,7 +155,7 @@ function IntroView({
                     ? cmsEditAttrs(`${module.id}::sub2`, 'Subtítulo', editSelectedId)
                     : {})}
                 >
-                  {copy.subtitleLine2}
+                  <AccentedText body={copy.subtitleLine2} accents={accents} />
                 </span>
               ) : null}
             </p>

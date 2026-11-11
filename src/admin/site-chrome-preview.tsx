@@ -1,5 +1,5 @@
+import { Moon } from '@phosphor-icons/react'
 import { useRef, useState, type ReactNode } from 'react'
-import { ThemeIcon } from '../theme'
 import CodeRain from '../components/CodeRain'
 import type { CmsChromePayload } from '../cms/chrome-content'
 import { fabStyleCss } from '../cms/chrome-content'
@@ -466,14 +466,14 @@ export function CornerToolsPreview({
                     ? cmsEditAttrs('theme', 'Tema', editSelectedId)
                     : {})}
                 >
-                  <span className="side-tools__theme-toggle">
-                    <span className="side-tools__theme-label">
-                      <ThemeIcon theme="light" />
-                    </span>
-                    <span className="side-tools__switch side-tools__switch--dark">
-                      <span className="side-tools__switch-thumb" />
-                    </span>
-                  </span>
+                  <label className="ui-switch">
+                    <input type="checkbox" checked readOnly tabIndex={-1} />
+                    <div className="slider">
+                      <div className="circle">
+                        <Moon weight="bold" />
+                      </div>
+                    </div>
+                  </label>
                 </div>
               ) : null}
             </div>

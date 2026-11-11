@@ -15,9 +15,9 @@ import {
   type CmsChromePayload,
 } from './chrome-content'
 import {
-  applyDesignToDocument,
+  buildDesignStyleSheet,
+  clearDesignInlineStyles,
   defaultDesignPayload,
-  designCssVars,
   fetchDesignPayload,
   type CmsDesignPayload,
 } from './design-content'
@@ -124,15 +124,9 @@ export function CmsProvider({ children }: { children: ReactNode }) {
       document.head.appendChild(styleEl)
     }
 
-    const desktop = designCssVars(design, 'desktop')
-    const mobile = designCssVars(design, 'mobile')
-    const toCss = (vars: Record<string, string>) =>
-      Object.entries(vars)
-        .map(([key, value]) => `${key}:${value};`)
-        .join('')
-
-    styleEl.textContent = `:root{${toCss(desktop)}}@media (max-width:1023px){:root{--respiro:${mobile['--respiro']};}}`
-    applyDesignToDocument(design, 'desktop')
+    // Inline antigo do design matava [data-theme='light'] — limpa e usa stylesheet.
+    clearDesignInlineStyles()
+    styleEl.textContent = buildDesignStyleSheet(design)
 
     return () => {
       // keep injected vars while browsing public routes

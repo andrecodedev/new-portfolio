@@ -1,3 +1,4 @@
+import { CaretLeft, CaretRight } from '@phosphor-icons/react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useLocale } from '../i18n/LocaleProvider'
@@ -246,15 +247,15 @@ export function GateCarousel({
                   total > 1 ? (
                     <div className="gate__nav">
                       <div className="gate__nav-side">
-                        {safeIndex > 0 ? (
-                          <button
-                            type="button"
-                            className="gate__nav-btn"
-                            onClick={() => onIndex(safeIndex - 1)}
-                          >
-                            {prevLabel}
-                          </button>
-                        ) : null}
+                        <button
+                          type="button"
+                          className="gate__nav-btn"
+                          aria-label={prevLabel}
+                          disabled={safeIndex <= 0}
+                          onClick={() => onIndex(safeIndex - 1)}
+                        >
+                          <CaretLeft weight="regular" aria-hidden />
+                        </button>
                       </div>
                       <p className="gate__dots" aria-hidden="true">
                         {views.map((item, dotIndex) => (
@@ -265,15 +266,15 @@ export function GateCarousel({
                         ))}
                       </p>
                       <div className="gate__nav-side gate__nav-side--end">
-                        {safeIndex < total - 1 ? (
-                          <button
-                            type="button"
-                            className="gate__nav-btn"
-                            onClick={() => onIndex(safeIndex + 1)}
-                          >
-                            {nextLabel}
-                          </button>
-                        ) : null}
+                        <button
+                          type="button"
+                          className="gate__nav-btn"
+                          aria-label={nextLabel}
+                          disabled={safeIndex >= total - 1}
+                          onClick={() => onIndex(safeIndex + 1)}
+                        >
+                          <CaretRight weight="regular" aria-hidden />
+                        </button>
                       </div>
                     </div>
                   ) : null

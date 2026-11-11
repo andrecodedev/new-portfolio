@@ -8,23 +8,42 @@ export const CMS_DESIGN_KEY = 'site_design'
 
 export const DESIGN_FONT_OPTIONS = [
   {
-    id: 'inclusive',
-    label: 'Inclusive Sans',
-    stack: "'Inclusive Sans', 'Segoe UI', sans-serif",
+    id: 'space',
+    label: 'Space Grotesk',
+    stack: "'Space Grotesk', 'Segoe UI', sans-serif",
   },
   {
-    id: 'inter',
-    label: 'Inter',
-    stack: "'Inter', 'Inclusive Sans', sans-serif",
+    id: 'manrope',
+    label: 'Manrope',
+    stack: "'Manrope', 'Segoe UI', sans-serif",
   },
   {
-    id: 'plex',
-    label: 'IBM Plex Mono',
-    stack: "'IBM Plex Mono', ui-monospace, monospace",
+    id: 'syne',
+    label: 'Syne',
+    stack: "'Syne', 'Segoe UI', sans-serif",
+  },
+  {
+    id: 'jetbrains',
+    label: 'JetBrains Mono',
+    stack: "'JetBrains Mono', ui-monospace, monospace",
   },
 ] as const
 
 export type DesignFontId = (typeof DESIGN_FONT_OPTIONS)[number]['id']
+
+export const DESIGN_ICON_STYLES = [
+  { id: 'tile', label: 'Com fundo' },
+  { id: 'plain', label: 'Só traço' },
+] as const
+
+export type DesignIconStyle = (typeof DESIGN_ICON_STYLES)[number]['id']
+
+export const DESIGN_ICON_WEIGHTS = [
+  { id: 'regular', label: 'Regular' },
+  { id: 'bold', label: 'Bold' },
+] as const
+
+export type DesignIconWeight = (typeof DESIGN_ICON_WEIGHTS)[number]['id']
 
 /** Valores reais por preset — o usuário só escolhe menor / padrão / maior */
 export const RESPIRO_DESKTOP_PX: Record<StyleSize, number> = {
@@ -43,6 +62,23 @@ export const STAGE_RADIUS_PX: Record<StyleSize, number> = {
   sm: 0,
   md: 5,
   lg: 14,
+}
+
+export const ICON_TILE_WASH: Record<StyleSize, string> = {
+  sm: '8%',
+  md: '12%',
+  lg: '18%',
+}
+
+export const ICON_TILE_RADIUS_PX: Record<StyleSize, number> = {
+  sm: 6,
+  md: 10,
+  lg: 14,
+}
+
+export const ICON_STROKE: Record<DesignIconWeight, string> = {
+  regular: '1.65',
+  bold: '2.15',
 }
 
 export type CmsDesignPayload = {
@@ -66,6 +102,12 @@ export type CmsDesignPayload = {
     bodyFont: DesignFontId
     uiFont: DesignFontId
   }
+  icons: {
+    style: DesignIconStyle
+    weight: DesignIconWeight
+    wash: StyleSize
+    radius: StyleSize
+  }
 }
 
 function asString(value: unknown, fallback = '') {
@@ -76,6 +118,20 @@ function asFontId(value: unknown, fallback: DesignFontId): DesignFontId {
   return DESIGN_FONT_OPTIONS.some((item) => item.id === value)
     ? (value as DesignFontId)
     : fallback
+}
+
+function asIconStyle(
+  value: unknown,
+  fallback: DesignIconStyle,
+): DesignIconStyle {
+  return value === 'tile' || value === 'plain' ? value : fallback
+}
+
+function asIconWeight(
+  value: unknown,
+  fallback: DesignIconWeight,
+): DesignIconWeight {
+  return value === 'regular' || value === 'bold' ? value : fallback
 }
 
 function fontStack(id: DesignFontId) {
@@ -127,10 +183,16 @@ export function defaultDesignPayload(): CmsDesignPayload {
       accent: '#f0d45c',
     },
     typography: {
-      titleFont: 'inclusive',
-      subtitleFont: 'inclusive',
-      bodyFont: 'inclusive',
-      uiFont: 'inter',
+      titleFont: 'space',
+      subtitleFont: 'manrope',
+      bodyFont: 'manrope',
+      uiFont: 'jetbrains',
+    },
+    icons: {
+      style: 'plain',
+      weight: 'regular',
+      wash: 'md',
+      radius: 'md',
     },
   }
 }
@@ -150,6 +212,10 @@ export function parseDesignPayload(payload: unknown): CmsDesignPayload {
   const typography =
     row.typography && typeof row.typography === 'object'
       ? (row.typography as Record<string, unknown>)
+      : {}
+  const icons =
+    row.icons && typeof row.icons === 'object'
+      ? (row.icons as Record<string, unknown>)
       : {}
 
   return {
@@ -189,6 +255,16 @@ export function parseDesignPayload(payload: unknown): CmsDesignPayload {
       bodyFont: asFontId(typography.bodyFont, fallback.typography.bodyFont),
       uiFont: asFontId(typography.uiFont, fallback.typography.uiFont),
     },
+    icons: {
+      style: asIconStyle(icons.style, fallback.icons.style),
+      weight: asIconWeight(icons.weight, fallback.icons.weight),
+      wash: asStyleSize(icons.wash, fallback.icons.wash),
+      radius: asStyleSize(
+        icons.radius,
+        fallback.icons.radius,
+        ICON_TILE_RADIUS_PX,
+      ),
+    },
   }
 }
 
@@ -220,8 +296,33 @@ export async function saveDesignPayload(payload: CmsDesignPayload) {
   if (error) throw error
 }
 
-/** CSS vars aplicadas no site e no preview */
-export function designCssVars(
+const DESIGN_INLINE_KEYS = [
+  '--respiro',
+  '--stage-radius',
+  '--bg-outer',
+  '--bg-stage',
+  '--text',
+  '--muted',
+  '--font-sans',
+  '--font-lead',
+  '--font-body',
+  '--font-ui',
+  '--font-mono',
+  '--cms-accent',
+  '--icon-tile-wash',
+  '--icon-tile-radius',
+  '--icon-stroke',
+  '--icon-glyph-scale',
+] as const
+
+function toCssDecls(vars: Record<string, string>) {
+  return Object.entries(vars)
+    .map(([key, value]) => `${key}:${value};`)
+    .join('')
+}
+
+/** Espaçamento + tipografia — válidos em qualquer tema */
+export function designStructuralCssVars(
   payload: CmsDesignPayload,
   device: 'desktop' | 'mobile' = 'desktop',
 ): Record<string, string> {
@@ -230,28 +331,69 @@ export function designCssVars(
       ? RESPIRO_MOBILE_PX[payload.stage.respiroMobile]
       : RESPIRO_DESKTOP_PX[payload.stage.respiroDesktop]
 
+  const ui = fontStack(payload.typography.uiFont)
+  const tiled = payload.icons.style === 'tile'
   return {
     '--respiro': `${respiro}px`,
     '--stage-radius': `${STAGE_RADIUS_PX[payload.stage.radius]}px`,
+    '--font-sans': fontStack(payload.typography.titleFont),
+    '--font-lead': fontStack(payload.typography.subtitleFont),
+    '--font-body': fontStack(payload.typography.bodyFont),
+    '--font-ui': ui,
+    '--font-mono': ui,
+    '--icon-tile-wash': tiled ? ICON_TILE_WASH[payload.icons.wash] : '0%',
+    '--icon-tile-radius': tiled
+      ? `${ICON_TILE_RADIUS_PX[payload.icons.radius]}px`
+      : '0px',
+    '--icon-stroke': ICON_STROKE[payload.icons.weight],
+    '--icon-glyph-scale': tiled ? '0.55' : '1',
+  }
+}
+
+/**
+ * Cores do CMS = tema escuro.
+ * Não podem ir em :root/inline, senão atropelam [data-theme='light'].
+ */
+export function designDarkThemeCssVars(
+  payload: CmsDesignPayload,
+): Record<string, string> {
+  return {
     '--bg-outer': payload.stage.bgOuter,
     '--bg-stage': payload.stage.bgStage,
     '--text': payload.colors.text,
     '--muted': payload.colors.muted,
-    '--font-sans': fontStack(payload.typography.titleFont),
-    '--font-lead': fontStack(payload.typography.subtitleFont),
-    '--font-body': fontStack(payload.typography.bodyFont),
-    '--font-ui': fontStack(payload.typography.uiFont),
     '--cms-accent': payload.colors.accent,
   }
 }
 
-export function applyDesignToDocument(
+/** Preview do admin: tudo junto no canvas (sem conflito de tema do site). */
+export function designCssVars(
   payload: CmsDesignPayload,
   device: 'desktop' | 'mobile' = 'desktop',
-) {
+): Record<string, string> {
+  return {
+    ...designStructuralCssVars(payload, device),
+    ...designDarkThemeCssVars(payload),
+  }
+}
+
+/** Stylesheet do site público — cores só no escuro. */
+export function buildDesignStyleSheet(payload: CmsDesignPayload): string {
+  const desktop = designStructuralCssVars(payload, 'desktop')
+  const mobile = designStructuralCssVars(payload, 'mobile')
+  const dark = designDarkThemeCssVars(payload)
+
+  return [
+    `:root{${toCssDecls(desktop)}}`,
+    `:root:not([data-theme="light"]),[data-theme="dark"]{${toCssDecls(dark)}}`,
+    `@media (max-width:1023px){:root{--respiro:${mobile['--respiro']};}}`,
+  ].join('')
+}
+
+/** Limpa overrides inline antigos que bloqueavam a troca de tema. */
+export function clearDesignInlineStyles() {
   const root = document.documentElement
-  const vars = designCssVars(payload, device)
-  for (const [key, value] of Object.entries(vars)) {
-    root.style.setProperty(key, value)
+  for (const key of DESIGN_INLINE_KEYS) {
+    root.style.removeProperty(key)
   }
 }

@@ -72,9 +72,22 @@
   --stage-height: calc(100svh - (var(--respiro) * 2));
   --stage-radius: 5px;
 
-  --font-sans: 'Inclusive Sans', 'Segoe UI', sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
-  --font-ui: 'Inter', 'Inclusive Sans', sans-serif;
+  /* Trio tipográfico do site:
+     sans  → títulos (Space Grotesk)
+     lead  → subtítulos
+     body  → parágrafos (Manrope)
+     ui/mono → MENU, SCROLL, chrome, chuva (JetBrains Mono) */
+  --font-sans: 'Space Grotesk', 'Segoe UI', sans-serif;
+  --font-lead: 'Manrope', 'Segoe UI', sans-serif;
+  --font-body: 'Manrope', 'Segoe UI', sans-serif;
+  --font-ui: 'JetBrains Mono', ui-monospace, monospace;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Ícones com fundo (tile) — override pelo CMS Aparência */
+  --icon-tile-wash: 12%;
+  --icon-tile-radius: 10px;
+  --icon-stroke: 1.85;
+  --icon-glyph-scale: 0.55;
 
   /*
     Escala fluida (boa prática): sobe/desce com a tela, sem extremos.
@@ -99,9 +112,9 @@
   --social-icon: clamp(26px, 1.35rem + 0.75vw, 36px);
   --menu-preview: clamp(200px, 28vw, 360px);
   --tools-lang: clamp(22px, 1.15rem + 0.45vw, 28px);
-  --tools-switch-w: clamp(26px, 1.35rem + 0.35vw, 30px);
-  --tools-switch-h: clamp(14px, 0.7rem + 0.2vw, 16px);
-  --tools-switch-thumb: clamp(10px, 0.55rem + 0.15vw, 12px);
+  --tools-switch-w: clamp(40px, 2rem + 0.55vw, 46px);
+  --tools-switch-h: clamp(22px, 1.1rem + 0.3vw, 26px);
+  --tools-switch-thumb: clamp(18px, 0.9rem + 0.25vw, 22px);
   --btn-height: clamp(34px, 1.85rem + 0.45vw, 40px);
   --btn-min-width: clamp(108px, 5.5rem + 2vw, 136px);
   --btn-pad-x: clamp(10px, 0.5rem + 0.35vw, 14px);
