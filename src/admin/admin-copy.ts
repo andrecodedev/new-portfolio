@@ -1,12 +1,15 @@
 export const adminCopy = {
   auth: {
+    title: 'Entrar',
+    mfaTitle: 'Código',
     email: 'Email',
     password: 'Senha',
     submit: 'Entrar',
-    back: 'Voltar',
+    back: 'Voltar ao site',
     error: 'Acesso negado.',
     missing: 'Indisponível.',
     locked: 'Aguarde',
+    captchaLabel: 'Não sou um robô',
     captchaRequired: 'Confirme que não é um robô.',
     mfaCode: 'Código',
     mfaSubmit: 'Continuar',

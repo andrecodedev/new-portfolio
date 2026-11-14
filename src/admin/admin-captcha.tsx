@@ -8,6 +8,7 @@ type TurnstileApi = {
     options: {
       sitekey: string
       theme?: 'auto' | 'light' | 'dark'
+      appearance?: 'always' | 'execute' | 'interaction-only'
       callback?: (token: string) => void
       'expired-callback'?: () => void
       'error-callback'?: () => void
@@ -84,7 +85,8 @@ export default function AdminCaptcha({ onToken, resetKey = 0 }: AdminCaptchaProp
         hostRef.current.innerHTML = ''
         widgetIdRef.current = window.turnstile.render(hostRef.current, {
           sitekey: siteKey,
-          theme: 'auto',
+          theme: 'dark',
+          appearance: 'always',
           callback: (token) => onToken(token),
           'expired-callback': () => onToken(null),
           'error-callback': () => onToken(null),

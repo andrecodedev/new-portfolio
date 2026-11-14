@@ -1,6 +1,6 @@
 const STORAGE_KEY = 'portfolio-admin-login-lock'
 export const MAX_LOGIN_ATTEMPTS = 3
-export const LOCKOUT_MS = 5 * 60 * 1000
+export const LOCKOUT_MS = 2 * 60 * 1000
 
 type LockState = {
   fails: number

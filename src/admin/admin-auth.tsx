@@ -74,11 +74,7 @@ export default function AdminAuth() {
     setLockMs(remaining)
     setCaptchaToken(null)
     setCaptchaReset((n) => n + 1)
-    if (remaining > 0) {
-      setError(`${copy.locked} ${formatLockCountdown(remaining)}.`)
-    } else {
-      setError(copy.error)
-    }
+    setError(remaining > 0 ? null : copy.error)
     return next
   }
 
@@ -148,7 +144,7 @@ export default function AdminAuth() {
 
     if (isLoginLocked()) {
       setLockMs(getLockRemainingMs())
-      setError(`${copy.locked} ${formatLockCountdown(getLockRemainingMs())}.`)
+      setError(null)
       return
     }
 
@@ -202,36 +198,21 @@ export default function AdminAuth() {
   return (
     <div className="admin admin--center">
       <div className="admin__card admin__card--gate">
-        <div className="admin__gate-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
-            <rect
-              x="5"
-              y="10"
-              width="14"
-              height="10"
-              rx="2"
-              stroke="currentColor"
-              strokeWidth="1.6"
-            />
-            <path
-              d="M8 10V7a4 4 0 0 1 8 0v3"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
+        <h1 className="admin__title admin__title--gate">
+          {step === 'password' ? copy.title : copy.mfaTitle}
+        </h1>
 
         {step === 'password' ? (
           <form className="admin__form" onSubmit={handleLogin}>
-            {error ? <p className="admin__error">{error}</p> : null}
             {!isCmsConfigured() ? (
               <p className="admin__error">{copy.missing}</p>
             ) : null}
             {locked ? (
-              <p className="admin__error">
-                {copy.locked} {formatLockCountdown(lockMs)}.
+              <p className="admin__lock" role="status">
+                {copy.locked} {formatLockCountdown(lockMs)}
               </p>
+            ) : error ? (
+              <p className="admin__error">{error}</p>
             ) : null}
 
             <label className="admin__hp" aria-hidden="true">
@@ -244,13 +225,13 @@ export default function AdminAuth() {
             </label>
 
             <label className="admin__label">
-              <span className="admin__sr">{copy.email}</span>
+              {copy.email}
               <input
                 className="admin__input"
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder={copy.email}
+                placeholder="seu@email.com"
                 required
                 autoComplete="username"
                 disabled={locked || loading}
@@ -258,20 +239,25 @@ export default function AdminAuth() {
             </label>
 
             <label className="admin__label">
-              <span className="admin__sr">{copy.password}</span>
+              {copy.password}
               <input
                 className="admin__input"
                 type="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                placeholder={copy.password}
+                placeholder="••••••••"
                 required
                 autoComplete="current-password"
                 disabled={locked || loading}
               />
             </label>
 
-            <AdminCaptcha onToken={setCaptchaToken} resetKey={captchaReset} />
+            {captchaRequired ? (
+              <div className="admin__captcha-block">
+                <p className="admin__captcha-label">{copy.captchaLabel}</p>
+                <AdminCaptcha onToken={setCaptchaToken} resetKey={captchaReset} />
+              </div>
+            ) : null}
 
             <button
               className="admin__btn admin__btn--solid"
@@ -300,7 +286,7 @@ export default function AdminAuth() {
             ) : null}
 
             <label className="admin__label">
-              <span className="admin__sr">{copy.mfaCode}</span>
+              {copy.mfaCode}
               <input
                 className="admin__input"
                 type="text"
@@ -309,7 +295,7 @@ export default function AdminAuth() {
                 autoComplete="one-time-code"
                 value={otp}
                 onChange={(event) => setOtp(event.target.value)}
-                placeholder={copy.mfaCode}
+                placeholder="000000"
                 required
                 maxLength={10}
                 disabled={loading}
@@ -326,8 +312,8 @@ export default function AdminAuth() {
           </form>
         )}
 
-        <Link className="admin__link admin__link--quiet" to="/">
-          ←
+        <Link className="admin__link" to="/">
+          {copy.back}
         </Link>
       </div>
     </div>
