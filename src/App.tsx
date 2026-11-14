@@ -1751,14 +1751,14 @@ function PortfolioShell() {
   }, [menuOpen, bootVisible, transition.active])
 
   useEffect(() => {
-    if (bootVisible) return
+    if (bootVisible || isNotFound) return
 
     const timer = window.setTimeout(() => {
       setGateOpen(true)
     }, 600)
 
     return () => window.clearTimeout(timer)
-  }, [bootVisible])
+  }, [bootVisible, isNotFound])
 
   useEffect(() => {
     if (!gateOpen || menuOpen || bootVisible) return
@@ -1836,23 +1836,21 @@ function PortfolioShell() {
               }}
             />
           </div>
-          {!isNotFound ? (
-            <div className="corner-tools">
-              <BackToTop />
-              <NewsFab onOpen={() => setGateOpen(true)} />
-              <SideTools
-                theme={theme}
-                onToggleTheme={() =>
-                  setTheme((current) =>
-                    current === 'dark' ? 'light' : 'dark',
-                  )
-                }
-              />
-            </div>
-          ) : null}
+          <div className="corner-tools">
+            {!isNotFound ? <BackToTop /> : null}
+            <NewsFab onOpen={() => setGateOpen(true)} />
+            <SideTools
+              theme={theme}
+              onToggleTheme={() =>
+                setTheme((current) =>
+                  current === 'dark' ? 'light' : 'dark',
+                )
+              }
+            />
+          </div>
           <div className="stage-panel stage-panel--gate">
             <GatePopup
-              open={gateOpen && !menuOpen && !bootVisible && !isNotFound}
+              open={gateOpen && !menuOpen && !bootVisible}
               onClose={dismissGate}
               onNavigate={(path) => {
                 dismissGate()
