@@ -743,11 +743,6 @@ function SlideInspector({
             }
             folder="gate"
             kind={slide.mediaKind}
-            accept={
-              slide.mediaKind === 'video'
-                ? 'video/mp4,video/webm'
-                : 'image/png,image/jpeg,image/webp,image/gif,image/avif'
-            }
           />
         </FieldWithShow>
       </InspectorShell>

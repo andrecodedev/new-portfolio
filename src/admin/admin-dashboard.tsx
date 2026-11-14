@@ -219,6 +219,13 @@ export default function AdminDashboard() {
         return
       }
 
+      const { data: aal } = await client.auth.mfa.getAuthenticatorAssuranceLevel()
+      if (aal?.currentLevel !== 'aal2') {
+        await client.auth.signOut()
+        navigate(ADMIN_BASE_PATH, { replace: true })
+        return
+      }
+
       const [
         heroPayload,
         gatePayload,

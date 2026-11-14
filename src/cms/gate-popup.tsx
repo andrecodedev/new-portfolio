@@ -1,6 +1,7 @@
 import { CaretLeft, CaretRight } from '@phosphor-icons/react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { isLocale, type Locale } from '../i18n/copy'
 import { useLocale } from '../i18n/LocaleProvider'
 import { easeOutSoft } from '../motion/reveal'
 import { useCmsGate } from './cms-provider'
@@ -177,7 +178,7 @@ function GateSlideFace({
 
 type GateCarouselProps = {
   slides: GateSlide[]
-  locale: ReturnType<typeof useLocale>['locale']
+  locale: string
   index: number
   onIndex: (index: number) => void
   onNavigate?: (path: string) => void
@@ -202,7 +203,8 @@ export function GateCarousel({
   showClose = true,
   reduce,
 }: GateCarouselProps) {
-  const views = slides.map((slide) => slideToView(slide, locale))
+  const dictLocale: Locale = isLocale(locale) ? locale : 'pt'
+  const views = slides.map((slide) => slideToView(slide, dictLocale))
   const total = views.length
   const safeIndex = Math.min(index, Math.max(0, total - 1))
   const current = views[safeIndex]
@@ -297,7 +299,7 @@ export function GatePreview({
   editSelectedId,
 }: {
   payload: CmsGatePayload
-  locale: ReturnType<typeof useLocale>['locale']
+  locale: string
   slideId?: string | null
   previewDevice?: PreviewDevice
   editMode?: boolean
@@ -354,7 +356,7 @@ type GatePopupProps = {
 }
 
 export default function GatePopup({ open, onClose, onNavigate }: GatePopupProps) {
-  const { t, locale } = useLocale()
+  const { t, dictionaryLocale: locale } = useLocale()
   const reduce = Boolean(useReducedMotion())
   const openRef = useRef(open)
   const [index, setIndex] = useState(0)

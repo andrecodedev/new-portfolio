@@ -28,8 +28,6 @@ import {
 import { SKILLS } from './data/about'
 import {
   LOCALE_FLAGS,
-  LOCALE_LABELS,
-  LOCALES,
   type AchievementEntry,
   type ExperienceEntry,
   type HighlightEntry,
@@ -1264,7 +1262,7 @@ function githubLangsUrl(title: string, locale: Locale, dark: boolean) {
 }
 
 function WorkGithub() {
-  const { t, locale } = useLocale()
+  const { t, dictionaryLocale: locale } = useLocale()
   const copy = t.pages.work.github
   const theme = useDocumentTheme()
   const dark = theme === 'dark'

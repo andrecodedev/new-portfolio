@@ -1,13 +1,17 @@
 export const adminCopy = {
   auth: {
-    title: 'Painel CMS',
-    subtitle: 'Entre para editar o conteúdo do portfólio.',
     email: 'Email',
     password: 'Senha',
     submit: 'Entrar',
-    back: 'Voltar ao site',
-    error: 'Email ou senha inválidos.',
-    missing: 'Supabase não configurado. Copie .env.example para .env.',
+    back: 'Voltar',
+    error: 'Acesso negado.',
+    missing: 'Indisponível.',
+    locked: 'Aguarde',
+    captchaRequired: 'Confirme que não é um robô.',
+    mfaCode: 'Código',
+    mfaSubmit: 'Continuar',
+    mfaError: 'Código inválido.',
+    enrollError: 'Código inválido.',
   },
   dashboard: {
     title: 'CMS do portfólio',

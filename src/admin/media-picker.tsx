@@ -8,7 +8,6 @@ import {
 import {
   defaultMediaLibrary,
   fetchMediaLibrary,
-  saveMediaLibrary,
   uploadToMediaLibrary,
   type MediaAsset,
   type MediaLibraryPayload,
@@ -76,15 +75,6 @@ export default function MediaPickerField({
   }, [kind, library.items, query])
 
   const visible = filtered.slice(0, visibleCount)
-
-  const persist = async (next: MediaLibraryPayload) => {
-    setLibrary(next)
-    try {
-      await saveMediaLibrary(next)
-    } catch {
-      // Bypass / offline: keep local state.
-    }
-  }
 
   const handleUpload = async (file: File | undefined) => {
     if (!file || atLimit) return
