@@ -120,6 +120,11 @@ export function highlightAccents(text: string, accents: readonly string[]) {
     })
 }
 
+export function isKnownSitePath(path: string): boolean {
+  if (path === '/' || path === '') return true
+  return Object.values(PAGE_META).some((item) => item.path === path)
+}
+
 export function getLoaderBgForPath(path: string): string {
   if (path === '/' || path === '') return HOME_LOADER_BG
   const page = Object.values(PAGE_META).find((item) => item.path === path)

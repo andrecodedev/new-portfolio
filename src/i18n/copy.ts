@@ -121,6 +121,13 @@ export type Dictionary = {
     description: string
     accents: readonly string[]
   }
+  notFound: {
+    code: string
+    title: string
+    titleLines: readonly [string, string]
+    body: string
+    cta: string
+  }
   home: {
     heroTitleLines: readonly [string, string]
     heroSubtitleLines: readonly [string, string]
@@ -183,6 +190,13 @@ const pt: Dictionary = {
     label: 'Home',
     description: 'Voltar para a página inicial.',
     accents: ['página', 'inicial'],
+  },
+  notFound: {
+    code: '404',
+    title: 'Página não encontrada.',
+    titleLines: ['Página não', 'encontrada.'],
+    body: 'Esse endereço não existe neste portfólio. Volta pra home e segue pelo menu.',
+    cta: 'Voltar à home',
   },
   home: {
     heroTitleLines: ['Olá, eu sou', 'André Vitor.'],
@@ -516,6 +530,13 @@ const en: Dictionary = {
     description: 'Back to the home page.',
     accents: ['home', 'page'],
   },
+  notFound: {
+    code: '404',
+    title: 'Page not found.',
+    titleLines: ['Page not', 'found.'],
+    body: 'This address is not part of this portfolio. Head home and browse from the menu.',
+    cta: 'Back to home',
+  },
   home: {
     heroTitleLines: ['Hi, I am', 'André Vitor.'],
     heroSubtitleLines: [
@@ -847,6 +868,13 @@ const es: Dictionary = {
     label: 'Home',
     description: 'Volver a la página de inicio.',
     accents: ['página', 'inicio'],
+  },
+  notFound: {
+    code: '404',
+    title: 'Página no encontrada.',
+    titleLines: ['Página no', 'encontrada.'],
+    body: 'Esta dirección no existe en este portafolio. Vuelve a la home y sigue por el menú.',
+    cta: 'Volver a la home',
   },
   home: {
     heroTitleLines: ['Hola, soy', 'André Vitor.'],

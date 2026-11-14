@@ -26,6 +26,12 @@ export async function uploadPublicMedia(file: File, folder = 'hero') {
   if (!supabase) {
     throw new Error('Supabase não configurado')
   }
+
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+  if (aal?.currentLevel !== 'aal2') {
+    throw new Error('Sessão MFA necessária para enviar mídia')
+  }
+
   const isImage = file.type.startsWith('image/')
   const isVideo = file.type.startsWith('video/')
   if (!isImage && !isVideo) {

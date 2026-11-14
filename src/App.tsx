@@ -9,25 +9,32 @@ import {
   type ReactNode,
 } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from 'react-router-dom'
 import { GitHubCalendar } from 'react-github-calendar'
 import { AccentedText } from './components/accented-text'
 import { DepthCarousel } from './components/depth-carousel'
 import { LayoutGrid } from './components/layout-grid'
 import CodeRain from './components/CodeRain'
+import NotFoundPage from './components/not-found'
 import { SkeletonImage } from './components/skeleton-image'
-import { Moon, Sun } from '@phosphor-icons/react'
 import { applyTheme, readDocumentTheme, type Theme } from './theme'
+import SideTools from './components/side-tools'
 import {
   ASSETS,
   PAGE_META,
   getAccentForPath,
   getLoaderBgForPath,
+  isKnownSitePath,
   type ContentPageId,
 } from './data/site'
 import { SKILLS } from './data/about'
 import {
-  LOCALE_FLAGS,
   type AchievementEntry,
   type ExperienceEntry,
   type HighlightEntry,
@@ -416,149 +423,6 @@ function BackToTop() {
         </motion.button>
       ) : null}
     </AnimatePresence>
-  )
-}
-
-type SideToolsProps = {
-  theme: Theme
-  onToggleTheme: () => void
-}
-
-function SideTools({ theme, onToggleTheme }: SideToolsProps) {
-  const isDark = theme === 'dark'
-  const rootRef = useRef<HTMLElement>(null)
-  const [open, setOpen] = useState(false)
-  const [touchMode, setTouchMode] = useState(false)
-  const { show } = useEntrance()
-  const { locale, setLocale, t } = useLocale()
-  const chrome = useCmsChrome()
-  const showLanguage =
-    chrome.blocksOrder.includes('language') && chrome.showLanguage
-  const showTheme = chrome.blocksOrder.includes('theme') && chrome.showTheme
-
-  useEffect(() => {
-    const media = window.matchMedia('(hover: none), (max-width: 1024px)')
-    const sync = () => {
-      setTouchMode(media.matches)
-      if (!media.matches) setOpen(false)
-    }
-    sync()
-    media.addEventListener('change', sync)
-    return () => media.removeEventListener('change', sync)
-  }, [])
-
-  useEffect(() => {
-    if (!open || !touchMode) return
-
-    const onPointerDown = (event: PointerEvent) => {
-      const target = event.target as Node
-      if (!rootRef.current?.contains(target)) setOpen(false)
-    }
-
-    document.addEventListener('pointerdown', onPointerDown)
-    return () => document.removeEventListener('pointerdown', onPointerDown)
-  }, [open, touchMode])
-
-  if (!showLanguage && !showTheme) return null
-
-  return (
-    <motion.aside
-      ref={rootRef}
-      className={`side-tools${open ? ' side-tools--open' : ''}${touchMode ? ' side-tools--touch' : ''}`}
-      aria-label={t.chrome.tools}
-      initial="hidden"
-      animate={show ? 'show' : 'hidden'}
-      variants={fabEntrance}
-      onMouseLeave={() => {
-        if (!touchMode) setOpen(false)
-      }}
-    >
-      <div className="side-tools__stack">
-        <div
-          className="side-tools__panel"
-          id="side-tools-panel"
-          inert={!open ? true : undefined}
-        >
-          {showLanguage ? (
-            <div className="side-tools__langs" role="group" aria-label={t.chrome.language}>
-              {chrome.locales
-                .filter((item) => item.enabled)
-                .map((item) => (
-                  <button
-                    key={item.code}
-                    type="button"
-                    className={`side-tools__lang${locale === item.code ? ' side-tools__lang--active' : ''}`}
-                    aria-label={item.label || item.code}
-                    aria-pressed={locale === item.code}
-                    title={item.label || item.code}
-                    onClick={() => setLocale(item.code)}
-                  >
-                    <span className="side-tools__flag" aria-hidden="true">
-                      {chrome.languageMode === 'image' && item.imageUrl ? (
-                        <img src={item.imageUrl} alt="" />
-                      ) : (
-                        item.flagEmoji ||
-                        LOCALE_FLAGS[item.code as Locale] ||
-                        item.code.toUpperCase()
-                      )}
-                    </span>
-                  </button>
-                ))}
-            </div>
-          ) : null}
-
-          {showLanguage && showTheme ? (
-            <span className="side-tools__divider" aria-hidden="true" />
-          ) : null}
-
-          {showTheme ? (
-            <div className="side-tools__theme">
-              <label
-                className="ui-switch"
-                title={isDark ? t.chrome.themeLight : t.chrome.themeDark}
-              >
-                <input
-                  type="checkbox"
-                  checked={isDark}
-                  onChange={onToggleTheme}
-                  aria-label={isDark ? t.chrome.themeLight : t.chrome.themeDark}
-                />
-                <div className="slider">
-                  <div className="circle">
-                    {isDark ? (
-                      <Moon weight="bold" />
-                    ) : (
-                      <Sun weight="bold" />
-                    )}
-                  </div>
-                </div>
-              </label>
-            </div>
-          ) : null}
-        </div>
-
-                <button
-          type="button"
-          className="side-tools__fab"
-          style={fabStyleCss(chrome.themeFab)}
-          aria-label={t.chrome.openSettings}
-          aria-expanded={open}
-          aria-controls="side-tools-panel"
-          onMouseEnter={() => {
-            if (!touchMode) setOpen(true)
-          }}
-          onClick={() => {
-            if (touchMode) setOpen((current) => !current)
-          }}
-        >
-          <SiteIcon
-            id={chrome.themeFab.iconId || 'settings'}
-            className="header__icon"
-            bare
-          />
-        </button>
-      </div>
-    </motion.aside>
   )
 }
 
@@ -1706,6 +1570,7 @@ function PortfolioShell() {
   const menuId = useId()
   const location = useLocation()
   const chrome = useCmsChrome()
+  const isNotFound = !isKnownSitePath(location.pathname)
   const pageAccent = getAccentForPath(location.pathname)
   const scrollRef = useRef<HTMLDivElement>(null)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -1927,6 +1792,7 @@ function PortfolioShell() {
   const pageClass = [
     'page',
     menuBlocksChrome ? 'page--menu-open' : '',
+    isNotFound ? 'page--not-found' : '',
   ]
     .filter(Boolean)
     .join(' ')
@@ -1970,19 +1836,23 @@ function PortfolioShell() {
               }}
             />
           </div>
-          <div className="corner-tools">
-            <BackToTop />
-            <NewsFab onOpen={() => setGateOpen(true)} />
-            <SideTools
-              theme={theme}
-              onToggleTheme={() =>
-                setTheme((current) => (current === 'dark' ? 'light' : 'dark'))
-              }
-            />
-          </div>
+          {!isNotFound ? (
+            <div className="corner-tools">
+              <BackToTop />
+              <NewsFab onOpen={() => setGateOpen(true)} />
+              <SideTools
+                theme={theme}
+                onToggleTheme={() =>
+                  setTheme((current) =>
+                    current === 'dark' ? 'light' : 'dark',
+                  )
+                }
+              />
+            </div>
+          ) : null}
           <div className="stage-panel stage-panel--gate">
             <GatePopup
-              open={gateOpen && !menuOpen && !bootVisible}
+              open={gateOpen && !menuOpen && !bootVisible && !isNotFound}
               onClose={dismissGate}
               onNavigate={(path) => {
                 dismissGate()
@@ -2038,6 +1908,10 @@ function PortfolioShell() {
                   path={PAGE_META.contact.path}
                   element={<ContentPage pageId="contact" />}
                 />
+                <Route
+                  path="*"
+                  element={<NotFoundPage onGoHome={() => navigateTo('/')} />}
+                />
               </Routes>
             </div>
           </ScrollRootContext.Provider>
@@ -2055,6 +1929,10 @@ function App() {
           <Routes>
             <Route path={ADMIN_BASE_PATH} element={<AdminAuth />} />
             <Route path={ADMIN_DASHBOARD_PATH} element={<AdminDashboard />} />
+            <Route
+              path={`${ADMIN_BASE_PATH}/*`}
+              element={<Navigate to={ADMIN_BASE_PATH} replace />}
+            />
             <Route path="*" element={<PortfolioShell />} />
           </Routes>
         </CmsProvider>

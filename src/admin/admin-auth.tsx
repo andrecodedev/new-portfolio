@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import SideTools from '../components/side-tools'
 import { isCmsConfigured, supabase } from '../lib/supabase-client'
-import { applyTheme, readStoredTheme } from '../theme'
+import {
+  applyTheme,
+  readStoredTheme,
+  type Theme,
+} from '../theme'
 import AdminCaptcha, { getTurnstileSiteKey } from './admin-captcha'
 import { adminCopy } from './admin-copy'
 import {
@@ -12,7 +17,9 @@ import {
   registerLoginFailure,
 } from './admin-login-lock'
 import { ADMIN_DASHBOARD_PATH } from './admin-paths'
+import { applyAdminNoIndex } from './admin-seo'
 import './admin.css'
+import '../App.css'
 
 type AuthStep = 'password' | 'mfa' | 'enroll'
 
@@ -31,6 +38,7 @@ export default function AdminAuth() {
   const [error, setError] = useState<string | null>(null)
   const [lockMs, setLockMs] = useState(0)
   const [lockReady, setLockReady] = useState(false)
+  const [theme, setTheme] = useState<Theme>(() => readStoredTheme())
   const lockUntilRef = useRef(0)
   const navigate = useNavigate()
   const copy = adminCopy.auth
@@ -48,8 +56,12 @@ export default function AdminAuth() {
   }
 
   useEffect(() => {
-    applyTheme(readStoredTheme())
+    applyAdminNoIndex()
   }, [])
+
+  useEffect(() => {
+    applyTheme(theme)
+  }, [theme])
 
   useEffect(() => {
     if (!locked) return
@@ -280,6 +292,16 @@ export default function AdminAuth() {
 
   return (
     <div className="admin admin--center">
+      <div className="corner-tools">
+        <SideTools
+          theme={theme}
+          onToggleTheme={() =>
+            setTheme((current) => (current === 'dark' ? 'light' : 'dark'))
+          }
+          immediate
+          forceShow
+        />
+      </div>
       <div className="admin__card admin__card--gate">
         <h1 className="admin__title admin__title--gate">
           {step === 'password' ? copy.title : copy.mfaTitle}

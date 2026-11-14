@@ -1,5 +1,6 @@
 -- Bucket público de mídia (mesmo nome do portfólio antigo).
--- Rode no SQL Editor se o upload falhar com "Bucket not found".
+-- Leitura pública. Escrita/remoção só com sessão MFA (aal2).
+-- Rode no SQL Editor do projeto portfolio.
 
 insert into storage.buckets (id, name, public)
 values ('avatars', 'avatars', true)
@@ -17,19 +18,31 @@ create policy "avatars_auth_insert"
   on storage.objects
   for insert
   to authenticated
-  with check (bucket_id = 'avatars');
+  with check (
+    bucket_id = 'avatars'
+    and (auth.jwt() ->> 'aal') = 'aal2'
+  );
 
 drop policy if exists "avatars_auth_update" on storage.objects;
 create policy "avatars_auth_update"
   on storage.objects
   for update
   to authenticated
-  using (bucket_id = 'avatars')
-  with check (bucket_id = 'avatars');
+  using (
+    bucket_id = 'avatars'
+    and (auth.jwt() ->> 'aal') = 'aal2'
+  )
+  with check (
+    bucket_id = 'avatars'
+    and (auth.jwt() ->> 'aal') = 'aal2'
+  );
 
 drop policy if exists "avatars_auth_delete" on storage.objects;
 create policy "avatars_auth_delete"
   on storage.objects
   for delete
   to authenticated
-  using (bucket_id = 'avatars');
+  using (
+    bucket_id = 'avatars'
+    and (auth.jwt() ->> 'aal') = 'aal2'
+  );

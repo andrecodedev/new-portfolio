@@ -183,8 +183,9 @@ export function defaultDesignPayload(): CmsDesignPayload {
       accent: '#f0d45c',
     },
     typography: {
-      titleFont: 'space',
-      subtitleFont: 'manrope',
+      // Syne = display com cara própria (Space Grotesk/Manrope ficam “Arial demais”).
+      titleFont: 'syne',
+      subtitleFont: 'space',
       bodyFont: 'manrope',
       uiFont: 'jetbrains',
     },

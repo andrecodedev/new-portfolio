@@ -1,6 +1,6 @@
--- Rodar no SQL Editor do Supabase (mesmo projeto do Auth).
+-- Rodar no SQL Editor do Supabase (projeto portfolio).
 -- Leitura pública: o site mostra o conteúdo publicado.
--- Escrita só com sessão autenticada: o painel admin.
+-- Escrita só com sessão autenticada + MFA (aal2).
 
 create table if not exists public.cms_content (
   key text primary key,
@@ -22,12 +22,12 @@ create policy "cms_content_auth_insert"
   on public.cms_content
   for insert
   to authenticated
-  with check (true);
+  with check ((auth.jwt() ->> 'aal') = 'aal2');
 
 drop policy if exists "cms_content_auth_update" on public.cms_content;
 create policy "cms_content_auth_update"
   on public.cms_content
   for update
   to authenticated
-  using (true)
-  with check (true);
+  using ((auth.jwt() ->> 'aal') = 'aal2')
+  with check ((auth.jwt() ->> 'aal') = 'aal2');

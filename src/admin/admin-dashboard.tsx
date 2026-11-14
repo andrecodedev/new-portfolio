@@ -39,6 +39,7 @@ import {
 } from '../theme'
 import { adminCopy } from './admin-copy'
 import { ADMIN_BASE_PATH } from './admin-paths'
+import { applyAdminNoIndex } from './admin-seo'
 import ChromeEditor from './chrome-editor'
 import DesignEditor from './design-editor'
 import FooterEditor from './footer-editor'
@@ -201,6 +202,10 @@ export default function AdminDashboard() {
   useEffect(() => {
     applyTheme(theme)
   }, [theme])
+
+  useEffect(() => {
+    applyAdminNoIndex()
+  }, [])
 
   useEffect(() => {
     const client = supabase
