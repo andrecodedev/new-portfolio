@@ -71,12 +71,27 @@ export default function AdminAuth() {
     })()
   }, [navigate])
 
+  // Ao abrir a página (mesmo sem email / depois de limpar cookie),
+  // consulta o lock do IP no servidor e mantém o "Aguarde" na tela.
+  useEffect(() => {
+    if (!supabase) return
+    let cancelled = false
+    void (async () => {
+      try {
+        const status = await fetchLoginLockStatus('')
+        if (!cancelled) applyLockMs(status.remainingMs)
+      } catch {
+        // ignore
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   useEffect(() => {
     const trimmed = email.trim()
-    if (!trimmed || !supabase) {
-      applyLockMs(0)
-      return
-    }
+    if (!supabase) return
 
     let cancelled = false
     const id = window.setTimeout(() => {
@@ -85,7 +100,7 @@ export default function AdminAuth() {
           const status = await fetchLoginLockStatus(trimmed)
           if (!cancelled) applyLockMs(status.remainingMs)
         } catch {
-          if (!cancelled) applyLockMs(0)
+          // keep previous lock state
         }
       })()
     }, 350)

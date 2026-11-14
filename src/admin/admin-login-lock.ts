@@ -34,8 +34,9 @@ export class LoginLockRpcError extends Error {
   }
 }
 
-export async function fetchLoginLockStatus(email: string): Promise<LoginLockStatus> {
-  if (!supabase || !email.trim()) {
+/** Sem email: checa lock do IP. Com email: checa email + IP. */
+export async function fetchLoginLockStatus(email = ''): Promise<LoginLockStatus> {
+  if (!supabase) {
     return { fails: 0, remainingMs: 0, locked: false }
   }
 
