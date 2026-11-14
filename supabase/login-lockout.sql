@@ -119,7 +119,7 @@ begin
   end if;
 
   -- Limite duro: evita payload gigante (parâmetro bound; não é SQL injection).
-  if length(p_email) > 254 then
+  if length(p_email) > 80 then
     return jsonb_build_object('fails', 0, 'remaining_ms', 0, 'locked', false);
   end if;
 

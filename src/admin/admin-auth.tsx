@@ -38,8 +38,8 @@ export default function AdminAuth() {
   const fieldsLocked = !lockReady || locked || loading
   const captchaRequired = Boolean(getTurnstileSiteKey())
 
-  const EMAIL_MAX = 254
-  const PASSWORD_MAX = 128
+  const EMAIL_MAX = 80
+  const PASSWORD_MAX = 64
 
   const applyLockMs = (remainingMs: number) => {
     const ms = Math.max(0, remainingMs)
