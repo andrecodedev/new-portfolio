@@ -8,6 +8,7 @@ import {
   clearLoginLock,
   fetchLoginLockStatus,
   formatLockCountdown,
+  LoginLockRpcError,
   registerLoginFailure,
 } from './admin-login-lock'
 import { ADMIN_DASHBOARD_PATH } from './admin-paths'
@@ -80,8 +81,12 @@ export default function AdminAuth() {
     let cancelled = false
     const id = window.setTimeout(() => {
       void (async () => {
-        const status = await fetchLoginLockStatus(trimmed)
-        if (!cancelled) applyLockMs(status.remainingMs)
+        try {
+          const status = await fetchLoginLockStatus(trimmed)
+          if (!cancelled) applyLockMs(status.remainingMs)
+        } catch {
+          if (!cancelled) applyLockMs(0)
+        }
       })()
     }, 350)
 
@@ -97,12 +102,26 @@ export default function AdminAuth() {
     navigate(ADMIN_DASHBOARD_PATH, { replace: true })
   }
 
-  const failSoft = async () => {
-    const status = await registerLoginFailure(email)
-    applyLockMs(status.remainingMs)
+  const mapAuthError = (message: string) => {
+    const lower = message.toLowerCase()
+    if (lower.includes('captcha')) return copy.captchaFailed
+    if (lower.includes('confirm')) return copy.unconfirmed
+    return copy.error
+  }
+
+  const failSoft = async (authMessage?: string) => {
     setCaptchaToken(null)
     setCaptchaReset((n) => n + 1)
-    setError(status.remainingMs > 0 ? null : copy.error)
+    try {
+      const status = await registerLoginFailure(email)
+      applyLockMs(status.remainingMs)
+      setError(status.remainingMs > 0 ? null : mapAuthError(authMessage ?? ''))
+    } catch (err) {
+      applyLockMs(0)
+      setError(
+        err instanceof LoginLockRpcError ? copy.lockUnavailable : copy.error,
+      )
+    }
   }
 
   const requireSecondFactor = async () => {
@@ -169,10 +188,15 @@ export default function AdminAuth() {
       return
     }
 
-    const status = await fetchLoginLockStatus(email)
-    if (status.remainingMs > 0) {
-      applyLockMs(status.remainingMs)
-      setError(null)
+    try {
+      const status = await fetchLoginLockStatus(email)
+      if (status.remainingMs > 0) {
+        applyLockMs(status.remainingMs)
+        setError(null)
+        return
+      }
+    } catch {
+      setError(copy.lockUnavailable)
       return
     }
 
@@ -191,7 +215,7 @@ export default function AdminAuth() {
     })
 
     if (authError) {
-      await failSoft()
+      await failSoft(authError.message)
       setLoading(false)
       return
     }

@@ -27,6 +27,13 @@ function normalize(data: unknown): LoginLockStatus {
   }
 }
 
+export class LoginLockRpcError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'LoginLockRpcError'
+  }
+}
+
 export async function fetchLoginLockStatus(email: string): Promise<LoginLockStatus> {
   if (!supabase || !email.trim()) {
     return { fails: 0, remainingMs: 0, locked: false }
@@ -37,7 +44,7 @@ export async function fetchLoginLockStatus(email: string): Promise<LoginLockStat
   })
 
   if (error) {
-    return { fails: 0, remainingMs: 0, locked: false }
+    throw new LoginLockRpcError(error.message)
   }
 
   return normalize(data)
@@ -53,7 +60,7 @@ export async function registerLoginFailure(email: string): Promise<LoginLockStat
   })
 
   if (error) {
-    return { fails: 0, remainingMs: 0, locked: false }
+    throw new LoginLockRpcError(error.message)
   }
 
   return normalize(data)
