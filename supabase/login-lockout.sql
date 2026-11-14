@@ -118,6 +118,11 @@ begin
     return public.admin_login_status('');
   end if;
 
+  -- Limite duro: evita payload gigante (parâmetro bound; não é SQL injection).
+  if length(p_email) > 254 then
+    return jsonb_build_object('fails', 0, 'remaining_ms', 0, 'locked', false);
+  end if;
+
   v_email_key := public._admin_email_key(p_email);
   v_remaining_ms := greatest(
     public._admin_remaining_ms(v_email_key),

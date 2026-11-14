@@ -30,11 +30,16 @@ export default function AdminAuth() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [lockMs, setLockMs] = useState(0)
+  const [lockReady, setLockReady] = useState(false)
   const lockUntilRef = useRef(0)
   const navigate = useNavigate()
   const copy = adminCopy.auth
   const locked = lockMs > 0
+  const fieldsLocked = !lockReady || locked || loading
   const captchaRequired = Boolean(getTurnstileSiteKey())
+
+  const EMAIL_MAX = 254
+  const PASSWORD_MAX = 128
 
   const applyLockMs = (remainingMs: number) => {
     const ms = Math.max(0, remainingMs)
@@ -71,17 +76,21 @@ export default function AdminAuth() {
     })()
   }, [navigate])
 
-  // Ao abrir a página (mesmo sem email / depois de limpar cookie),
-  // consulta o lock do IP no servidor e mantém o "Aguarde" na tela.
+  // Campos ficam bloqueados até o servidor responder (evita digitar antes do Aguarde).
   useEffect(() => {
-    if (!supabase) return
+    if (!supabase) {
+      setLockReady(true)
+      return
+    }
     let cancelled = false
     void (async () => {
       try {
         const status = await fetchLoginLockStatus('')
         if (!cancelled) applyLockMs(status.remainingMs)
       } catch {
-        // ignore
+        // ignore — libera o form se o status falhar
+      } finally {
+        if (!cancelled) setLockReady(true)
       }
     })()
     return () => {
@@ -198,6 +207,13 @@ export default function AdminAuth() {
       return
     }
 
+    if (!lockReady || locked) return
+
+    if (email.length > EMAIL_MAX || password.length > PASSWORD_MAX) {
+      setError(copy.error)
+      return
+    }
+
     if (honey.trim()) {
       await failSoft()
       return
@@ -297,11 +313,14 @@ export default function AdminAuth() {
                 className="admin__input"
                 type="email"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(event) =>
+                  setEmail(event.target.value.slice(0, EMAIL_MAX))
+                }
                 placeholder="seu@email.com"
                 required
+                maxLength={EMAIL_MAX}
                 autoComplete="username"
-                disabled={locked || loading}
+                disabled={fieldsLocked}
               />
             </label>
 
@@ -311,11 +330,14 @@ export default function AdminAuth() {
                 className="admin__input"
                 type="password"
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
+                onChange={(event) =>
+                  setPassword(event.target.value.slice(0, PASSWORD_MAX))
+                }
                 placeholder="••••••••"
                 required
+                maxLength={PASSWORD_MAX}
                 autoComplete="current-password"
-                disabled={locked || loading}
+                disabled={fieldsLocked}
               />
             </label>
 
@@ -330,8 +352,7 @@ export default function AdminAuth() {
               className="admin__btn admin__btn--solid"
               type="submit"
               disabled={
-                loading ||
-                locked ||
+                fieldsLocked ||
                 !isCmsConfigured() ||
                 (captchaRequired && !captchaToken)
               }
