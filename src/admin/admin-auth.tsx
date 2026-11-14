@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { isCmsConfigured, supabase } from '../lib/supabase-client'
 import { applyTheme, readStoredTheme } from '../theme'
@@ -6,9 +6,8 @@ import AdminCaptcha, { getTurnstileSiteKey } from './admin-captcha'
 import { adminCopy } from './admin-copy'
 import {
   clearLoginLock,
+  fetchLoginLockStatus,
   formatLockCountdown,
-  getLockRemainingMs,
-  isLoginLocked,
   registerLoginFailure,
 } from './admin-login-lock'
 import { ADMIN_DASHBOARD_PATH } from './admin-paths'
@@ -29,11 +28,18 @@ export default function AdminAuth() {
   const [totpSecret, setTotpSecret] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [lockMs, setLockMs] = useState(() => getLockRemainingMs())
+  const [lockMs, setLockMs] = useState(0)
+  const lockUntilRef = useRef(0)
   const navigate = useNavigate()
   const copy = adminCopy.auth
   const locked = lockMs > 0
   const captchaRequired = Boolean(getTurnstileSiteKey())
+
+  const applyLockMs = (remainingMs: number) => {
+    const ms = Math.max(0, remainingMs)
+    lockUntilRef.current = ms > 0 ? Date.now() + ms : 0
+    setLockMs(ms)
+  }
 
   useEffect(() => {
     applyTheme(readStoredTheme())
@@ -42,7 +48,8 @@ export default function AdminAuth() {
   useEffect(() => {
     if (!locked) return
     const id = window.setInterval(() => {
-      setLockMs(getLockRemainingMs())
+      const remaining = Math.max(0, lockUntilRef.current - Date.now())
+      setLockMs(remaining)
     }, 250)
     return () => window.clearInterval(id)
   }, [locked])
@@ -63,19 +70,39 @@ export default function AdminAuth() {
     })()
   }, [navigate])
 
-  const enterDashboard = () => {
-    clearLoginLock()
+  useEffect(() => {
+    const trimmed = email.trim()
+    if (!trimmed || !supabase) {
+      applyLockMs(0)
+      return
+    }
+
+    let cancelled = false
+    const id = window.setTimeout(() => {
+      void (async () => {
+        const status = await fetchLoginLockStatus(trimmed)
+        if (!cancelled) applyLockMs(status.remainingMs)
+      })()
+    }, 350)
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(id)
+    }
+  }, [email])
+
+  const enterDashboard = async () => {
+    await clearLoginLock(email)
+    applyLockMs(0)
     navigate(ADMIN_DASHBOARD_PATH, { replace: true })
   }
 
-  const failSoft = () => {
-    const next = registerLoginFailure()
-    const remaining = getLockRemainingMs()
-    setLockMs(remaining)
+  const failSoft = async () => {
+    const status = await registerLoginFailure(email)
+    applyLockMs(status.remainingMs)
     setCaptchaToken(null)
     setCaptchaReset((n) => n + 1)
-    setError(remaining > 0 ? null : copy.error)
-    return next
+    setError(status.remainingMs > 0 ? null : copy.error)
   }
 
   const requireSecondFactor = async () => {
@@ -91,7 +118,7 @@ export default function AdminAuth() {
     }
 
     if (aal.currentLevel === 'aal2') {
-      enterDashboard()
+      await enterDashboard()
       return
     }
 
@@ -138,12 +165,13 @@ export default function AdminAuth() {
     }
 
     if (honey.trim()) {
-      failSoft()
+      await failSoft()
       return
     }
 
-    if (isLoginLocked()) {
-      setLockMs(getLockRemainingMs())
+    const status = await fetchLoginLockStatus(email)
+    if (status.remainingMs > 0) {
+      applyLockMs(status.remainingMs)
       setError(null)
       return
     }
@@ -163,12 +191,12 @@ export default function AdminAuth() {
     })
 
     if (authError) {
-      failSoft()
+      await failSoft()
       setLoading(false)
       return
     }
 
-    clearLoginLock()
+    await clearLoginLock(email)
     await requireSecondFactor()
     setLoading(false)
   }
@@ -192,7 +220,7 @@ export default function AdminAuth() {
       return
     }
 
-    enterDashboard()
+    await enterDashboard()
   }
 
   return (

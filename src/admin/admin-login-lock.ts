@@ -1,60 +1,67 @@
-const STORAGE_KEY = 'portfolio-admin-login-lock'
+import { supabase } from '../lib/supabase-client'
+
 export const MAX_LOGIN_ATTEMPTS = 3
-export const LOCKOUT_MS = 2 * 60 * 1000
 
-type LockState = {
+export type LoginLockStatus = {
   fails: number
-  lockedUntil: number
+  remainingMs: number
+  locked: boolean
 }
 
-function readState(): LockState {
-  if (typeof window === 'undefined') return { fails: 0, lockedUntil: 0 }
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return { fails: 0, lockedUntil: 0 }
-    const parsed = JSON.parse(raw) as Partial<LockState>
-    return {
-      fails: typeof parsed.fails === 'number' ? parsed.fails : 0,
-      lockedUntil: typeof parsed.lockedUntil === 'number' ? parsed.lockedUntil : 0,
-    }
-  } catch {
-    return { fails: 0, lockedUntil: 0 }
+type RpcStatus = {
+  fails?: number
+  remaining_ms?: number
+  locked?: boolean
+}
+
+function normalize(data: unknown): LoginLockStatus {
+  const row = (data ?? {}) as RpcStatus
+  const remainingMs =
+    typeof row.remaining_ms === 'number' && Number.isFinite(row.remaining_ms)
+      ? Math.max(0, Math.floor(row.remaining_ms))
+      : 0
+  return {
+    fails: typeof row.fails === 'number' ? row.fails : 0,
+    remainingMs,
+    locked: Boolean(row.locked) || remainingMs > 0,
   }
 }
 
-function writeState(state: LockState) {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-  } catch {
-    // storage bloqueado
+export async function fetchLoginLockStatus(email: string): Promise<LoginLockStatus> {
+  if (!supabase || !email.trim()) {
+    return { fails: 0, remainingMs: 0, locked: false }
   }
+
+  const { data, error } = await supabase.rpc('admin_login_status', {
+    p_email: email.trim(),
+  })
+
+  if (error) {
+    return { fails: 0, remainingMs: 0, locked: false }
+  }
+
+  return normalize(data)
 }
 
-export function getLockRemainingMs(now = Date.now()) {
-  const { lockedUntil } = readState()
-  return Math.max(0, lockedUntil - now)
+export async function registerLoginFailure(email: string): Promise<LoginLockStatus> {
+  if (!supabase || !email.trim()) {
+    return { fails: 0, remainingMs: 0, locked: false }
+  }
+
+  const { data, error } = await supabase.rpc('admin_login_fail', {
+    p_email: email.trim(),
+  })
+
+  if (error) {
+    return { fails: 0, remainingMs: 0, locked: false }
+  }
+
+  return normalize(data)
 }
 
-export function isLoginLocked(now = Date.now()) {
-  return getLockRemainingMs(now) > 0
-}
-
-export function registerLoginFailure(now = Date.now()) {
-  const state = readState()
-  if (state.lockedUntil > now) return state
-
-  const fails = state.fails + 1
-  const next: LockState =
-    fails >= MAX_LOGIN_ATTEMPTS
-      ? { fails: 0, lockedUntil: now + LOCKOUT_MS }
-      : { fails, lockedUntil: 0 }
-
-  writeState(next)
-  return next
-}
-
-export function clearLoginLock() {
-  writeState({ fails: 0, lockedUntil: 0 })
+export async function clearLoginLock(email: string) {
+  if (!supabase || !email.trim()) return
+  await supabase.rpc('admin_login_clear', { p_email: email.trim() })
 }
 
 export function formatLockCountdown(ms: number) {
