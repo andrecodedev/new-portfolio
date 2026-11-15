@@ -59,6 +59,7 @@ export const SCROLL_RECIPES: Record<string, ScrollRecipe> = {
   work: { body: 'up', button: 'lift', rule: 'left' },
   about: { body: 'right', button: 'slide', rule: 'right' },
   reading: { body: 'soft', button: 'pop', rule: 'left' },
+  blog: { body: 'up', button: 'lift', rule: 'left' },
   contact: { body: 'left', button: 'lift', rule: 'right' },
 }
 

@@ -70,6 +70,23 @@ export type AboutPageCopy = PageCopy & {
   }
 }
 
+export type ReadingPageCopy = PageCopy & {
+  studies: {
+    heading: string
+    items: readonly { title: string; subtitle: string }[]
+  }
+}
+
+export type BlogPageCopy = PageCopy & {
+  listHeading: string
+  empty: string
+  readMore: string
+  backToList: string
+  minRead: string
+  publishedOn: string
+  moreHeading: string
+}
+
 export type WorkPageCopy = PageCopy & {
   stats: readonly WorkStat[]
   github: {
@@ -147,13 +164,15 @@ export type Dictionary = {
     }
     about: SpotCopy
     reading: SpotCopy
+    blog: SpotCopy
     hire: SpotCopy
     contact: SpotCopy
   }
   pages: {
     work: WorkPageCopy
     about: AboutPageCopy
-    reading: PageCopy
+    reading: ReadingPageCopy
+    blog: BlogPageCopy
     hire: PageCopy
     contact: PageCopy
   }
@@ -233,6 +252,13 @@ const pt: Dictionary = {
       body: 'Evoluo na prática: projetos, experimentos e iterações constantes. Aplico o que aprendo em código real, buscando clareza e qualidade.',
       accents: ['clareza', 'qualidade'],
       cta: 'Meus estudos',
+    },
+    blog: {
+      ariaLabel: 'Blog',
+      titleLines: ['Leia meu blog e', 'meus posts'],
+      body: 'Um espaço para registrar o que aprendo e compartilhar o que acho interessante: artigos, dicas e reflexões sobre tecnologia, código e carreira.',
+      accents: ['aprendo', 'interessante'],
+      cta: 'Meu blog',
     },
     hire: {
       ariaLabel: 'Contrato',
@@ -488,6 +514,33 @@ const pt: Dictionary = {
       body: 'Evoluo na prática: projetos, experimentos e hábitos constantes. Aplico práticas modernas no código do dia a dia, sempre buscando entregar com clareza e qualidade.',
       accents: ['clareza', 'qualidade'],
       imageAlt: 'Ilustração de estudos e projetos',
+      studies: {
+        heading: 'O que estudo',
+        items: [
+        { title: 'React', subtitle: 'Interfaces e componentes' },
+        { title: 'Node.js', subtitle: 'APIs e back-end' },
+        { title: 'TypeScript', subtitle: 'Código mais seguro' },
+        { title: 'Banco de dados', subtitle: 'SQL e modelagem' },
+        { title: 'UX e UI', subtitle: 'Design centrado no usuário' },
+        { title: 'Clean Code', subtitle: 'Código legível e simples' },
+        ],
+      },
+    },
+    blog: {
+      menuLabel: 'Blog',
+      menuDescription: 'Artigos e conteúdos que acho interessantes.',
+      menuAccents: ['Artigos', 'conteúdos'],
+      title: 'Meu blog.',
+      body: 'Aqui eu escrevo sobre o que aprendo e o que acho interessante: artigos, dicas e reflexões sobre tecnologia, código e carreira.',
+      accents: ['aprendo', 'interessante'],
+      imageAlt: 'Ilustração de um artigo com caneta',
+      listHeading: 'Últimos posts',
+      empty: 'Nenhum post publicado ainda.',
+      readMore: 'Ler artigo',
+      backToList: 'Voltar ao blog',
+      minRead: 'min de leitura',
+      publishedOn: 'Publicado em',
+      moreHeading: 'Continue lendo',
     },
     hire: {
       menuLabel: 'Contrato',
@@ -584,6 +637,13 @@ const en: Dictionary = {
       body: 'I grow by doing: projects, experiments, and constant iteration. I apply what I learn in real code, aiming for clarity and quality.',
       accents: ['clarity', 'quality'],
       cta: 'My studies',
+    },
+    blog: {
+      ariaLabel: 'Blog',
+      titleLines: ['Read my blog and', 'my posts'],
+      body: 'A space to record what I learn and share what I find interesting: articles, tips and thoughts on technology, code and career.',
+      accents: ['learn', 'interesting'],
+      cta: 'My blog',
     },
     hire: {
       ariaLabel: 'Contract',
@@ -839,6 +899,33 @@ const en: Dictionary = {
       body: 'I grow by doing: projects, experiments, and steady habits. I apply modern practices in day-to-day code, always aiming to ship with clarity and quality.',
       accents: ['clarity', 'quality'],
       imageAlt: 'Studies and projects illustration',
+      studies: {
+        heading: 'What I study',
+        items: [
+        { title: 'React', subtitle: 'Interfaces and components' },
+        { title: 'Node.js', subtitle: 'APIs and back end' },
+        { title: 'TypeScript', subtitle: 'Safer code' },
+        { title: 'Databases', subtitle: 'SQL and modeling' },
+        { title: 'UX and UI', subtitle: 'User-centered design' },
+        { title: 'Clean Code', subtitle: 'Readable, simple code' },
+        ],
+      },
+    },
+    blog: {
+      menuLabel: 'Blog',
+      menuDescription: 'Articles and content I find interesting.',
+      menuAccents: ['Articles', 'content'],
+      title: 'My blog.',
+      body: 'Here I write about what I learn and what I find interesting: articles, tips and thoughts on technology, code and career.',
+      accents: ['learn', 'interesting'],
+      imageAlt: 'Illustration of an article with a pen',
+      listHeading: 'Latest posts',
+      empty: 'No posts published yet.',
+      readMore: 'Read article',
+      backToList: 'Back to the blog',
+      minRead: 'min read',
+      publishedOn: 'Published on',
+      moreHeading: 'Keep reading',
     },
     hire: {
       menuLabel: 'Contract',
@@ -935,6 +1022,13 @@ const es: Dictionary = {
       body: 'Evoluciono en la práctica: proyectos, experimentos e iteraciones constantes. Aplico lo que aprendo en código real, buscando claridad y calidad.',
       accents: ['claridad', 'calidad'],
       cta: 'Mis estudios',
+    },
+    blog: {
+      ariaLabel: 'Blog',
+      titleLines: ['Lee mi blog y', 'mis posts'],
+      body: 'Un espacio para registrar lo que aprendo y compartir lo que me parece interesante: artículos, consejos y reflexiones sobre tecnología, código y carrera.',
+      accents: ['aprendo', 'interesante'],
+      cta: 'Mi blog',
     },
     hire: {
       ariaLabel: 'Contrato',
@@ -1190,6 +1284,33 @@ const es: Dictionary = {
       body: 'Evoluciono en la práctica: proyectos, experimentos y hábitos constantes. Aplico prácticas modernas en el código del día a día, siempre buscando entregar con claridad y calidad.',
       accents: ['claridad', 'calidad'],
       imageAlt: 'Ilustración de estudios y proyectos',
+      studies: {
+        heading: 'Lo que estudio',
+        items: [
+        { title: 'React', subtitle: 'Interfaces y componentes' },
+        { title: 'Node.js', subtitle: 'APIs y back end' },
+        { title: 'TypeScript', subtitle: 'Código más seguro' },
+        { title: 'Bases de datos', subtitle: 'SQL y modelado' },
+        { title: 'UX y UI', subtitle: 'Diseño centrado en el usuario' },
+        { title: 'Clean Code', subtitle: 'Código legible y simple' },
+        ],
+      },
+    },
+    blog: {
+      menuLabel: 'Blog',
+      menuDescription: 'Artículos y contenidos que me parecen interesantes.',
+      menuAccents: ['Artículos', 'contenidos'],
+      title: 'Mi blog.',
+      body: 'Aquí escribo sobre lo que aprendo y lo que me parece interesante: artículos, consejos y reflexiones sobre tecnología, código y carrera.',
+      accents: ['aprendo', 'interesante'],
+      imageAlt: 'Ilustración de un artículo con una pluma',
+      listHeading: 'Últimos posts',
+      empty: 'Aún no hay posts publicados.',
+      readMore: 'Leer artículo',
+      backToList: 'Volver al blog',
+      minRead: 'min de lectura',
+      publishedOn: 'Publicado el',
+      moreHeading: 'Sigue leyendo',
     },
     hire: {
       menuLabel: 'Contrato',

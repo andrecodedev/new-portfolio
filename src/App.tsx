@@ -15,6 +15,7 @@ import {
   Route,
   Routes,
   useLocation,
+  useParams,
 } from 'react-router-dom'
 import { GitHubCalendar } from 'react-github-calendar'
 import { AccentedText } from './components/accented-text'
@@ -24,7 +25,9 @@ import InfiniteSpiral from './components/infinite-spiral'
 import DriftWall from './components/drift-wall'
 import FlexCarousel from './components/flex-carousel'
 import BounceCards from './components/bounce-cards'
+import { BLOG_POSTS, findBlogPost, formatBlogDate, type BlogBlock } from './data/blog-posts'
 import AccordionGallery from './components/accordion-gallery'
+import ChromaGrid from './components/chroma-grid'
 import {
   Briefcase,
   ChatCircleDots,
@@ -926,7 +929,7 @@ function Works({ onNavigate }: NavigateProps) {
 }
 
 type SpotAlign = 'start' | 'end'
-type AccentTone = 'work' | 'about' | 'reading' | 'hire' | 'contact'
+type AccentTone = 'work' | 'about' | 'reading' | 'blog' | 'hire' | 'contact'
 
 type SpotProps = {
   id: string
@@ -1165,9 +1168,181 @@ function AboutExtras({ onNavigate }: NavigateProps) {
   )
 }
 
-function ReadingExtras() {
+const STUDY_ACCENTS = ['#61dafb', '#68d391', '#60a5fa', '#fbbf24', '#f472b6', '#a78bfa']
+
+function BlogTags({ tags }: { tags: string[] }) {
+  return (
+    <ul className="blog-tags">
+      {tags.map((tag) => (
+        <li className="blog-tags__item" key={tag}>
+          {tag}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function BlogCard({
+  post,
+  onNavigate,
+}: {
+  post: (typeof BLOG_POSTS)[number]
+  onNavigate: (path: string) => void
+}) {
+  const { t, dictionaryLocale } = useLocale()
+  const blog = t.pages.blog
+  const content = post.content[dictionaryLocale]
+  const path = `${PAGE_META.blog.path}/${post.slug}`
+
+  return (
+    <li className="blog-card">
+      <a
+        className="blog-card__link"
+        href={path}
+        onClick={(event) => {
+          // Mantém a transição de página do site (sem recarregar).
+          event.preventDefault()
+          onNavigate(path)
+        }}
+      >
+        <span className="blog-card__meta">
+          {formatBlogDate(post.date, dictionaryLocale)} · {post.readMinutes} {blog.minRead}
+        </span>
+        <h3 className="blog-card__title">{content.title}</h3>
+        <p className="blog-card__excerpt">{content.excerpt}</p>
+        <BlogTags tags={post.tags} />
+        <span className="blog-card__cta">{blog.readMore} →</span>
+      </a>
+    </li>
+  )
+}
+
+/** /blog: lista de posts (abaixo do hero da página). */
+function BlogExtras({ onNavigate }: NavigateProps) {
+  const { t } = useLocale()
+  const blog = t.pages.blog
+
+  return (
+    <section className="page-block about-journey" data-accent="blog">
+      <h2 className="about-journey__title">{blog.listHeading}</h2>
+      {BLOG_POSTS.length === 0 ? (
+        <p className="blog-empty">{blog.empty}</p>
+      ) : (
+        <ul className="blog-list">
+          {BLOG_POSTS.map((post) => (
+            <BlogCard key={post.slug} post={post} onNavigate={onNavigate} />
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
+function renderBlogBlock(block: BlogBlock, index: number) {
+  if (block.type === 'h2') return <h2 key={index}>{block.text}</h2>
+  if (block.type === 'quote') return <blockquote key={index}>{block.text}</blockquote>
+  if (block.type === 'list')
+    return (
+      <ul key={index}>
+        {block.items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    )
+  if (block.type === 'code')
+    return (
+      <pre key={index}>
+        <code>{block.text}</code>
+      </pre>
+    )
+  return <p key={index}>{block.text}</p>
+}
+
+/** /blog/:slug: página de um post. */
+function BlogPostPage({ onNavigate }: NavigateProps) {
+  const { t, dictionaryLocale } = useLocale()
+  const blog = t.pages.blog
+  const { slug = '' } = useParams()
+  const post = findBlogPost(slug)
+  const others = BLOG_POSTS.filter((item) => item.slug !== slug)
+
   return (
     <>
+      <article className="blog-post" data-accent="blog">
+        <button
+          type="button"
+          className="blog-post__back"
+          onClick={() => onNavigate(PAGE_META.blog.path)}
+        >
+          ← {blog.backToList}
+        </button>
+
+        {post ? (
+          <>
+            <header className="blog-post__head">
+              <p className="blog-post__meta">
+                {blog.publishedOn} {formatBlogDate(post.date, dictionaryLocale)} · {post.readMinutes}{' '}
+                {blog.minRead}
+              </p>
+              <h1 className="blog-post__title">{post.content[dictionaryLocale].title}</h1>
+              <BlogTags tags={post.tags} />
+            </header>
+            <div className="blog-post__body">
+              {post.content[dictionaryLocale].body.map(renderBlogBlock)}
+            </div>
+          </>
+        ) : (
+          <p className="blog-empty">{blog.empty}</p>
+        )}
+      </article>
+
+      {others.length > 0 ? (
+        <section className="page-block about-journey" data-accent="blog">
+          <h2 className="about-journey__title">{blog.moreHeading}</h2>
+          <ul className="blog-list">
+            {others.map((item) => (
+              <BlogCard key={item.slug} post={item} onNavigate={onNavigate} />
+            ))}
+          </ul>
+        </section>
+      ) : null}
+      <Copyright />
+    </>
+  )
+}
+
+function ReadingExtras() {
+  const { t } = useLocale()
+  const studies = t.pages.reading.studies
+
+  return (
+    <>
+      <section className="page-block about-journey" data-accent="reading">
+        <h2 className="about-journey__title">{studies.heading}</h2>
+        <ChromaGrid
+          items={studies.items.map((item, index) => ({
+            image: `/showcase/projeto-${index + 1}.svg`,
+            title: item.title,
+            subtitle: item.subtitle,
+            accent: STUDY_ACCENTS[index % STUDY_ACCENTS.length],
+          }))}
+          columns={3}
+          minCardWidth={220}
+          gap={14}
+          radius={260}
+          reveal="spotlight"
+          aspectRatio="3 / 2"
+          cardRadius={14}
+          softness={0.6}
+          damping={0.45}
+          fadeOut={0.6}
+          grayscale={1}
+          dim={0.12}
+          glow={0.5}
+          borderGlow={1}
+        />
+      </section>
+
       <section className="page-block showcase-drift">
         <DriftWall
           columns={5}
@@ -1782,9 +1957,26 @@ function HomePage({ onNavigate }: NavigateProps) {
         onNavigate={onNavigate}
       />
       <Spot
+        id="blog"
+        ariaLabel={t.home.blog.ariaLabel}
+        align="end"
+        accent="blog"
+        titleLine1={t.home.blog.titleLines[0]}
+        titleLine2={t.home.blog.titleLines[1]}
+        text={
+          <AccentedText
+            body={t.home.blog.body}
+            accents={t.home.blog.accents}
+          />
+        }
+        ctaLabel={t.home.blog.cta}
+        to={PAGE_META.blog.path}
+        onNavigate={onNavigate}
+      />
+      <Spot
         id="contrato"
         ariaLabel={t.home.hire.ariaLabel}
-        align="end"
+        align="start"
         accent="hire"
         titleLine1={t.home.hire.titleLines[0]}
         titleLine2={t.home.hire.titleLines[1]}
@@ -1801,7 +1993,7 @@ function HomePage({ onNavigate }: NavigateProps) {
       <Spot
         id="juntos"
         ariaLabel={t.home.contact.ariaLabel}
-        align="start"
+        align="end"
         accent="contact"
         titleLine1={t.home.contact.titleLines[0]}
         titleLine2={t.home.contact.titleLines[1]}
@@ -2155,6 +2347,18 @@ function PortfolioShell() {
                       <ReadingExtras />
                     </ContentPage>
                   }
+                />
+                <Route
+                  path={PAGE_META.blog.path}
+                  element={
+                    <ContentPage pageId="blog">
+                      <BlogExtras onNavigate={navigateTo} />
+                    </ContentPage>
+                  }
+                />
+                <Route
+                  path={`${PAGE_META.blog.path}/:slug`}
+                  element={<BlogPostPage onNavigate={navigateTo} />}
                 />
                 <Route
                   path={PAGE_META.hire.path}

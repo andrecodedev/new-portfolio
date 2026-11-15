@@ -15,6 +15,7 @@ export const ASSETS = {
   linkedin: '/linkedin.png',
   instagram: '/instagram.png',
   youtube: '/youtube.png',
+  blog: '/blog.png',
 } as const
 
 export const SOCIAL_LINKS = [
@@ -45,7 +46,14 @@ export const SOCIAL_LINKS = [
   },
 ] as const
 
-export type SitePageId = 'home' | 'work' | 'about' | 'reading' | 'hire' | 'contact'
+export type SitePageId =
+  | 'home'
+  | 'work'
+  | 'about'
+  | 'reading'
+  | 'blog'
+  | 'hire'
+  | 'contact'
 
 export type ContentPageId = Exclude<SitePageId, 'home'>
 
@@ -81,6 +89,13 @@ export const PAGE_META: Record<ContentPageId, PageMeta> = {
     loaderBg: 'var(--loader-reading)',
     image: ASSETS.studies,
     accent: 'reading',
+  },
+  blog: {
+    id: 'blog',
+    path: '/blog',
+    loaderBg: 'var(--loader-blog)',
+    image: ASSETS.blog,
+    accent: 'blog',
   },
   hire: {
     id: 'hire',
@@ -120,20 +135,25 @@ export function highlightAccents(text: string, accents: readonly string[]) {
     })
 }
 
+/** Página dona do caminho: igual ao path ou subcaminho (ex.: /blog/meu-post pertence a /blog). */
+function pageForPath(path: string): PageMeta | undefined {
+  return Object.values(PAGE_META).find(
+    (item) => path === item.path || path.startsWith(`${item.path}/`),
+  )
+}
+
 export function isKnownSitePath(path: string): boolean {
   if (path === '/' || path === '') return true
-  return Object.values(PAGE_META).some((item) => item.path === path)
+  return Boolean(pageForPath(path))
 }
 
 export function getLoaderBgForPath(path: string): string {
   if (path === '/' || path === '') return HOME_LOADER_BG
-  const page = Object.values(PAGE_META).find((item) => item.path === path)
-  return page?.loaderBg ?? HOME_LOADER_BG
+  return pageForPath(path)?.loaderBg ?? HOME_LOADER_BG
 }
 
 /** Accent da rota (home = null: scrollbar/cursor neutros). */
 export function getAccentForPath(path: string): ContentPageId | null {
   if (path === '/' || path === '') return null
-  const page = Object.values(PAGE_META).find((item) => item.path === path)
-  return page?.accent ?? null
+  return pageForPath(path)?.accent ?? null
 }

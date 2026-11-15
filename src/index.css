@@ -51,26 +51,30 @@
   --scrollbar-track: #121212;
   --selection-fg: #ffffff;
   --icon-filter: invert(1);
-  --loader-work: #3f3a1f;
-  --loader-about: #1f3328;
-  --loader-reading: #1e303a;
-  --loader-contact: #3a2424;
-  --loader-hire: #32284a;
-  --accent-work: #f0d45c;
-  --accent-about: #74d7a4;
-  --accent-reading: #78bfee;
-  --accent-contact: #f0aaa5;
-  --accent-hire: #c4b5fd;
-  --accent-work-deep: #fbbf24;
-  --accent-work-pale: #fde68a;
-  --accent-about-deep: #34d399;
-  --accent-about-pale: #bbf7d0;
-  --accent-reading-deep: #38bdf8;
-  --accent-reading-pale: #bae6fd;
-  --accent-contact-deep: #f87171;
-  --accent-contact-pale: #fecaca;
-  --accent-hire-deep: #a78bfa;
-  --accent-hire-pale: #ede9fe;
+  --loader-work: #3d371f;
+  --loader-about: #1f3d2e;
+  --loader-reading: #1f2f3d;
+  --loader-contact: #3d201f;
+  --loader-hire: #291f3d;
+  --loader-blog: #3d1f2f;
+  --accent-work: #f2d150;
+  --accent-about: #5cd699;
+  --accent-reading: #61adef;
+  --accent-contact: #f06a66;
+  --accent-hire: #a47cf4;
+  --accent-blog: #eb6fb4;
+  --accent-work-deep: #f4cd2f;
+  --accent-work-pale: #f9efc8;
+  --accent-about-deep: #3fd58a;
+  --accent-about-pale: #c8f9e0;
+  --accent-reading-deep: #419ff1;
+  --accent-reading-pale: #c8e2f9;
+  --accent-contact-deep: #f14c46;
+  --accent-contact-pale: #f9cac8;
+  --accent-hire-deep: #8f5cf5;
+  --accent-hire-pale: #d8c8f9;
+  --accent-blog-deep: #ec51a6;
+  --accent-blog-pale: #f9c8e3;
   --accent-teal: #2dd4bf;
   --accent-rose: #f472b6;
   --accent-lime: #a3e635;
@@ -180,6 +184,7 @@
   --loader-reading: #b7d8ea;
   --loader-contact: #f0bfbc;
   --loader-hire: #d9c8f0;
+  --loader-blog: #f4c2dc;
   /*
     Accents no claro: saturados o bastante para ler a cor,
     sem cair no pastel (some) nem no tom “sujo” (vira cinza).
@@ -189,6 +194,7 @@
   --accent-reading: #2f6ff0;
   --accent-contact: #e53e3e;
   --accent-hire: #7c4dff;
+  --accent-blog: #e0107b;
   --accent-work-deep: #b45309;
   --accent-work-pale: #f5c518;
   --accent-about-deep: #0f7a3d;
@@ -199,6 +205,8 @@
   --accent-contact-pale: #fb7185;
   --accent-hire-deep: #5b21b6;
   --accent-hire-pale: #e9d5ff;
+  --accent-blog-deep: #a50b5a;
+  --accent-blog-pale: #f472b6;
   --accent-teal: #0d9488;
   --accent-rose: #db2777;
   --accent-lime: #65a30d;

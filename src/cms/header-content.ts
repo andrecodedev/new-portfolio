@@ -390,6 +390,27 @@ export function defaultHeaderPayload(): CmsHeaderPayload {
         imageUrl: PAGE_META.reading.image,
       }),
       createHeaderNavItem({
+        name: 'Blog',
+        path: PAGE_META.blog.path,
+        label: {
+          pt: pageMenu('pt', 'blog').menuLabel,
+          en: pageMenu('en', 'blog').menuLabel,
+          es: pageMenu('es', 'blog').menuLabel,
+        },
+        description: {
+          pt: pageMenu('pt', 'blog').menuDescription,
+          en: pageMenu('en', 'blog').menuDescription,
+          es: pageMenu('es', 'blog').menuDescription,
+        },
+        accents: {
+          pt: [...pageMenu('pt', 'blog').menuAccents],
+          en: [...pageMenu('en', 'blog').menuAccents],
+          es: [...pageMenu('es', 'blog').menuAccents],
+        },
+        accent: 'blog',
+        imageUrl: PAGE_META.blog.image,
+      }),
+      createHeaderNavItem({
         name: 'Contrato',
         path: PAGE_META.hire.path,
         label: {
