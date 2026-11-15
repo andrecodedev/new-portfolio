@@ -466,12 +466,13 @@ export function ScrollFade({
   children,
   ...rest
 }: ScrollFadeProps) {
-  const { canAnimate, reduce, playId } = useScrollReveal()
+  // Sem `key={playId}`: remontar o bloco trocaria os elementos filhos e quebraria quem guarda
+  // referência a eles (ex.: o carrossel de skills, que anima o track direto no DOM).
+  const { canAnimate, reduce } = useScrollReveal()
   const viewport = useScrollViewport()
   const Tag = as === 'div' ? motion.div : motion.section
   return (
     <Tag
-      key={playId}
       className={className}
       initial="hidden"
       whileInView={canAnimate ? 'show' : 'hidden'}
