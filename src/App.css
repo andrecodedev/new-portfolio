@@ -5642,10 +5642,19 @@ button.folders-path__crumb:focus-visible {
   color: color-mix(in srgb, var(--text) 55%, transparent);
 }
 
+/* Nome longo do curso: não corta, o caminho rola pro lado. */
 .folders-path__crumb--course {
-  max-width: 46vw;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex: none;
+  white-space: nowrap;
+}
+
+.folders-path__trail {
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+}
+
+.folders-path__trail li {
+  flex: none;
 }
 
 @media (max-width: 767px) {
@@ -5702,4 +5711,57 @@ div.study-card:hover {
 
 [data-theme='light'] .study-card__fold {
   background: linear-gradient(225deg, transparent 50%, color-mix(in srgb, var(--platform) 40%, #ececec) 50%);
+}
+
+/* Margem pro scroll ao trocar de nível nas pastas não ficar escondido atrás do menu fixo. */
+.page-block.about-journey {
+  scroll-margin-top: 4.5rem;
+}
+
+/* Ícones nítidos: selo de concluído e medalha com tamanho explícito (não dependem da fonte do texto). */
+.study-progress__done {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: #fff;
+  background: #1f9d63;
+}
+
+.study-progress__done svg {
+  width: 12px;
+  height: 12px;
+}
+
+.study-card[data-status='done'] .study-progress__pct,
+.course-folder[data-status='done'] .study-progress__pct {
+  font-size: inherit;
+}
+
+.study-course__cert svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 767px) {
+  .study-progress__done {
+    width: 18px;
+    height: 18px;
+  }
+
+  .study-progress__done svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  .study-progress__pct {
+    min-width: 1.8rem;
+  }
+
+  .study-course__cert svg {
+    width: 15px;
+    height: 15px;
+  }
 }

@@ -1,6 +1,7 @@
 import { useRef, useState, type CSSProperties } from 'react'
 import { ArrowLeft, CaretRight, FolderSimple } from '@phosphor-icons/react'
 import Folder from './Folder'
+import { useScrollToSectionOnChange } from '../navigation/use-scroll-to-section'
 import type { WorkPageCopy } from '../i18n/copy'
 
 type Clients = WorkPageCopy['clients']
@@ -75,6 +76,7 @@ export function ClientsFolders({ clients, isMobile }: ClientsFoldersProps) {
     else if (path.level === 'root' && shellRef.current && !isMobile) setLockH(shellRef.current.offsetHeight)
     setPath(next)
   }
+  useScrollToSectionOnChange(shellRef, JSON.stringify(path))
   const size = isMobile ? 0.8 : 1.2
 
   const rootFolder: RootFolder | null =

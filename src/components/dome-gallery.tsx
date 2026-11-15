@@ -173,13 +173,30 @@ export default function DomeGallery({
   const movedRef = useRef(false)
   const lastDragEndAt = useRef(0)
   const inertiaRAF = useRef<number | null>(null)
+  const tileRefs = useRef<(HTMLDivElement | null)[]>([])
+  const visibleRef = useRef<boolean[]>([])
+  const scrollingUntil = useRef(0)
 
   const tiles = useMemo(() => buildTiles(images, segments), [images, segments])
 
-  const applyTransform = useCallback((xDeg: number, yDeg: number) => {
-    const el = sphereRef.current
-    if (el) el.style.transform = `translateZ(calc(var(--radius) * -1)) rotateX(${xDeg}deg) rotateY(${yDeg}deg)`
-  }, [])
+  // Tiles do lado de trás da esfera ficam invisíveis (backface), mas continuam sendo camadas de GPU.
+  // No celular isso trava o scroll: só mantemos montado o que está virado pra frente (+ margem).
+  const tileAngles = useMemo(() => tiles.map((tile) => (360 / segments / 2) * (tile.x + 0.5)), [tiles, segments])
+
+  const applyTransform = useCallback(
+    (xDeg: number, yDeg: number) => {
+      const el = sphereRef.current
+      if (el) el.style.transform = `translateZ(calc(var(--radius) * -1)) rotateX(${xDeg}deg) rotateY(${yDeg}deg)`
+      for (let i = 0; i < tileAngles.length; i++) {
+        const show = Math.abs(wrapAngleSigned(tileAngles[i] + yDeg)) < 105
+        if (visibleRef.current[i] === show) continue
+        visibleRef.current[i] = show
+        const node = tileRefs.current[i]
+        if (node) node.style.display = show ? '' : 'none'
+      }
+    },
+    [tileAngles],
+  )
 
   useEffect(() => {
     const root = rootRef.current
@@ -202,6 +219,7 @@ export default function DomeGallery({
   }, [fit, fitBasis, minRadius, maxRadius, applyTransform])
 
   useEffect(() => {
+    visibleRef.current = []
     applyTransform(rotationRef.current.x, rotationRef.current.y)
   }, [applyTransform])
 
@@ -280,6 +298,21 @@ export default function DomeGallery({
     { target: mainRef, eventOptions: { passive: true } },
   )
 
+  // Se o navegador toma o gesto (scroll vertical no celular), o drag termina sem passar pelo `last`.
+  useEffect(() => {
+    const main = mainRef.current
+    if (!main) return
+    const release = () => {
+      draggingRef.current = false
+    }
+    main.addEventListener('pointercancel', release)
+    main.addEventListener('pointerup', release)
+    return () => {
+      main.removeEventListener('pointercancel', release)
+      main.removeEventListener('pointerup', release)
+    }
+  }, [])
+
   // Giro automático: lento e suave. Só avança quando ninguém está arrastando e a inércia já acabou.
   useEffect(() => {
     const root = rootRef.current
@@ -290,12 +323,17 @@ export default function DomeGallery({
       visible = entry.isIntersecting
     })
     io.observe(root)
+    // Enquanto a página rola (no celular, com o dedo), o giro espera: evita disputar o frame com o scroll.
+    const onScroll = () => {
+      scrollingUntil.current = performance.now() + 180
+    }
+    document.addEventListener('scroll', onScroll, { capture: true, passive: true })
     let frame = 0
     let last = performance.now()
     const tick = (time: number) => {
       const dt = Math.min((time - last) / 1000, 0.05)
       last = time
-      if (visible && !draggingRef.current && inertiaRAF.current === null && !document.hidden) {
+      if (visible && !draggingRef.current && inertiaRAF.current === null && !document.hidden && time > scrollingUntil.current) {
         const nextY = wrapAngleSigned(rotationRef.current.y + autoRotateSpeed * dt)
         rotationRef.current = { ...rotationRef.current, y: nextY }
         applyTransform(rotationRef.current.x, nextY)
@@ -306,6 +344,7 @@ export default function DomeGallery({
     return () => {
       cancelAnimationFrame(frame)
       io.disconnect()
+      document.removeEventListener('scroll', onScroll, { capture: true })
     }
   }, [autoRotate, autoRotateSpeed, applyTransform])
 
@@ -334,6 +373,9 @@ export default function DomeGallery({
             {tiles.map((tile, i) => (
               <div
                 key={`${tile.x},${tile.y},${i}`}
+                ref={(node) => {
+                  tileRefs.current[i] = node
+                }}
                 className="dome-item"
                 style={
                   {
@@ -370,6 +412,8 @@ export default function DomeGallery({
         <div className="dome-fade dome-fade--vignette" />
         <div className="dome-fade dome-fade--top" />
         <div className="dome-fade dome-fade--bottom" />
+        <div className="dome-fade dome-fade--left" />
+        <div className="dome-fade dome-fade--right" />
       </div>
     </div>
   )

@@ -169,8 +169,24 @@
  * Laterais: máscara em vez de gradiente de cor. Os tiles das pontas aparecem de lado (quase de perfil) e
  * viram fiapos claros; um gradiente translúcido não esconde isso, a máscara apaga de verdade.
  */
-/* A máscara chega a 0 exatamente onde o corte duro (clip-path de 3%) começa, então não sobra borda marcada. */
-.dome-stage {
-  -webkit-mask-image: linear-gradient(to right, transparent 0, transparent 3%, #000 24%, #000 76%, transparent 97%, transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0, transparent 3%, #000 24%, #000 76%, transparent 97%, transparent 100%);
+
+/*
+ * Laterais: gradiente opaco nas pontas (esconde os tiles de perfil) que se dissolve pro centro.
+ * Antes era mask-image no palco; máscara sobre cena 3D força recomposição a cada frame e travava o scroll no celular.
+ */
+.dome-fade--left,
+.dome-fade--right {
+  top: 0;
+  bottom: 0;
+  width: 26%;
+}
+
+.dome-fade--left {
+  left: 0;
+  background: linear-gradient(to right, var(--fade-color) 0, var(--fade-color) 12%, transparent 100%);
+}
+
+.dome-fade--right {
+  right: 0;
+  background: linear-gradient(to left, var(--fade-color) 0, var(--fade-color) 12%, transparent 100%);
 }

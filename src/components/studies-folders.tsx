@@ -1,6 +1,7 @@
-import { useRef, useState, type CSSProperties } from 'react'
-import { ArrowLeft, CaretRight, CheckCircle, FolderSimple, Medal } from '@phosphor-icons/react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { ArrowLeft, CaretRight, Check, FolderSimple, Medal } from '@phosphor-icons/react'
 import Folder from './Folder'
+import { useScrollToSectionOnChange } from '../navigation/use-scroll-to-section'
 import { MiniFolder } from './clients-folders'
 import type { ReadingPageCopy } from '../i18n/copy'
 import {
@@ -46,7 +47,13 @@ function ProgressBar({ item, labels }: { item: Progressive; labels: Labels }) {
         <span style={{ width: `${value}%` }} />
       </span>
       <span className="study-progress__pct">
-        {item.status === 'done' ? <CheckCircle weight="fill" aria-label={labels.done} /> : `${value}%`}
+        {item.status === 'done' ? (
+          <span className="study-progress__done" role="img" aria-label={labels.done}>
+            <Check weight="bold" aria-hidden />
+          </span>
+        ) : (
+          `${value}%`
+        )}
       </span>
     </span>
   )
@@ -135,6 +142,13 @@ function Crumbs({
   course: StudyCourse | null
   onGo: (next: Path) => void
 }) {
+  const trailRef = useRef<HTMLOListElement>(null)
+  // Caminho longo: ao entrar num curso o final (nome atual) aparece; o resto fica a um deslize de distância.
+  useEffect(() => {
+    const trail = trailRef.current
+    if (trail) trail.scrollTo({ left: trail.scrollWidth, behavior: 'smooth' })
+  }, [platform, course])
+
   return (
     <nav className="folders-path" aria-label={labels.heading}>
       <button
@@ -146,7 +160,7 @@ function Crumbs({
       >
         <ArrowLeft weight="bold" aria-hidden />
       </button>
-      <ol className="folders-path__trail">
+      <ol className="folders-path__trail" ref={trailRef}>
         <li>
           <button
             type="button"
@@ -197,6 +211,8 @@ export function StudiesFolders({ labels, isMobile }: StudiesFoldersProps) {
     else if (path.platform === null && shellRef.current && !isMobile) setLockH(shellRef.current.offsetHeight)
     setPath(next)
   }
+
+  useScrollToSectionOnChange(shellRef, `${path.platform}-${path.course}`)
 
   const platform = path.platform !== null ? studyPlatforms[path.platform] : null
   const course = platform && path.course !== null ? platform.courses[path.course] : null
