@@ -5227,7 +5227,7 @@ button.folders-path__crumb:focus-visible {
 }
 
 .skill-dome__play[aria-pressed='true'] {
-  color: #111;
+  color: var(--bg-stage);
   background: var(--text);
   border-color: var(--text);
 }
@@ -5250,7 +5250,7 @@ button.folders-path__crumb:focus-visible {
 }
 
 .skill-dome__chip[data-active] {
-  color: #111;
+  color: var(--bg-stage);
   background: var(--text);
   border-color: var(--text);
 }
@@ -5693,4 +5693,13 @@ div.study-card {
 div.study-card:hover {
   transform: none;
   filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.3));
+}
+
+/* Tema claro: papel branco para destacar do fundo cinza claro. */
+[data-theme='light'] .study-card::before {
+  background: #ffffff;
+}
+
+[data-theme='light'] .study-card__fold {
+  background: linear-gradient(225deg, transparent 50%, color-mix(in srgb, var(--platform) 40%, #ececec) 50%);
 }
