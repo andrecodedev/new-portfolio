@@ -19,6 +19,21 @@ import {
 import { GitHubCalendar } from 'react-github-calendar'
 import { AccentedText } from './components/accented-text'
 import { DepthCarousel } from './components/depth-carousel'
+import CircularCarousel from './components/circular-carousel'
+import InfiniteSpiral from './components/infinite-spiral'
+import DriftWall from './components/drift-wall'
+import FlexCarousel from './components/flex-carousel'
+import BounceCards from './components/bounce-cards'
+import AccordionGallery from './components/accordion-gallery'
+import {
+  Briefcase,
+  ChatCircleDots,
+  Code,
+  GraduationCap,
+  Stack,
+  type Icon,
+} from '@phosphor-icons/react'
+import CircularGallery from './components/circular-gallery'
 import { LayoutGrid } from './components/layout-grid'
 import CodeRain from './components/CodeRain'
 import NotFoundPage from './components/not-found'
@@ -47,6 +62,7 @@ import {
   CmsProvider,
   useCmsChrome,
   useCmsFooter,
+  useCmsGate,
   useCmsHeader,
   useCmsHero,
 } from './cms/cms-provider'
@@ -55,6 +71,7 @@ import { headerChromeCss } from './cms/header-content'
 import { SiteIcon } from './cms/icon-registry'
 import { buttonStyleCss, textStyleCss } from './cms/style-tokens'
 import GatePopup from './cms/gate-popup'
+import { gateIsAvailable } from './cms/gate-content'
 import { HeroModulesView } from './cms/hero-stack'
 import { LocaleProvider, useLocale } from './i18n/LocaleProvider'
 import {
@@ -820,8 +837,11 @@ function Hero({ onNavigate }: { onNavigate: (path: string) => void }) {
   )
 }
 
+const SCROLL_CUE_WORD = { pt: 'DESLIZAR', en: 'SCROLL', es: 'DESPLAZA' } as const
+
 function ScrollCue() {
-  const letters = ['S', 'C', 'R', 'O', 'L', 'L']
+  const { dictionaryLocale } = useLocale()
+  const letters = Array.from(SCROLL_CUE_WORD[dictionaryLocale])
   const { canAnimate, reduce, playId } = useScrollReveal()
   const scrollViewport = useScrollViewport()
   const rise = visibleRiseVariants(reduce)
@@ -995,7 +1015,6 @@ function ContentPage({
   const { canAnimate, reduce, playId } = useScrollReveal()
   const scrollViewport = useScrollViewport()
   const rise = visibleRiseVariants(reduce)
-
   return (
     <>
       <section className="hero hero--page" aria-label={page.title} data-accent={accent}>
@@ -1062,12 +1081,214 @@ function AboutHeroActions({ onNavigate }: NavigateProps) {
   )
 }
 
-function AboutExtras() {
-  return <AboutJourney />
+type FanItem = {
+  key: string
+  title: string
+  text: string
+  Icon: Icon
+  to?: string
+}
+
+/** Conteúdo provisório dos cards da sanfona (Sobre) até haver texto definitivo. */
+const FAN_ITEMS: FanItem[] = [
+  { key: 'study', title: 'Formação', text: 'ETEC e Facens, ADS', Icon: GraduationCap },
+  { key: 'xp', title: 'Experiência', text: 'Desenvolvedor Web na TEC4U', Icon: Briefcase },
+  { key: 'stack', title: 'Stack', text: 'React, Node e banco de dados', Icon: Code },
+  { key: 'work', title: 'Projetos', text: 'Casos reais e estudos', Icon: Stack, to: PAGE_META.work.path },
+  { key: 'contact', title: 'Contato', text: 'Vamos conversar', Icon: ChatCircleDots, to: PAGE_META.contact.path },
+]
+
+function FanCard({ item, onNavigate }: { item: FanItem; onNavigate: (to: string) => void }) {
+  const { Icon } = item
+  const inner = (
+    <>
+      <span className="fan-card__icon">
+        <Icon size={26} weight="bold" aria-hidden="true" />
+      </span>
+      <span className="fan-card__copy">
+        <span className="fan-card__title">{item.title}</span>
+        <span className="fan-card__text">{item.text}</span>
+      </span>
+    </>
+  )
+  const to = item.to
+  if (to) {
+    return (
+      <button type="button" className={`fan-card fan-card--${item.key}`} onClick={() => onNavigate(to)}>
+        {inner}
+      </button>
+    )
+  }
+  return <div className={`fan-card fan-card--${item.key}`}>{inner}</div>
+}
+
+function AboutFan({ onNavigate }: NavigateProps) {
+  return (
+    <section className="page-block about-fan" data-accent="about">
+      <div className="about-fan__stack">
+        <BounceCards
+          containerWidth={1360}
+          containerHeight={230}
+          cardWidth={450}
+          cardHeight={150}
+          spread={212}
+          rotation={6}
+          pushDistance={170}
+        >
+          {FAN_ITEMS.map((item) => (
+            <FanCard key={item.key} item={item} onNavigate={onNavigate} />
+          ))}
+        </BounceCards>
+      </div>
+      <div className="about-fan__grid">
+        {FAN_ITEMS.map((item) => (
+          <FanCard key={item.key} item={item} onNavigate={onNavigate} />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function AboutExtras({ onNavigate }: NavigateProps) {
+  const isMobile = useIsMobile()
+  return (
+    <>
+      <AboutFan onNavigate={onNavigate} />
+      <AboutJourney />
+      <section className="page-block showcase-flex">
+        <FlexCarousel
+          preset="liquid"
+          intro="rise"
+          cardHeight={isMobile ? 0.46 : 0.5}
+          gap={12}
+          squeeze={0.2}
+          focusOnClick
+          captions
+          fit="natural"
+          radius={0}
+          lensWidth={0.74}
+          lensHeight={1.18}
+          tilt={62}
+          roundness={1}
+          bend={isMobile ? 0.2 : 0.34}
+          reach={0.38}
+          curl="twist"
+          dispersion={isMobile ? 0.3 : 0.45}
+          liquid={0}
+          followCursor={false}
+          autoplay={false}
+          interval={4}
+          captureWheel={false}
+        />
+      </section>
+    </>
+  )
+}
+
+function ReadingExtras() {
+  return (
+    <>
+      <section className="page-block showcase-drift">
+        <DriftWall
+          columns={5}
+          tileWidth={200}
+          tileHeight={132}
+          gap={18}
+          tilt={16}
+          turn={-14}
+          perspective={1200}
+          depth={120}
+          speed={42}
+          direction="up"
+          variance={0.45}
+          parallax={0.6}
+          lift={64}
+          fade={0.6}
+          dim={0.55}
+          overlayColor="#060010"
+          radius={14}
+          roll={0}
+          pauseOnHover={false}
+          grayscale={false}
+        />
+      </section>
+    </>
+  )
+}
+
+function HireExtras() {
+  return (
+    <>
+      <section className="page-block showcase-circular">
+        <CircularCarousel
+          preset="cylinder"
+          intro="rise"
+          cardWidth={220}
+          aspectRatio={1}
+          speed={14}
+          gap={25}
+          tilt={-5}
+          curve={1}
+          perspective={2500}
+          autoplay="drift"
+          direction="left"
+          momentum={0.6}
+          fadeColor="#000000"
+          depthFade={0.55}
+          innerShade={0.6}
+          cornerRadius={12}
+        />
+      </section>
+    </>
+  )
+}
+
+function ContactExtras() {
+  return (
+    <>
+      <section className="page-block showcase-spiral">
+        <InfiniteSpiral
+          items={SPIRAL_IMAGES}
+          animationMode="auto"
+          speed={0.55}
+          radius={170}
+          cardWidth={100}
+          cardHeight={100}
+          verticalSpacing={60}
+          perspective={1000}
+          cardRadius={10}
+          centerScale={1.2}
+          edgeBlur={6}
+          cardsPerTurn={7}
+          pauseOnHover
+          direction="up"
+          rotation={0}
+          cardTilt={0}
+          edgeFade={0.3}
+          imageFit="cover"
+          grayscale={1}
+        />
+      </section>
+    </>
+  )
+}
+
+function useIsMobile() {
+  const [mobile, setMobile] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches,
+  )
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 767px)')
+    const update = () => setMobile(query.matches)
+    query.addEventListener('change', update)
+    return () => query.removeEventListener('change', update)
+  }, [])
+  return mobile
 }
 
 function WorkExtras() {
   const { t } = useLocale()
+  const isMobile = useIsMobile()
   const stats = t.pages.work.stats
 
   return (
@@ -1075,22 +1296,79 @@ function WorkExtras() {
       <WorkSkillsMarquee />
       <WorkGithub />
 
-      <section className="work-stats">
+      <section className="page-block work-stats">
         <ul className="work-stats__grid">
           {stats.map((stat) => (
             <li className="work-stats__item" key={stat.label}>
               <p className="work-stats__value">{stat.value}</p>
-              <p className="work-stats__label">
-                {stat.label}
-                <span className="work-stats__hint">{stat.hint}</span>
-              </p>
+              <p className="work-stats__label">{stat.label}</p>
             </li>
           ))}
         </ul>
       </section>
+
+      <section className="page-block showcase-gallery">
+        <h2 className="showcase-gallery__title">{t.pages.work.gallery.heading}</h2>
+        <div className="showcase-gallery__stage">
+        <CircularGallery
+          items={GALLERY_ITEMS}
+          bend={3}
+          textColor="#ffffff"
+          borderRadius={0.05}
+          scrollEase={0.05}
+          itemSize={0.84}
+          bottomSpace={isMobile ? 64 : 110}
+          itemAspect={1.6}
+          gap={0.26}
+          wave={1}
+          fadeEdges={0.12}
+          shadow={0.25}
+          scrollSpeed={2}
+          autoScroll={0}
+          snap
+          grayscale={false}
+          showTitles
+          openOnClick
+          intro
+        />
+        </div>
+      </section>
     </>
   )
 }
+
+/** Cards de exemplo da galeria (prints de páginas, em /public/showcase) até haver projetos reais. */
+const GALLERY_ITEMS = [
+  ['Landing page', 'Página de captação com foco em conversão.'],
+  ['Loja virtual', 'Catálogo, carrinho e checkout integrados.'],
+  ['Painel admin', 'Dashboard com métricas e gestão de conteúdo.'],
+  ['Site institucional', 'Identidade da marca em várias páginas.'],
+  ['Portfólio', 'Vitrine de projetos com animações.'],
+  ['Aplicativo web', 'Interface rápida para o dia a dia.'],
+].map(([text, description], index) => ({
+  image: `/showcase/projeto-${index + 1}.svg`,
+  text,
+  description,
+}))
+
+/** Painéis de exemplo da Accordion Gallery (Sobre): artes abstratas em /public/showcase. */
+const ACCORDION_ITEMS = ['Design', 'Código', 'Produto', 'Pessoas', 'Entrega'].map((label, index) => ({
+  image: `/showcase/accordion-${index + 1}.svg`,
+  label,
+}))
+
+/** Imagens de exemplo (Unsplash) até você definir o conteúdo real. */
+const SPIRAL_IMAGES = [
+  ['photo-1506744038136-46273834b3fb', 'Mountain valley'],
+  ['photo-1486406146926-c627a92ad1ab', 'Glass towers'],
+  ['photo-1502680390469-be75c86b636f', 'Surfer in a wave'],
+  ['photo-1519681393784-d120267933ba', 'Milky Way over peaks'],
+  ['photo-1493246507139-91e8fad9978e', 'Mountains in a lake'],
+  ['photo-1487958449943-2429e8be8625', 'White building'],
+].map(([id, alt]) => ({
+  src: `https://images.unsplash.com/${id}?w=400&q=80&auto=format&fit=crop`,
+  alt,
+}))
 
 function useDocumentTheme(): Theme {
   const [theme, setTheme] = useState<Theme>(readDocumentTheme)
@@ -1106,15 +1384,19 @@ function useDocumentTheme(): Theme {
 }
 
 const GITHUB_USERNAME = 'andrecodedev'
+const GITHUB_BLOCK_MARGIN = 4
 const GITHUB_YEARS = ['last', 2026, 2025, 2024] as const
 type GithubYear = (typeof GITHUB_YEARS)[number]
+
+/** Mesma instância de github-readme-stats usada no README do perfil (dados reais, incl. privados). */
+const GITHUB_STATS_HOST = 'https://github-readme-stats-livid-seven-19.vercel.app'
 
 function githubStatsUrl(title: string, locale: Locale, dark: boolean) {
   const loc = locale === 'en' ? 'en' : locale === 'es' ? 'es' : 'pt-br'
   const themeParams = dark
     ? 'title_color=ffffff&text_color=a3a3a3&icon_color=26a641&theme=dark'
     : 'title_color=1f2937&text_color=4b5563&icon_color=216e39&theme=light'
-  return `https://github-readme-stats-eight-theta.vercel.app/api?username=${GITHUB_USERNAME}&show_icons=true&include_all_commits=true&count_private=true&hide_border=true&custom_title=${encodeURIComponent(title)}&locale=${loc}&${themeParams}&bg_color=00000000`
+  return `${GITHUB_STATS_HOST}/api?username=${GITHUB_USERNAME}&show_icons=true&include_all_commits=true&count_private=true&hide_border=true&custom_title=${encodeURIComponent(title)}&locale=${loc}&${themeParams}&bg_color=00000000`
 }
 
 function githubLangsUrl(title: string, locale: Locale, dark: boolean) {
@@ -1122,7 +1404,7 @@ function githubLangsUrl(title: string, locale: Locale, dark: boolean) {
   const themeParams = dark
     ? 'title_color=ffffff&text_color=a3a3a3&theme=dark'
     : 'title_color=1f2937&text_color=4b5563&theme=light'
-  return `https://github-readme-stats-eight-theta.vercel.app/api/top-langs/?username=${GITHUB_USERNAME}&layout=compact&langs_count=12&hide_border=true&custom_title=${encodeURIComponent(title)}&locale=${loc}&${themeParams}&bg_color=00000000`
+  return `${GITHUB_STATS_HOST}/api/top-langs/?username=${GITHUB_USERNAME}&layout=compact&langs_count=12&card_width=495&hide_border=true&custom_title=${encodeURIComponent(title)}&locale=${loc}&${themeParams}&bg_color=00000000`
 }
 
 function WorkGithub() {
@@ -1131,16 +1413,30 @@ function WorkGithub() {
   const theme = useDocumentTheme()
   const dark = theme === 'dark'
   const [year, setYear] = useState<GithubYear>('last')
+  const calendarRef = useRef<HTMLDivElement>(null)
+  const [blockSize, setBlockSize] = useState(10)
+
+  // Ajusta o tamanho dos quadradinhos à largura disponível: o calendário
+  // (53 semanas) preenche o card em vez de ficar estreito no meio.
+  useEffect(() => {
+    const el = calendarRef.current
+    if (!el) return
+    const update = () => {
+      const free = el.clientWidth - 40 // espaço para os rótulos de dias/meses
+      const size = Math.floor(free / 53 - GITHUB_BLOCK_MARGIN)
+      setBlockSize(Math.min(12, Math.max(8, size)))
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   return (
-    <section className="work-github" data-accent="work">
+    <section className="page-block work-github" data-accent="work">
       <div className="work-github__card">
         <div className="work-github__head">
-          <span className="work-github__icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-            </svg>
-          </span>
+          <SiteIcon id="github" className="work-github__icon" />
           <h2 className="work-github__title">{copy.heading}</h2>
         </div>
 
@@ -1157,7 +1453,7 @@ function WorkGithub() {
           ))}
         </div>
 
-        <div className="work-github__calendar">
+        <div className="work-github__calendar" ref={calendarRef}>
           <GitHubCalendar
             username={GITHUB_USERNAME}
             year={year}
@@ -1167,8 +1463,8 @@ function WorkGithub() {
               dark: ['var(--btn-bg)', '#0e4429', '#006d32', '#26a641', '#39d353'],
             }}
             blockRadius={2}
-            blockMargin={3}
-            blockSize={10}
+            blockMargin={GITHUB_BLOCK_MARGIN}
+            blockSize={blockSize}
             labels={{
               legend: { less: copy.legendLess, more: copy.legendMore },
             }}
@@ -1251,39 +1547,21 @@ function AboutVideo() {
 }
 
 /** px/s: velocidade do scroll do marquee (mais baixo = mais lento). */
-const SKILLS_MARQUEE_SPEED = 95
-/** Raio (px) de influência do efeito de onda ao redor do centro do viewport. */
-const SKILLS_WAVE_RADIUS = 340
-const SKILLS_WAVE_MIN_SCALE = 0.85
-const SKILLS_WAVE_MAX_SCALE = 1.16
-const SKILLS_WAVE_MAX_LIFT = 6
-
-/** Curva suave 0→1→0 nas bordas do raio (smoothstep), evita degrau no efeito. */
-function waveFactor(distance: number) {
-  const t = Math.max(0, 1 - Math.abs(distance) / SKILLS_WAVE_RADIUS)
-  return t * t * (3 - 2 * t)
-}
+const SKILLS_MARQUEE_SPEED = 55
 
 function WorkSkillsMarquee() {
   const reduce = Boolean(useReducedMotion())
-  const viewportRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
-  const itemRefs = useRef<(HTMLDivElement | null)[]>([])
   const items = reduce ? SKILLS : [...SKILLS, ...SKILLS]
 
   useEffect(() => {
     if (reduce) return
     const track = trackRef.current
-    const viewport = viewportRef.current
-    if (!track || !viewport) return
+    if (!track) return
 
-    let centers: number[] = []
     let halfWidth = 0
 
     const measure = () => {
-      centers = itemRefs.current.map((el) =>
-        el ? el.offsetLeft + el.offsetWidth / 2 : 0,
-      )
       halfWidth = track.scrollWidth / 2
     }
     measure()
@@ -1302,21 +1580,6 @@ function WorkSkillsMarquee() {
       if (halfWidth > 0 && x <= -halfWidth) x += halfWidth
       track.style.transform = `translateX(${x}px)`
 
-      const trackLeft = track.getBoundingClientRect().left
-      const viewportRect = viewport.getBoundingClientRect()
-      const centerX = viewportRect.left + viewportRect.width / 2
-
-      itemRefs.current.forEach((el, index) => {
-        if (!el) return
-        const distance = trackLeft + centers[index] - centerX
-        const factor = waveFactor(distance)
-        const scale =
-          SKILLS_WAVE_MIN_SCALE +
-          (SKILLS_WAVE_MAX_SCALE - SKILLS_WAVE_MIN_SCALE) * factor
-        const lift = (1 - factor) * SKILLS_WAVE_MAX_LIFT
-        el.style.transform = `translateY(${lift}px) scale(${scale})`
-      })
-
       raf = requestAnimationFrame(tick)
     }
 
@@ -1329,8 +1592,8 @@ function WorkSkillsMarquee() {
   }, [reduce])
 
   return (
-    <section className="work-skills" aria-hidden="true">
-      <div className="work-skills__viewport" ref={viewportRef}>
+    <section className="page-block work-skills" aria-hidden="true">
+      <div className="work-skills__viewport">
         <div
           className={`work-skills__track${reduce ? ' work-skills__track--static' : ''}`}
           ref={trackRef}
@@ -1339,9 +1602,6 @@ function WorkSkillsMarquee() {
             <div
               className="work-skills__item"
               key={`${skill.name}-${index}`}
-              ref={(el) => {
-                itemRefs.current[index] = el
-              }}
             >
               <img src={skill.icon} alt="" loading="lazy" draggable={false} />
             </div>
@@ -1353,6 +1613,7 @@ function WorkSkillsMarquee() {
 }
 
 function AboutAchievements({ items }: { items: readonly AchievementEntry[] }) {
+  const isMobile = useIsMobile()
   const carouselItems = useMemo(
     () => items.map((item) => ({ image: item.image, alt: item.title })),
     [items],
@@ -1363,14 +1624,14 @@ function AboutAchievements({ items }: { items: readonly AchievementEntry[] }) {
       <div className="about-achievements__stage">
         <DepthCarousel
           items={carouselItems}
-          cardWidth={340}
-          cardHeight={420}
+          cardWidth={isMobile ? 280 : 440}
+          cardHeight={isMobile ? 370 : 560}
           radius={10}
           tint="var(--bg-outer)"
-          depth={220}
-          spread={110}
-          tilt={20}
-          visibleCards={3}
+          depth={isMobile ? 160 : 220}
+          spread={isMobile ? 14 : 110}
+          tilt={isMobile ? 14 : 20}
+          visibleCards={2}
           falloff={0.28}
           blur={5}
           duration={650}
@@ -1394,35 +1655,32 @@ function AboutExperienceList({ items }: { items: readonly ExperienceEntry[] }) {
   )
 }
 
-function AboutHighlightsPanel({
-  subtitle,
-  items,
-}: {
-  subtitle: string
-  items: readonly HighlightEntry[]
-}) {
+function AboutHighlightsPanel({ items }: { items: readonly HighlightEntry[] }) {
   const [active, setActive] = useState(items[0]?.id ?? '')
   const current = items.find((item) => item.id === active) ?? items[0]
 
   return (
     <div className="about-highlights">
-      <p className="about-highlights__subtitle">{subtitle}</p>
       <div className="about-highlights__layout">
         <div className="about-highlights__list">
-          {items.map((item) => (
+          {items.map((item, index) => (
             <button
               key={item.id}
               type="button"
               className={`about-highlights__item${item.id === active ? ' is-active' : ''}`}
               onClick={() => setActive(item.id)}
             >
-              {item.title}
+              <span className="about-highlights__index">{String(index + 1).padStart(2, '0')}</span>
+              <span className="about-highlights__item-title">{item.title}</span>
             </button>
           ))}
         </div>
         {current ? (
           <div className="about-highlights__panel">
             <div className="about-highlights__panel-content" key={current.id}>
+              <span className="about-highlights__panel-index" aria-hidden="true">
+                {String(items.findIndex((item) => item.id === current.id) + 1).padStart(2, '0')}
+              </span>
               <h3 className="about-highlights__panel-title">{current.title}</h3>
               {current.description.split('\n\n').map((paragraph, index) => (
                 <p className="about-highlights__panel-text" key={index}>
@@ -1437,52 +1695,56 @@ function AboutHighlightsPanel({
   )
 }
 
-type AboutTabKey = 'achievements' | 'video' | 'experience' | 'details'
-
+/**
+ * Sobre: ordem narrativa (quem sou -> como penso -> onde atuei -> o que conquistei).
+ * Vídeo não leva título (o próprio player já se explica); sanfona e carrossel final
+ * também ficam sem título, em AboutExtras.
+ */
 function AboutJourney() {
   const { t } = useLocale()
   const page = t.pages.about
-  const [tab, setTab] = useState<AboutTabKey>('achievements')
-
-  const tabs: Array<{ key: AboutTabKey; label: string }> = [
-    { key: 'achievements', label: page.tabs.achievements },
-    { key: 'video', label: page.tabs.video },
-    { key: 'experience', label: page.tabs.experience },
-    { key: 'details', label: page.tabs.details },
-  ]
-  const activeLabel = tabs.find((item) => item.key === tab)?.label
+  const isMobile = useIsMobile()
 
   return (
-    <section className="about-journey" data-accent="about">
-      <div className="about-journey__tabs" role="tablist">
-        {tabs.map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            role="tab"
-            aria-selected={tab === item.key}
-            className={`about-journey__tab${tab === item.key ? ' is-active' : ''}`}
-            onClick={() => setTab(item.key)}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="about-journey__panel">
-        <h2 className="about-journey__title">{activeLabel}</h2>
-
-        {tab === 'achievements' ? (
-          <AboutAchievements items={page.achievements} />
-        ) : tab === 'video' ? (
-          <AboutVideo />
-        ) : tab === 'experience' ? (
-          <AboutExperienceList items={page.experience} />
-        ) : (
-          <AboutHighlightsPanel subtitle={page.highlights.subtitle} items={page.highlights.items} />
-        )}
-      </div>
-    </section>
+    <>
+      <section className="page-block about-journey" data-accent="about" aria-label={page.tabs.video}>
+        <AboutVideo />
+      </section>
+      <section className="page-block about-journey" data-accent="about">
+        <h2 className="about-journey__title">{page.tabs.details}</h2>
+        <AboutHighlightsPanel items={page.highlights.items} />
+      </section>
+      <section className="page-block about-journey" data-accent="about">
+        <h2 className="about-journey__title">{page.tabs.experience}</h2>
+        <AboutExperienceList items={page.experience} />
+      </section>
+      <section className="page-block about-journey" data-accent="about">
+        <h2 className="about-journey__title">{page.tabs.achievements}</h2>
+        <AboutAchievements items={page.achievements} />
+      </section>
+      <section className="page-block about-accordion" data-accent="about">
+        <AccordionGallery
+          items={ACCORDION_ITEMS}
+          defaultIndex={2}
+          expandRatio={isMobile ? 0.62 : 0.52}
+          trigger="hover"
+          accentColor="var(--section-accent)"
+          overlayColor="var(--bg-outer)"
+          textColor="#ffffff"
+          grayscale
+          showLabels
+          duration={0.6}
+          ease="power3.out"
+          parallax={0.5}
+          tilt={isMobile ? 4 : 8}
+          stagger={0.06}
+          height={isMobile ? 400 : 460}
+          gap={isMobile ? 6 : 10}
+          radius={10}
+          orientation="horizontal"
+        />
+      </section>
+    </>
   )
 }
 
@@ -1586,7 +1848,10 @@ function PortfolioShell() {
       : getLoaderBgForPath(window.location.pathname),
   )
   const [theme, setTheme] = useState<Theme>(readDocumentTheme)
-  const [gateOpen, setGateOpen] = useState(false)
+  const [gateRequested, setGateOpen] = useState(false)
+  const gateAvailable = gateIsAvailable(useCmsGate())
+  // Pop-up desligado (ou sem slide ativo) nunca abre: sem fundo escuro, sem trava de scroll.
+  const gateOpen = gateRequested && gateAvailable
   const { transition, goTo, finishTransition, transitionExitMs } =
     usePageNavigator()
 
@@ -1751,14 +2016,14 @@ function PortfolioShell() {
   }, [menuOpen, bootVisible, transition.active])
 
   useEffect(() => {
-    if (bootVisible || isNotFound) return
+    if (bootVisible || isNotFound || !gateAvailable) return
 
     const timer = window.setTimeout(() => {
       setGateOpen(true)
     }, 600)
 
     return () => window.clearTimeout(timer)
-  }, [bootVisible, isNotFound])
+  }, [bootVisible, isNotFound, gateAvailable])
 
   useEffect(() => {
     if (!gateOpen || menuOpen || bootVisible) return
@@ -1838,7 +2103,7 @@ function PortfolioShell() {
           </div>
           <div className="corner-tools">
             {!isNotFound ? <BackToTop /> : null}
-            <NewsFab onOpen={() => setGateOpen(true)} />
+            {gateAvailable ? <NewsFab onOpen={() => setGateOpen(true)} /> : null}
             <SideTools
               theme={theme}
               onToggleTheme={() =>
@@ -1890,21 +2155,33 @@ function PortfolioShell() {
                       pageId="about"
                       actions={<AboutHeroActions onNavigate={navigateTo} />}
                     >
-                      <AboutExtras />
+                      <AboutExtras onNavigate={navigateTo} />
                     </ContentPage>
                   }
                 />
                 <Route
                   path={PAGE_META.reading.path}
-                  element={<ContentPage pageId="reading" />}
+                  element={
+                    <ContentPage pageId="reading">
+                      <ReadingExtras />
+                    </ContentPage>
+                  }
                 />
                 <Route
                   path={PAGE_META.hire.path}
-                  element={<ContentPage pageId="hire" />}
+                  element={
+                    <ContentPage pageId="hire">
+                      <HireExtras />
+                    </ContentPage>
+                  }
                 />
                 <Route
                   path={PAGE_META.contact.path}
-                  element={<ContentPage pageId="contact" />}
+                  element={
+                    <ContentPage pageId="contact">
+                      <ContactExtras />
+                    </ContentPage>
+                  }
                 />
                 <Route
                   path="*"

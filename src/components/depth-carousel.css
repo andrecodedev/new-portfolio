@@ -161,8 +161,10 @@
 
 .depth-carousel__nav {
   position: absolute;
-  top: calc(50% - (var(--dc-card-h, 380px) / 2) - 52px);
-  left: calc(50% + (var(--dc-card-w, 300px) / 2) + 64px);
+  /* Abaixo do card e da paginação (pontinhos), centralizado. */
+  top: calc(50% + (var(--dc-card-h, 380px) * var(--dc-scale, 1) / 2) + 56px);
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 3000;
   display: flex;
   gap: 10px;
@@ -193,7 +195,7 @@
 
 .depth-carousel__dots {
   position: absolute;
-  top: calc(50% + (var(--dc-card-h, 380px) / 2) + 20px);
+  top: calc(50% + (var(--dc-card-h, 380px) * var(--dc-scale, 1) / 2) + 20px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 3000;

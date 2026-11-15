@@ -39,10 +39,12 @@ function CodeRain({ className = 'code-rain', config }: CodeRainProps) {
 
   const enabled = config?.enabled !== false
   const color = config?.color?.trim() || ''
-  const words = useMemo(
-    () => (config ? rainActiveTexts(config) : [...DEFAULT_RAIN_TEXTS]),
-    [config],
-  )
+  const rawWords = config ? rainActiveTexts(config) : [...DEFAULT_RAIN_TEXTS]
+  // Chave estável: o objeto config muda de identidade a cada render/navegação, e
+  // regenerar os streams reinicia todas as animações (piscada de "TV antiga").
+  const wordsKey = rawWords.join('\u0001')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const words = useMemo(() => rawWords, [wordsKey])
 
   useEffect(() => {
     const root = rootRef.current
@@ -59,7 +61,11 @@ function CodeRain({ className = 'code-rain', config }: CodeRainProps) {
 
     const observer = new ResizeObserver((entries) => {
       const nextHeight = entries[0]?.contentRect.height
-      if (nextHeight && nextHeight > 0) setAreaHeight(nextHeight)
+      // Arredonda em faixas de 200px: oscilações pequenas (troca de página, barra
+      // do navegador) não devem recriar a chuva.
+      if (nextHeight && nextHeight > 0) {
+        setAreaHeight(Math.ceil(nextHeight / 200) * 200)
+      }
     })
 
     observer.observe(host)

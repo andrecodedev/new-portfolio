@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useLocale } from '../i18n/LocaleProvider'
 import {
   defaultChromePayload,
   fetchChromePayload,
@@ -53,6 +54,8 @@ import './admin.css'
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
+  // Assina o idioma: sem isso o painel não re-renderiza quando troca PT/EN/ES.
+  const { dictionaryLocale, setLocale } = useLocale()
   const copy = adminCopy.dashboard
   const [loading, setLoading] = useState(true)
   const [saveStatus, setSaveStatus] = useState<
@@ -443,6 +446,21 @@ export default function AdminDashboard() {
           >
             {adminCopy.auth.back}
           </button>
+          <div className="admin__lang" role="group" aria-label="Idioma / Language">
+            {(['pt', 'en', 'es'] as const).map((code) => (
+              <button
+                key={code}
+                type="button"
+                className={`admin__btn admin__btn--ghost admin__lang-btn${
+                  dictionaryLocale === code ? ' is-active' : ''
+                }`}
+                aria-pressed={dictionaryLocale === code}
+                onClick={() => setLocale(code)}
+              >
+                {code.toUpperCase()}
+              </button>
+            ))}
+          </div>
           <button
             className="admin__btn admin__btn--ghost admin__btn--icon"
             type="button"

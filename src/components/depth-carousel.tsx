@@ -236,8 +236,10 @@ export function DepthCarousel({
     const ro = new ResizeObserver((entries) => {
       const w = entries[0].contentRect.width
       const cfg = cfgRef.current
-      const needed = cfg.cardWidth + Math.abs(cfg.spread) * 2 + 120
+      const needed = cfg.cardWidth + Math.abs(cfg.spread) * 2 + 48
       scaleRef.current = clamp(w / needed, 0.4, 1)
+      // O CSS usa a escala para posicionar paginação e setas junto do card reduzido.
+      root.style.setProperty('--dc-scale', String(scaleRef.current))
       layout(posRef.current)
     })
     ro.observe(root)

@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { setAdminLocale } from '../admin/admin-copy'
 import {
   DICTIONARIES,
   isLocale,
@@ -65,6 +66,8 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const dictionaryLocale = dictionaryFor(locale)
+  // Antes dos filhos renderizarem: o painel admin lê o idioma deste módulo.
+  setAdminLocale(dictionaryLocale)
 
   const value = useMemo(
     () => ({

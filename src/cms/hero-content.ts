@@ -423,7 +423,7 @@ export function createScrollModule(): ScrollModule {
     kind: 'scroll',
     name: '',
     enabled: true,
-    label: { pt: 'SCROLL', en: 'SCROLL', es: 'SCROLL' },
+    label: { pt: 'DESLIZAR', en: 'SCROLL', es: 'DESPLAZA' },
     accent: 'ink',
     alignDesktop: 'start',
     alignMobile: 'center',
@@ -641,13 +641,23 @@ function parseScrollModule(value: unknown): ScrollModule | null {
     kind: 'scroll',
     name: asName(row.name),
     enabled: row.enabled !== false,
-    label: asStringMap(row.label, fallback.label),
+    label: migrateScrollLabel(asStringMap(row.label, fallback.label)),
     accent: isScrollAccent(row.accent) ? row.accent : 'ink',
     alignDesktop: isAlign(row.alignDesktop) ? row.alignDesktop : 'start',
     alignMobile: isAlign(row.alignMobile) ? row.alignMobile : 'center',
     visible: parseScrollVisible(row.visible),
     slots: parseSlotList(row.slots, SCROLL_SLOT_IDS, defaultScrollSlots()),
     labelStyle: parseTextStyle(row.labelStyle, fallback.labelStyle),
+  }
+}
+
+/** Conteúdo salvo antes da tradução ainda traz 'SCROLL' em pt/es: troca pelo texto local. */
+function migrateScrollLabel(label: LocaleMap<string>): LocaleMap<string> {
+  const isOld = (value: string) => value.trim().toUpperCase() === 'SCROLL'
+  return {
+    ...label,
+    pt: isOld(label.pt ?? '') ? 'DESLIZAR' : label.pt,
+    es: isOld(label.es ?? '') ? 'DESPLAZA' : label.es,
   }
 }
 

@@ -335,6 +335,22 @@
   flex: 1 1 auto;
 }
 
+.admin__lang {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.admin__header-actions .admin__lang .admin__lang-btn {
+  flex: 0 0 auto;
+  min-width: 0;
+  padding-inline: 10px;
+}
+
+.admin__lang-btn.is-active {
+  background: var(--text);
+  color: var(--bg-stage);
+}
+
 .admin__btn--icon {
   width: var(--admin-btn-h);
   min-width: var(--admin-btn-h);

@@ -1,0 +1,238 @@
+.flex-carousel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: contain;
+  outline: none;
+}
+
+.flex-carousel[data-hover='open'] {
+  cursor: zoom-in;
+}
+
+.flex-carousel[data-hover='close'] {
+  cursor: zoom-out;
+}
+
+.flex-carousel[data-dragging] {
+  cursor: grabbing;
+}
+
+.flex-carousel:focus-visible {
+  box-shadow: inset 0 0 0 2px rgba(128, 128, 140, 0.55);
+}
+
+.flex-carousel__caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% + var(--flex-carousel-half) * var(--flex-carousel-lift, 1) + 22px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  pointer-events: none;
+  text-align: center;
+  animation: flex-carousel-reveal 900ms ease both;
+}
+
+.flex-carousel__title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.35;
+  animation: flex-carousel-title 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.flex-carousel__subtitle {
+  font-weight: 400;
+  opacity: 0.6;
+}
+
+.flex-carousel__count {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.5;
+  transition: opacity 400ms ease;
+}
+
+.flex-carousel__count[data-hidden] {
+  opacity: 0;
+}
+
+.flex-carousel__digits {
+  display: inline-flex;
+}
+
+.flex-carousel__digit {
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+}
+
+.flex-carousel__reel {
+  display: flex;
+  flex-direction: column;
+  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.flex-carousel__reel span {
+  height: 1em;
+}
+
+.flex-carousel__slash {
+  opacity: 0.6;
+}
+
+.flex-carousel__live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes flex-carousel-title {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes flex-carousel-reveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flex-carousel__caption,
+  .flex-carousel__title {
+    animation: none;
+  }
+
+  .flex-carousel__reel {
+    transition: none;
+  }
+}
+
+.flex-carousel__arrows {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  z-index: 2;
+  display: flex;
+  gap: 28px;
+  transform: translateX(-50%);
+}
+
+.flex-carousel__arrow {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1.5px solid currentColor;
+  border-radius: var(--stage-radius, 5px);
+  background: transparent;
+  color: inherit;
+  font-size: 18px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.flex-carousel__arrow:hover {
+  opacity: 0.7;
+}
+
+.flex-carousel__arrow:active {
+  transform: scale(0.94);
+}
+
+.flex-carousel__arrow:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+  .flex-carousel__arrows {
+    gap: 16px;
+  }
+
+  .flex-carousel__arrow {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+}
+
+/* Bordas esmaecidas: rampa com vários passos (curva suave) em vez de um degradê linear,
+   que formava uma "faixa de sombra" visível. Desktop: rampa curta; celular: mais larga. */
+.flex-carousel canvas {
+  --fc-mask: linear-gradient(
+    90deg,
+    transparent 0,
+    rgba(0, 0, 0, 0.05) 1.5%,
+    rgba(0, 0, 0, 0.18) 3.5%,
+    rgba(0, 0, 0, 0.42) 6%,
+    rgba(0, 0, 0, 0.72) 9%,
+    rgba(0, 0, 0, 0.92) 12%,
+    #000 15%,
+    #000 85%,
+    rgba(0, 0, 0, 0.92) 88%,
+    rgba(0, 0, 0, 0.72) 91%,
+    rgba(0, 0, 0, 0.42) 94%,
+    rgba(0, 0, 0, 0.18) 96.5%,
+    rgba(0, 0, 0, 0.05) 98.5%,
+    transparent 100%
+  );
+  -webkit-mask-image: var(--fc-mask);
+  mask-image: var(--fc-mask);
+}
+
+@media (max-width: 767px) {
+  .flex-carousel canvas {
+    --fc-mask: linear-gradient(
+      90deg,
+      transparent 0,
+      rgba(0, 0, 0, 0.04) 4%,
+      rgba(0, 0, 0, 0.16) 8%,
+      rgba(0, 0, 0, 0.38) 13%,
+      rgba(0, 0, 0, 0.66) 18%,
+      rgba(0, 0, 0, 0.88) 24%,
+      #000 30%,
+      #000 70%,
+      rgba(0, 0, 0, 0.88) 76%,
+      rgba(0, 0, 0, 0.66) 82%,
+      rgba(0, 0, 0, 0.38) 87%,
+      rgba(0, 0, 0, 0.16) 92%,
+      rgba(0, 0, 0, 0.04) 96%,
+      transparent 100%
+    );
+  }
+}

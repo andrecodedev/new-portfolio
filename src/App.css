@@ -879,47 +879,6 @@ svg.header__theme-icon {
   user-select: none;
 }
 
-/*
-  Respiro com pausas: o granulado vem do subpixel + filter em movimento.
-  Em cada pico a imagem para um pouco e volta o foco.
-*/
-@keyframes media-orbit {
-  0%,
-  14% {
-    transform: translate3d(0, 0, 0);
-  }
-  24% {
-    transform: translate3d(0, 6px, 0);
-  }
-  32%,
-  42% {
-    transform: translate3d(0, 6px, 0);
-  }
-  52% {
-    transform: translate3d(4px, -4px, 0);
-  }
-  60%,
-  70% {
-    transform: translate3d(4px, -4px, 0);
-  }
-  80% {
-    transform: translate3d(-4px, -8px, 0);
-  }
-  88%,
-  94% {
-    transform: translate3d(-4px, -8px, 0);
-  }
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero__figure {
-    animation: none;
-  }
-}
-
 .menu__link:hover .menu__link-label,
 .menu__link--hot .menu__link-label {
   color: var(--text);
@@ -927,6 +886,7 @@ svg.header__theme-icon {
 
 .menu__link:hover .menu__link-desc {
   color: var(--text);
+  opacity: 1;
 }
 
 .menu__link:hover .menu__link-desc .accent-text,
@@ -1112,11 +1072,12 @@ svg.header__theme-icon {
 
 .menu__link-desc {
   font-family: var(--font-sans);
-  font-size: calc(var(--text-lead) * 0.9 * var(--cms-text-scale, 1));
+  font-size: calc(var(--text-lead) * 0.78 * var(--cms-text-scale, 1));
   font-weight: 500;
   line-height: 1.45;
   letter-spacing: 0;
   color: var(--text);
+  opacity: 0.68;
   transition:
     color 0.2s ease,
     opacity 0.2s ease;
@@ -1404,7 +1365,6 @@ svg.menu__social-icon {
   display: grid;
   place-items: center;
   flex-shrink: 1;
-  animation: media-orbit 18s ease-in-out infinite;
 }
 
 .hero__figure-img {
@@ -1428,7 +1388,6 @@ svg.menu__social-icon {
 /* Página Trabalho: grade de estatísticas abaixo do scroll cue */
 .work-stats {
   padding-inline: calc(var(--content-x) - var(--edge));
-  padding-block: var(--gap) 0;
 }
 
 .work-stats__grid {
@@ -1454,7 +1413,7 @@ svg.menu__social-icon {
 .work-stats__value {
   margin: 0 0 0.35rem;
   font-family: var(--font-sans);
-  font-size: var(--text-display);
+  font-size: calc(var(--text-display) * 0.86);
   font-weight: 600;
   color: var(--text);
 }
@@ -1466,20 +1425,6 @@ svg.menu__social-icon {
   font-weight: 500;
   line-height: 1.4;
   color: var(--muted);
-}
-
-.work-stats__hint {
-  display: block;
-  margin-top: 0.25rem;
-  font-style: italic;
-  font-size: calc(var(--text-ui) - 1px);
-  opacity: 0;
-  transition: opacity 0.18s ease;
-}
-
-.work-stats__item:hover .work-stats__hint,
-.work-stats__item:focus-within .work-stats__hint {
-  opacity: 1;
 }
 
 @media (min-width: 768px) {
@@ -1508,7 +1453,6 @@ svg.menu__social-icon {
   display: flex;
   justify-content: center;
   padding-inline: calc(var(--content-x) - var(--edge));
-  padding-block: var(--gap) 0;
 }
 
 .work-github__card {
@@ -1517,11 +1461,12 @@ svg.menu__social-icon {
   align-items: center;
   gap: var(--gap-sm);
   width: 100%;
-  max-width: 840px;
+  max-width: 1240px;
   border: 1.5px solid var(--text);
   border-radius: var(--stage-radius);
-  background: var(--btn-bg);
-  padding: var(--gap-sm) var(--gap);
+  /* Transparente: a chuva de código aparece atrás. */
+  background: transparent;
+  padding: var(--gap-sm) var(--gap-sm);
 }
 
 .work-github__head {
@@ -1531,9 +1476,9 @@ svg.menu__social-icon {
   gap: 0.6rem;
 }
 
-.work-github__icon {
-  display: grid;
-  place-items: center;
+svg.work-github__icon {
+  width: 22px;
+  height: 22px;
   color: var(--section-accent, var(--text));
 }
 
@@ -1587,27 +1532,110 @@ svg.menu__social-icon {
 }
 
 .work-github__stats {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: stretch;
   gap: var(--gap-sm);
   width: 100%;
   padding-top: var(--gap-sm);
   border-top: 1px solid color-mix(in srgb, var(--text) 16%, transparent);
 }
 
-.work-github__stats-frame {
-  flex: 1 1 280px;
-  max-width: 320px;
-  aspect-ratio: 495 / 195;
+@media (min-width: 700px) {
+  .work-github__stats {
+    /* Colunas com largura máxima: o card fica largo, mas o texto das imagens
+       (que escala com a largura) não cresce junto. */
+    grid-template-columns: repeat(2, minmax(0, 430px));
+    justify-content: center;
+    gap: var(--gap);
+  }
+}
+
+/* .media-skel (definido mais abaixo) força height:100%; sem isso o frame
+   cresce além do card. Aqui a altura vem da própria imagem. */
+.media-skel.work-github__stats-frame {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
   border: 1.5px solid var(--text);
   border-radius: var(--stage-radius);
 }
 
+/* Cards com proporções diferentes (467x195 e 495x240): a moldura estica
+   para a mesma altura e a imagem fica centralizada dentro dela. */
 .work-github__stats-img {
+  display: block;
   width: 100%;
-  height: 100%;
-  object-fit: contain;
+  height: auto;
+}
+
+/* Vitrines de componentes (React Bits): precisam de altura explícita */
+.showcase-circular {
+  flex-shrink: 0;
+  position: relative;
+  width: 100%;
+  height: 560px;
+}
+
+/* Infinite Spiral (React Bits): precisa de altura explícita */
+.showcase-spiral {
+  flex-shrink: 0;
+  position: relative;
+  width: 100%;
+  height: 600px;
+}
+
+/* Drift Wall (React Bits): precisa de altura explícita */
+.showcase-drift {
+  flex-shrink: 0;
+  position: relative;
+  width: 100%;
+  height: 600px;
+}
+
+/* Flex Carousel (React Bits, WebGL): precisa de altura explícita */
+.showcase-flex {
+  flex-shrink: 0;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  /* Mesmo recuo lateral do hero e da galeria de Trabalho. */
+  padding-inline: calc(var(--content-x) - var(--edge));
+  height: 620px;
+}
+
+/* Circular Gallery (React Bits, WebGL): precisa de altura explícita */
+.showcase-gallery {
+  flex-shrink: 0;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  /* Mesmo recuo lateral do hero. */
+  padding-inline: calc(var(--content-x) - var(--edge));
+  height: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
+
+.showcase-gallery__title {
+  flex: none;
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: clamp(1.05rem, 0.9rem + 0.7vw, 1.5rem);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.showcase-gallery__stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
 }
 
 /* Página Sobre: vídeo pitch */
@@ -1615,11 +1643,10 @@ svg.menu__social-icon {
   display: flex;
   justify-content: center;
   width: 100%;
-  margin-bottom: 6rem;
 }
 
 .about-video__frame {
-  width: min(100%, 900px);
+  width: min(100%, 960px);
   aspect-ratio: 16 / 9;
   border: 1.5px solid var(--text);
   border-radius: var(--stage-radius);
@@ -1645,7 +1672,8 @@ svg.menu__social-icon {
   cursor: pointer;
 }
 
-.about-video__thumb-frame {
+.about-video__facade .about-video__thumb-frame {
+  /* .media-skel (definido depois) força position:relative e empurrava o play para baixo. */
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -1684,15 +1712,17 @@ svg.menu__social-icon {
      do item, e o flexbox espreme essa section quase a 0 (ela é curta perto das
      outras, que só escapam disso por terem min-height explícito). */
   flex-shrink: 0;
-  padding-block: var(--gap-sm) 0;
+  /* Mesmo recuo lateral do hero, para o carrossel não colar na borda do stage. */
+  padding-inline: calc(var(--content-x) - var(--edge));
 }
 
 .work-skills__viewport {
   overflow: hidden;
   width: 100%;
   padding-block: 16px;
-  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  /* Some mais cedo: o fade começa a 18% da largura em vez de 8%. */
+  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
 }
 
 .work-skills__track {
@@ -1711,7 +1741,7 @@ svg.menu__social-icon {
   flex: none;
   display: grid;
   place-items: center;
-  width: clamp(88px, 10.5vw, 128px);
+  width: clamp(92px, 10.4vw, 126px);
   padding-block: var(--gap-sm);
   will-change: transform;
 }
@@ -1721,8 +1751,8 @@ svg.menu__social-icon {
 }
 
 .work-skills__item img {
-  width: clamp(44px, 5.2vw, 66px);
-  height: clamp(44px, 5.2vw, 66px);
+  width: clamp(44px, 4.9vw, 62px);
+  height: clamp(44px, 4.9vw, 62px);
   object-fit: contain;
   opacity: 0.82;
   transition: opacity 0.2s ease;
@@ -1735,48 +1765,16 @@ svg.menu__social-icon {
 /* Página Sobre: abas (Conquistas / Experiências / Detalhes) */
 .about-journey {
   padding-inline: calc(var(--content-x) - var(--edge));
-  padding-block: var(--gap);
-}
-
-.about-journey__tabs {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-bottom: var(--gap);
-}
-
-.about-journey__tab {
-  border: 1.5px solid var(--text);
-  border-radius: var(--stage-radius);
-  background: var(--btn-bg);
-  color: var(--text);
-  font-family: var(--font-mono);
-  font-size: var(--text-ui);
-  padding: 0.45rem 0.9rem;
-  cursor: pointer;
-  white-space: nowrap;
-  transition:
-    background-color 0.18s ease,
-    color 0.18s ease;
-}
-
-.about-journey__tab:hover {
-  background: var(--btn-bg-hover);
-}
-
-.about-journey__tab.is-active {
-  background: var(--section-accent, var(--text));
-  border-color: var(--section-accent, var(--text));
-  color: var(--bg-outer);
 }
 
 .about-journey__title {
   margin: 0 0 var(--gap);
   text-align: center;
-  font-family: var(--font-sans);
-  font-size: var(--text-lead);
+  font-family: var(--font-mono);
+  font-size: clamp(1.05rem, 0.9rem + 0.7vw, 1.5rem);
   font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--text);
 }
 
@@ -1792,7 +1790,15 @@ svg.menu__social-icon {
 .about-achievements__stage {
   position: relative;
   width: 100%;
-  height: min(62vh, 560px);
+  /* Cabe o card em proporção de post vertical (4:5) + paginação + setas.
+     O carrossel centraliza o card; como paginação e setas ficam embaixo, subimos o
+     conjunto para o card não ficar longe do título. */
+  height: 680px;
+}
+
+.about-achievements__stage .depth-carousel {
+  position: relative;
+  top: -44px;
 }
 
 .about-achievements__back-title {
@@ -1814,7 +1820,8 @@ svg.menu__social-icon {
 /* Experiências: lista de cards */
 .about-experience {
   width: 100%;
-  margin-bottom: 6rem;
+  max-width: 1240px;
+  margin-inline: auto;
 }
 
 .about-experience__item {
@@ -1879,9 +1886,8 @@ svg.menu__social-icon {
 /* Detalhes: lista + painel */
 .about-highlights {
   width: 100%;
-  max-width: 900px;
+  max-width: 1240px;
   margin-inline: auto;
-  margin-bottom: 6rem;
 }
 
 .about-highlights__subtitle {
@@ -1901,58 +1907,98 @@ svg.menu__social-icon {
 
 .about-highlights__list {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.35rem;
 }
 
+/* Itens sem fundo: só uma linha lateral que acende com o verde da página. */
 .about-highlights__item {
-  border: 1.5px solid var(--text);
-  border-radius: var(--stage-radius);
-  background: var(--btn-bg);
-  color: var(--text);
+  display: flex;
+  align-items: baseline;
+  gap: 0.85rem;
+  border: 0;
+  border-left: 2px solid color-mix(in srgb, var(--text) 18%, transparent);
+  background: transparent;
+  color: var(--muted);
   font-family: var(--font-mono);
-  font-size: calc(var(--text-ui) - 1px);
-  padding: 0.4rem 0.75rem;
+  font-size: var(--text-ui);
+  padding: 0.7rem 1rem;
   cursor: pointer;
   text-align: left;
   transition:
-    background-color 0.18s ease,
-    color 0.18s ease;
+    color 0.2s ease,
+    border-color 0.2s ease,
+    padding-left 0.2s ease;
+}
+
+.about-highlights__index {
+  font-size: calc(var(--text-ui) - 2px);
+  letter-spacing: 0.08em;
+  opacity: 0.6;
 }
 
 .about-highlights__item:hover {
-  background: var(--btn-bg-hover);
+  color: var(--text);
+  padding-left: 1.25rem;
 }
 
 .about-highlights__item.is-active {
-  background: var(--section-accent, var(--text));
-  border-color: var(--section-accent, var(--text));
-  color: var(--bg-outer);
+  color: var(--text);
+  border-left-color: var(--section-accent, var(--text));
 }
 
+.about-highlights__item.is-active .about-highlights__index {
+  color: var(--section-accent, var(--text));
+  opacity: 1;
+}
+
+/* Painel transparente: moldura fina e número grande como marca d'água. */
 .about-highlights__panel {
-  border: 1.5px solid var(--text);
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--text) 22%, transparent);
   border-radius: var(--stage-radius);
-  background: var(--btn-bg);
-  padding: var(--gap-sm);
+  background: transparent;
+  padding: var(--gap-sm) var(--gap);
   display: flex;
   flex-direction: column;
+  /* Altura fixa: trocar de item não pode mexer o tamanho do card. */
+  height: clamp(24rem, 32vw, 28rem);
+  overflow-y: auto;
   justify-content: center;
 }
 
 .about-highlights__panel-content {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  animation: about-fade-in 0.4s ease;
+  /* Bloco de altura fixa e centralizado no card: número, título e descrição ficam
+     sempre na mesma posição e o conjunto fica no meio (sem pulo entre itens). */
+  flex: none;
+  height: 20rem;
+  margin-block: auto;
+  animation: about-fade-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.about-highlights__panel-index {
+  font-family: var(--font-mono);
+  font-size: clamp(2.25rem, 4.5vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--section-accent, var(--text));
+  opacity: 0.9;
 }
 
 @keyframes about-fade-in {
   from {
     opacity: 0;
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -1966,6 +2012,7 @@ svg.menu__social-icon {
 
 .about-highlights__panel-text {
   margin: 0;
+  max-width: 64ch;
   font-family: var(--font-sans);
   font-size: var(--text-ui);
   line-height: 1.65;
@@ -1979,8 +2026,7 @@ svg.menu__social-icon {
   }
 
   .about-highlights__list {
-    flex-direction: column;
-    flex: 0 0 240px;
+    flex: 0 0 300px;
   }
 
   .about-highlights__panel {
@@ -3955,5 +4001,302 @@ video.gate__media--on {
     justify-content: center;
     align-items: flex-start;
     padding-block: clamp(1.25rem, 4vw, 2rem);
+  }
+}
+
+/* A última seção da página ganha o respiro de baixo (as outras só têm o de cima). */
+.stage__scroll > section:last-of-type {
+  margin-bottom: var(--section-space);
+}
+
+/* Galeria de projetos no celular: seção mais baixa e título mais perto dos cards. */
+@media (max-width: 767px) {
+  .showcase-gallery {
+    height: 400px;
+    gap: 6px;
+  }
+}
+
+/*
+  REGRA DE ESPAÇAMENTO VERTICAL (páginas internas: Trabalho, Sobre, Estudos, Contrato, Contato)
+  - Todo bloco empilhado depois do hero leva a classe `page-block`.
+  - O espaço entre blocos vem SÓ do topo do bloco de baixo (`margin-top`).
+    Nenhum bloco tem margem/padding embaixo, para dois vizinhos nunca somarem.
+  - Valor: `--section-space`. Logo depois do "DESLIZAR" vale `--section-space-first`.
+  - A última seção da página ganha o respiro de baixo (regra mais abaixo).
+  - A home não segue esta regra (layout próprio).
+*/
+.page-block {
+  margin-top: var(--section-space);
+  margin-bottom: 0;
+}
+
+.scroll + .page-block {
+  margin-top: var(--section-space-first);
+}
+
+/* Sobre: sanfona de cards (BounceCards, portado do Worky). Cores próprias dos cards. */
+.about-fan {
+  padding-inline: calc(var(--content-x) - var(--edge));
+}
+
+.about-fan__stack {
+  display: flex;
+  justify-content: center;
+  width: min(100%, 80rem);
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.about-fan__grid {
+  display: none;
+  width: min(100%, 64rem);
+  margin: 0 auto;
+  gap: 0.75rem;
+}
+
+.fan-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 1rem 1.35rem;
+  border-radius: var(--stage-radius);
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  text-align: left;
+  font-family: var(--font-body, var(--font-sans));
+  color: inherit;
+  overflow: hidden;
+  box-sizing: border-box;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+
+button.fan-card {
+  cursor: pointer;
+  appearance: none;
+  line-height: 1.2;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.fan-card__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.6rem;
+  height: 1.6rem;
+  line-height: 0;
+}
+
+.fan-card__copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.fan-card__title {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 1.15rem;
+  line-height: 1.25;
+}
+
+.fan-card__text {
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+/* Paleta da página Sobre: preto, cinza escuro, cinza claro, branco e o verde de destaque. */
+.fan-card--study {
+  background: #0a0a0a;
+  border-color: #2a2a2a;
+}
+.fan-card--study .fan-card__icon { color: var(--section-accent); }
+.fan-card--study .fan-card__title { color: #fff; }
+.fan-card--study .fan-card__text { color: #a3a3a3; }
+
+.fan-card--xp {
+  background: var(--section-accent);
+  border-color: var(--section-accent);
+}
+.fan-card--xp .fan-card__icon,
+.fan-card--xp .fan-card__title { color: #0a0a0a; }
+.fan-card--xp .fan-card__text { color: rgba(10, 10, 10, 0.72); }
+
+.fan-card--stack {
+  background: #6b6b6b;
+  border-color: #6b6b6b;
+}
+.fan-card--stack .fan-card__icon,
+.fan-card--stack .fan-card__title { color: #fff; }
+.fan-card--stack .fan-card__text { color: rgba(255, 255, 255, 0.78); }
+
+.fan-card--work {
+  background: #262626;
+  border-color: #3a3a3a;
+}
+.fan-card--work .fan-card__icon { color: var(--section-accent); }
+.fan-card--work .fan-card__title { color: #fff; }
+.fan-card--work .fan-card__text { color: #a3a3a3; }
+button.fan-card--work:hover { background: #303030; }
+
+.fan-card--contact {
+  background: #fafafa;
+  border-color: #e5e5e5;
+}
+.fan-card--contact .fan-card__icon { color: #0a0a0a; }
+.fan-card--contact .fan-card__title { color: #0a0a0a; }
+.fan-card--contact .fan-card__text { color: #525252; }
+button.fan-card--contact:hover { background: #fff; }
+
+/* Tablet/celular: sem sanfona (precisa de hover), vira grade de 2 colunas. */
+@media (max-width: 1024px) {
+  .about-fan__stack {
+    display: none;
+  }
+
+  .about-fan__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .fan-card {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 0.45rem;
+    height: auto;
+  }
+
+  .fan-card__copy {
+    width: 100%;
+  }
+
+  .fan-card:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Sobre: Accordion Gallery com o mesmo recuo lateral dos outros blocos. */
+.about-accordion {
+  padding-inline: calc(var(--content-x) - var(--edge));
+}
+
+/* ===== Sobre no celular (até 767px) ===== */
+@media (max-width: 767px) {
+  /* Conquistas: área mais baixa; o card escala junto com a largura. */
+  .about-achievements__stage {
+    height: 560px;
+  }
+
+  /* Detalhes: itens viram carrossel horizontal e o card mostra o texto completo. */
+  .about-highlights__layout {
+    flex-direction: column;
+  }
+
+  .about-highlights__list {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 0.5rem;
+    scrollbar-width: none;
+  }
+
+  .about-highlights__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .about-highlights__item {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    border-left: 0;
+    border-bottom: 2px solid color-mix(in srgb, var(--text) 18%, transparent);
+    padding: 0.6rem 0.9rem;
+    white-space: nowrap;
+  }
+
+  .about-highlights__item:hover {
+    padding-left: 0.9rem;
+  }
+
+  .about-highlights__item.is-active {
+    border-bottom-color: var(--section-accent, var(--text));
+  }
+
+  .about-highlights__panel {
+    height: auto;
+    overflow: visible;
+    justify-content: flex-start;
+    /* Mesmo respiro nos quatro lados (antes: topo/base menores que as laterais). */
+    padding: 1.75rem;
+  }
+
+  .about-highlights__panel-content {
+    height: auto;
+    margin-block: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Sanfona em grade: textos e paddings menores (antes estavam gigantes). */
+  .fan-card {
+    padding: 0.85rem 0.9rem;
+    gap: 0.35rem;
+  }
+
+  .fan-card__icon {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+
+  .fan-card__title {
+    font-size: 1rem;
+  }
+
+  .fan-card__text {
+    font-size: 0.8rem;
+    line-height: 1.35;
+  }
+
+  /* Conquistas: área enxuta, sem o vazio em cima do card (paginação e setas ficam embaixo). */
+  .about-achievements__stage {
+    height: 450px;
+  }
+
+  .about-achievements__stage .depth-carousel {
+    position: relative;
+    top: -52px;
+  }
+
+  /* Carrossel final: o componente já tem respiro interno acima do card. */
+  .showcase-flex {
+    height: 480px;
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Verso do card de conquista: texto legível dentro do card reduzido. */
+  /* O card é reduzido pela escala: a fonte precisa compensar para ficar legível. */
+  .about-achievements__back-title {
+    font-size: 1.35rem;
+    line-height: 1.25;
+  }
+
+  .about-achievements__back-text {
+    font-size: 1.1rem;
+    line-height: 1.5;
+  }
+
+  .about-achievements__stage .depth-carousel__face--back {
+    padding: 1rem;
+    gap: 0.5rem;
   }
 }

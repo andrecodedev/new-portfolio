@@ -18,11 +18,6 @@ export const DESIGN_FONT_OPTIONS = [
     stack: "'Manrope', 'Segoe UI', sans-serif",
   },
   {
-    id: 'syne',
-    label: 'Syne',
-    stack: "'Syne', 'Segoe UI', sans-serif",
-  },
-  {
     id: 'jetbrains',
     label: 'JetBrains Mono',
     stack: "'JetBrains Mono', ui-monospace, monospace",
@@ -183,8 +178,7 @@ export function defaultDesignPayload(): CmsDesignPayload {
       accent: '#f0d45c',
     },
     typography: {
-      // Syne = display com cara própria (Space Grotesk/Manrope ficam “Arial demais”).
-      titleFont: 'syne',
+      titleFont: 'space',
       subtitleFont: 'space',
       bodyFont: 'manrope',
       uiFont: 'jetbrains',

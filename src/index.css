@@ -9,6 +9,11 @@
   --edge: clamp(16px, 1.8vw, 24px);
   --content-x: clamp(120px, 14vw, 200px);
   --gap: clamp(32px, 5vw, 64px);
+  /* Espaço entre seções empilhadas das páginas: cada seção usa SÓ o topo, nunca o
+     rodapé, para dois blocos vizinhos não somarem margens. */
+  --section-space: calc(var(--gap) * 2.8);
+  /* Primeiro bloco logo depois do 'DESLIZAR' (primeira dobra): mantém o espaço original. */
+  --section-space-first: calc(var(--gap) * 1.4);
   --gap-sm: clamp(16px, 2vw, 24px);
 
   /*

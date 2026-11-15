@@ -78,8 +78,15 @@ export function gateHasSlot(slide: GateSlide, slot: GateSlotId) {
 
 export type CmsGatePayload = {
   version: 2
+  /** Desliga o pop-up inteiro no site (preview do admin continua mostrando). */
+  enabled: boolean
   sectionName: string
   slides: GateSlide[]
+}
+
+/** Pop-up só abre se estiver ligado e tiver ao menos 1 slide ativo. */
+export function gateIsAvailable(payload: CmsGatePayload) {
+  return payload.enabled && payload.slides.some((slide) => slide.enabled)
 }
 
 function defaultGateTextStyles(): GateTextStyles {
@@ -179,6 +186,7 @@ export function defaultGatePayload(): CmsGatePayload {
 
   return {
     version: 2,
+    enabled: true,
     sectionName: '',
     slides: [
       {
@@ -307,6 +315,7 @@ export function parseGatePayload(payload: unknown): CmsGatePayload {
     .filter((slide): slide is GateSlide => slide !== null)
   return {
     version: 2,
+    enabled: row.enabled !== false,
     sectionName: typeof row.sectionName === 'string' ? row.sectionName : '',
     slides: slides.length > 0 ? slides : fallback.slides,
   }

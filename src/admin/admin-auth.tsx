@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import SideTools from '../components/side-tools'
+import { useLocale } from '../i18n/LocaleProvider'
 import { isCmsConfigured, supabase } from '../lib/supabase-client'
 import {
   applyTheme,
@@ -24,6 +25,8 @@ import '../App.css'
 type AuthStep = 'password' | 'mfa' | 'enroll'
 
 export default function AdminAuth() {
+  // Assina o idioma: o texto do login vem de adminCopy, que segue a troca PT/EN/ES.
+  useLocale()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [honey, setHoney] = useState('')

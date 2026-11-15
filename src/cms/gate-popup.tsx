@@ -8,6 +8,7 @@ import { useCmsGate } from './cms-provider'
 import { cmsEditAttrs, cmsEditClass } from './cms-edit'
 import {
   slideToView,
+  gateIsAvailable,
   type CmsGatePayload,
   type GateSlide,
 } from './gate-content'
@@ -324,6 +325,7 @@ export function GatePreview({
   return (
     <div className="gate gate--preview" data-preview-device={previewDevice}>
       <div
+        style={{ width: 'min(100%, 840px)' }}
         className={
           editMode && currentId
             ? cmsEditClass(editSelectedId, currentId)
@@ -361,6 +363,7 @@ export default function GatePopup({ open, onClose, onNavigate }: GatePopupProps)
   const openRef = useRef(open)
   const [index, setIndex] = useState(0)
   const payload = useCmsGate()
+  const available = gateIsAvailable(payload)
   openRef.current = open
 
   return (
@@ -370,7 +373,7 @@ export default function GatePopup({ open, onClose, onNavigate }: GatePopupProps)
         setIndex(0)
       }}
     >
-      {open ? (
+      {open && available ? (
         <div className="gate">
           <motion.button
             type="button"

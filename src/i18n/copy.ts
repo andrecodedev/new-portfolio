@@ -75,6 +75,9 @@ export type WorkPageCopy = PageCopy & {
     legendLess: string
     legendMore: string
   }
+  gallery: {
+    heading: string
+  }
 }
 
 export type SpotCopy = AccentedCopy & {
@@ -264,6 +267,9 @@ const pt: Dictionary = {
         langsAlt: 'Linguagens mais usadas',
         legendLess: 'Menos',
         legendMore: 'Mais',
+      },
+      gallery: {
+        heading: 'Projetos em destaque',
       },
     },
     about: {
@@ -604,6 +610,9 @@ const en: Dictionary = {
         legendLess: 'Less',
         legendMore: 'More',
       },
+      gallery: {
+        heading: 'Featured projects',
+      },
     },
     about: {
       menuLabel: 'About',
@@ -942,6 +951,9 @@ const es: Dictionary = {
         langsAlt: 'Lenguajes más usados',
         legendLess: 'Menos',
         legendMore: 'Más',
+      },
+      gallery: {
+        heading: 'Proyectos destacados',
       },
     },
     about: {

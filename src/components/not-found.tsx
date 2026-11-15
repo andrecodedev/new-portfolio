@@ -32,7 +32,7 @@ export default function NotFoundPage({ onGoHome }: NotFoundPageProps) {
   const copy = t.notFound
   const [fontsReady, setFontsReady] = useState(false)
 
-  // Título do site (Space Grotesk / Syne) — Manrope fica genérica demais nessa 404.
+  // Título do site (Space Grotesk) — Manrope fica genérica demais nessa 404.
   const titleFont = useMemo(
     () => stackFor(design.typography.titleFont),
     [design.typography.titleFont],

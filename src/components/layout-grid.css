@@ -3,24 +3,37 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--gap-sm);
   width: 100%;
-  max-width: 56rem;
+  max-width: 1240px;
   margin-inline: auto;
 }
 
+/* Sem fundo: moldura fina e logo em "pastilha"; no hover sobe e acende no verde. */
 .layout-grid__cell {
+  position: relative;
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
-  gap: 1.35rem;
-  min-height: 6.5rem;
-  padding: 0.85rem;
-  border: 1.5px solid var(--text);
+  justify-content: flex-start;
+  gap: 1.1rem;
+  min-height: 7.5rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--text) 22%, transparent);
   border-radius: var(--stage-radius);
-  background: var(--btn-bg);
+  background: transparent;
   color: var(--text);
   cursor: pointer;
   font: inherit;
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.layout-grid__cell:hover,
+.layout-grid__cell:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--section-accent, var(--text));
+  box-shadow: 0 14px 30px -18px color-mix(in srgb, var(--section-accent, var(--text)) 60%, transparent);
 }
 
 .layout-grid__cell--ghost {
@@ -30,33 +43,36 @@
 
 .layout-grid__logo {
   flex: none;
-  width: 3.25rem;
-  height: 3.25rem;
+  width: 3.75rem;
+  height: 3.75rem;
+  padding: 0.5rem;
   object-fit: contain;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--text) 7%, transparent);
 }
 
 .layout-grid__name {
   font-family: var(--font-mono);
   font-size: var(--text-ui);
+  line-height: 1.4;
   text-align: left;
-  color: var(--muted);
+  color: var(--text);
 }
 
 .layout-grid__backdrop {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 200;
   border: 0;
   padding: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.65);
   cursor: pointer;
 }
 
 .layout-grid__modal-layer {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 210;
   display: grid;
   place-items: center;
   padding: var(--gap);
@@ -64,27 +80,38 @@
 }
 
 .layout-grid__modal {
+  position: relative;
   pointer-events: auto;
   display: flex;
-  flex-direction: row-reverse;
-  align-items: flex-start;
+  flex-direction: column;
   gap: var(--gap-sm);
-  width: min(42rem, 100%);
+  width: min(46rem, 100%);
   max-height: min(80vh, 36rem);
   overflow: auto;
   padding: var(--gap);
-  border: 1.5px solid var(--text);
+  border: 1.5px solid color-mix(in srgb, var(--text) 40%, transparent);
   border-radius: var(--stage-radius);
-  background: var(--btn-bg);
-  box-shadow: 0 24px 46px -24px rgba(0, 0, 0, 0.45);
+  /* Mesmo fundo escuro da página (o cinza antigo destoava). */
+  background: var(--bg-outer);
+  box-shadow: 0 24px 46px -24px rgba(0, 0, 0, 0.6);
+}
+
+/* Logo pequeno ao lado do título/empresa/datas; a descrição ocupa a linha toda. */
+.layout-grid__modal-head {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding-right: 2.5rem;
 }
 
 .layout-grid__modal-logo {
   flex: none;
-  width: 4.25rem;
-  height: 4.25rem;
+  width: 4.5rem;
+  height: 4.5rem;
+  padding: 0.55rem;
   object-fit: contain;
-  border-radius: 0.5rem;
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--text) 7%, transparent);
 }
 
 .layout-grid__modal-body {
@@ -95,8 +122,74 @@
   min-width: 0;
 }
 
-@media (max-width: 720px) {
+.layout-grid__close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1.5px solid color-mix(in srgb, var(--text) 40%, transparent);
+  border-radius: var(--stage-radius);
+  background: transparent;
+  color: var(--text);
+  font-size: 1rem;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.layout-grid__close:hover,
+.layout-grid__close:focus-visible {
+  border-color: var(--section-accent, var(--text));
+  color: var(--section-accent, var(--text));
+}
+
+/* Celular: experiências viram carrossel horizontal com snap. */
+@media (max-width: 767px) {
   .layout-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    gap: var(--gap-sm);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 0.5rem;
+    scrollbar-width: none;
+  }
+
+  .layout-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .layout-grid__cell {
+    flex: 0 0 78%;
+    min-width: 0;
+    scroll-snap-align: center;
+  }
+
+  .layout-grid__name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Modal: logo em cima e o texto ocupando a largura toda (sem quebrar em colunas estreitas). */
+  .layout-grid__modal {
+    padding: var(--gap-sm);
+  }
+
+  .layout-grid__modal-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding-right: 2.25rem;
+  }
+
+  .layout-grid__modal-logo {
+    width: 3.75rem;
+    height: 3.75rem;
   }
 }

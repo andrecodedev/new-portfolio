@@ -266,6 +266,8 @@ export default function GateEditor({
         title: gateData.sectionName.trim() || copy.gateRootTitle,
         description: copy.gateRootDesc,
         icon: <TreeHeaderIcon />,
+        enabled: gateData.enabled,
+        showToggle: true,
         draggable: false,
         addLabel: copy.addBlock,
         addOptions: [
@@ -302,6 +304,10 @@ export default function GateEditor({
           selectedId={editingId}
           onSelect={onEditingIdChange}
           onToggleEnabled={(id, enabled) => {
+            if (id === GATE_ROOT_ID) {
+              onChange({ ...gateData, enabled })
+              return
+            }
             const root = treeRootId(id)
             const slide = gateData.slides.find((item) => item.id === root)
             if (!slide) return
