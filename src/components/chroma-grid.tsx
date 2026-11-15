@@ -93,19 +93,19 @@ const THEMES: Record<string, Record<string, string>> = {
 
 const DEFAULT_ITEMS: ChromaGridItem[] = [
   {
-    image: 'https://images.unsplash.com/photo-1514519334989-3d5c8b1a9f91?w=800&q=80&auto=format&fit=crop',
+    image: '/showcase/galeria-01.jpg',
     title: 'Golden Hour',
     subtitle: 'Sky study',
     accent: '#ff8a4c',
   },
   {
-    image: 'https://images.unsplash.com/photo-1520930528075-4ea5ead759f5?w=800&q=80&auto=format&fit=crop',
+    image: '/showcase/galeria-02.jpg',
     title: 'Steel Arches',
     subtitle: 'Sculpture',
     accent: '#ff5a36',
   },
   {
-    image: 'https://images.unsplash.com/photo-1511300636408-a63a89df3482?w=800&q=80&auto=format&fit=crop',
+    image: '/showcase/galeria-03.jpg',
     title: 'Black Beach',
     subtitle: 'Landscape',
     accent: '#a98bff',

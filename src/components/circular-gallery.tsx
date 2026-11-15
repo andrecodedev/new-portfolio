@@ -70,18 +70,18 @@ const CLASSES = {
 }
 const STEPS: Record<string, number> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }
 const DEFAULT_ITEMS: CircularGalleryItem[] = [
-  { image: 'https://picsum.photos/seed/1/800/600', text: 'Bridge' },
-  { image: 'https://picsum.photos/seed/2/800/600', text: 'Desk Setup' },
-  { image: 'https://picsum.photos/seed/3/800/600', text: 'Waterfall' },
-  { image: 'https://picsum.photos/seed/4/800/600', text: 'Strawberries' },
-  { image: 'https://picsum.photos/seed/5/800/600', text: 'Deep Diving' },
-  { image: 'https://picsum.photos/seed/16/800/600', text: 'Train Track' },
-  { image: 'https://picsum.photos/seed/17/800/600', text: 'Santorini' },
-  { image: 'https://picsum.photos/seed/8/800/600', text: 'Blurry Lights' },
-  { image: 'https://picsum.photos/seed/9/800/600', text: 'New York' },
-  { image: 'https://picsum.photos/seed/10/800/600', text: 'Good Boy' },
-  { image: 'https://picsum.photos/seed/21/800/600', text: 'Coastline' },
-  { image: 'https://picsum.photos/seed/12/800/600', text: 'Palm Trees' },
+  { image: '/showcase/galeria-01.jpg', text: 'Studio' },
+  { image: '/showcase/galeria-02.jpg', text: 'Behind the scenes' },
+  { image: '/showcase/galeria-03.jpg', text: 'Process' },
+  { image: '/showcase/galeria-04.jpg', text: 'Detail' },
+  { image: '/showcase/galeria-05.jpg', text: 'Draft' },
+  { image: '/showcase/galeria-06.jpg', text: 'Layout' },
+  { image: '/showcase/galeria-07.jpg', text: 'Color' },
+  { image: '/showcase/galeria-08.jpg', text: 'Texture' },
+  { image: '/showcase/galeria-09.jpg', text: 'Rhythm' },
+  { image: '/showcase/galeria-10.jpg', text: 'Shape' },
+  { image: '/showcase/galeria-11.jpg', text: 'Light' },
+  { image: '/showcase/galeria-12.jpg', text: 'Result' },
 ]
 
 const VERTEX = `#version 300 es

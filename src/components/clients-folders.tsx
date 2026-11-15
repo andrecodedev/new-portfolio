@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react'
+import { useRef, useState, type CSSProperties } from 'react'
 import { ArrowLeft, CaretRight, FolderSimple } from '@phosphor-icons/react'
 import Folder from './Folder'
 import type { WorkPageCopy } from '../i18n/copy'
@@ -66,6 +66,15 @@ function projectItems(projects: readonly Project[], variant: 'peek' | 'open') {
 
 export function ClientsFolders({ clients, isMobile }: ClientsFoldersProps) {
   const [path, setPath] = useState<Path>({ level: 'root' })
+  const shellRef = useRef<HTMLDivElement>(null)
+  // Ao entrar numa pasta o conteúdo muda de altura (duas pastas viram uma). Travar a altura
+  // evita o documento encolher e a página "pular" de posição enquanto o usuário olha.
+  const [lockH, setLockH] = useState<number | null>(null)
+  const go = (next: Path) => {
+    if (next.level === 'root') setLockH(null)
+    else if (path.level === 'root' && shellRef.current) setLockH(shellRef.current.offsetHeight)
+    setPath(next)
+  }
   const size = isMobile ? 1 : 1.2
 
   const rootFolder: RootFolder | null =
@@ -77,14 +86,19 @@ export function ClientsFolders({ clients, isMobile }: ClientsFoldersProps) {
 
   const goBack = () => {
     if (path.level === 'files') {
-      setPath({ level: 'projects', rootIndex: path.rootIndex })
+      go({ level: 'projects', rootIndex: path.rootIndex })
       return
     }
-    if (path.level === 'projects') setPath({ level: 'root' })
+    if (path.level === 'projects') go({ level: 'root' })
   }
 
   return (
-    <div className="showcase-folders-shell">
+    <div
+      ref={shellRef}
+      className="showcase-folders-shell"
+      data-locked={lockH ? '' : undefined}
+      style={lockH ? { minHeight: lockH } : undefined}
+    >
       {path.level !== 'root' && (
         <nav className="folders-path" aria-label={clients.heading}>
           <button
@@ -101,7 +115,7 @@ export function ClientsFolders({ clients, isMobile }: ClientsFoldersProps) {
               <button
                 type="button"
                 className="folders-path__crumb folders-path__crumb--home"
-                onClick={() => setPath({ level: 'root' })}
+                onClick={() => go({ level: 'root' })}
                 aria-label={clients.heading}
                 title={clients.heading}
               >
@@ -115,7 +129,7 @@ export function ClientsFolders({ clients, isMobile }: ClientsFoldersProps) {
                   <button
                     type="button"
                     className="folders-path__crumb"
-                    onClick={() => setPath({ level: 'projects', rootIndex: path.rootIndex })}
+                    onClick={() => go({ level: 'projects', rootIndex: path.rootIndex })}
                   >
                     {rootFolder.label}
                   </button>
@@ -163,7 +177,7 @@ export function ClientsFolders({ clients, isMobile }: ClientsFoldersProps) {
                 theme="dark"
                 items={projectItems(folder.projects, 'peek')}
                 onOpenChange={(open) => {
-                  if (open) setPath({ level: 'projects', rootIndex })
+                  if (open) go({ level: 'projects', rootIndex })
                 }}
               />
             </div>
@@ -192,7 +206,7 @@ export function ClientsFolders({ clients, isMobile }: ClientsFoldersProps) {
               theme="dark"
               items={projectItems(rootFolder.projects, 'open')}
               onItemClick={(_item, index) => {
-                setPath({
+                go({
                   level: 'files',
                   rootIndex: path.rootIndex,
                   projectIndex: index,

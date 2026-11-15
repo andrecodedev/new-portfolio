@@ -46,70 +46,16 @@ export type CircularCarouselProps = {
   style?: React.CSSProperties
 }
 
-const photo = (id: string) =>
-  `https://images.unsplash.com/${id}?w=900&q=80&auto=format&fit=max&sat=-100`
-
+/** Imagens genéricas locais até você definir o conteúdo real. */
 const DEFAULT_ITEMS: CircularCarouselItem[] = [
-  {
-    src: photo('photo-1506744038136-46273834b3fb'),
-    alt: 'Mist drifting through a mountain valley',
-    title: 'Valley',
-    subtitle: 'Landscape',
-  },
-  {
-    src: photo('photo-1524504388940-b1c1722653e1'),
-    alt: 'A woman with long hair in soft studio light',
-    title: 'Portrait',
-    subtitle: 'Studio',
-  },
-  {
-    src: photo('photo-1486406146926-c627a92ad1ab'),
-    alt: 'Glass towers seen from street level',
-    title: 'Towers',
-    subtitle: 'Architecture',
-  },
-  {
-    src: photo('photo-1502680390469-be75c86b636f'),
-    alt: 'A surfer carving inside a breaking wave',
-    title: 'Swell',
-    subtitle: 'Ocean',
-  },
-  {
-    src: photo('photo-1487958449943-2429e8be8625'),
-    alt: 'An angular white building against the sky',
-    title: 'Facade',
-    subtitle: 'Architecture',
-  },
-  {
-    src: photo('photo-1509631179647-0177331693ae'),
-    alt: 'A model in striped trousers leaning on a wall',
-    title: 'Pose',
-    subtitle: 'Editorial',
-  },
-  {
-    src: photo('photo-1519681393784-d120267933ba'),
-    alt: 'The Milky Way above snowy peaks',
-    title: 'Night',
-    subtitle: 'Sky',
-  },
-  {
-    src: photo('photo-1485968579580-b6d095142e6e'),
-    alt: 'A woman in a long coat on a city street',
-    title: 'Street',
-    subtitle: 'Editorial',
-  },
-  {
-    src: photo('photo-1493246507139-91e8fad9978e'),
-    alt: 'Mountains mirrored in a still lake',
-    title: 'Mirror',
-    subtitle: 'Landscape',
-  },
-  {
-    src: photo('photo-1511818966892-d7d671e672a2'),
-    alt: 'A glass skyscraper under a cloudy sky',
-    title: 'Glass',
-    subtitle: 'Architecture',
-  },
+  { src: '/showcase/galeria-01.jpg', alt: 'Studio', title: 'Studio' },
+  { src: '/showcase/galeria-02.jpg', alt: 'Behind the scenes', title: 'Behind the scenes' },
+  { src: '/showcase/galeria-03.jpg', alt: 'Process', title: 'Process' },
+  { src: '/showcase/galeria-04.jpg', alt: 'Detail', title: 'Detail' },
+  { src: '/showcase/galeria-05.jpg', alt: 'Draft', title: 'Draft' },
+  { src: '/showcase/galeria-06.jpg', alt: 'Layout', title: 'Layout' },
+  { src: '/showcase/galeria-07.jpg', alt: 'Color', title: 'Color' },
+  { src: '/showcase/galeria-08.jpg', alt: 'Texture', title: 'Texture' },
 ]
 
 const PRESETS = {

@@ -47,69 +47,20 @@ export type FlexCarouselProps = {
   style?: React.CSSProperties
 }
 
-const photo = (id: string) => `https://images.unsplash.com/${id}?w=1200&q=80&auto=format&fit=max`
-
+/** Imagens genéricas locais (formatos variados: quadrado, horizontal e estreito). */
 const DEFAULT_ITEMS: FlexCarouselItem[] = [
-  {
-    src: photo('photo-1737071371043-761e02b1ef95'),
-    alt: 'An iridescent chrome sculpture of a head',
-    title: 'Iridescence',
-  },
-  {
-    src: photo('photo-1693645325828-62cd35c8da8f'),
-    alt: 'A person in dark clothes standing in front of a white backdrop',
-    title: 'White Room',
-  },
-  {
-    src: photo('photo-1739056238917-d89cd05c48d5'),
-    alt: 'A twisted chrome form on black',
-    title: 'Liquid Metal',
-  },
-  {
-    src: photo('photo-1747191092806-c7da11881986'),
-    alt: 'A clay bust shown in profile',
-    title: 'Clay Study',
-  },
-  {
-    src: photo('photo-1605034313761-73ea4a0cfbf3'),
-    alt: 'Black and white low top sneakers',
-    title: 'Low Tops',
-  },
-  {
-    src: photo('photo-1495462911434-be47104d70fa'),
-    alt: 'A woman in a wide black hat',
-    title: 'Brim',
-  },
-  {
-    src: photo('photo-1786835568925-20cd20007ed0'),
-    alt: 'Three swirling shapes in white, gold and silver on grey',
-    title: 'Three Forms',
-  },
-  {
-    src: photo('photo-1770249196550-ff6c641165cb'),
-    alt: 'A chrome humanoid sculpture',
-    title: 'Automaton',
-  },
-  {
-    src: photo('photo-1787181875088-087d612262a7'),
-    alt: 'A black textured sculpture with an opening at its center',
-    title: 'Obsidian',
-  },
-  {
-    src: photo('photo-1770062422885-2dfcbe8fb65b'),
-    alt: 'A woman in a white shirt crouching on a dark set',
-    title: 'Poise',
-  },
-  {
-    src: photo('photo-1726910133626-9b573eca70ff'),
-    alt: 'Black curved shapes stacked like a fan',
-    title: 'Fins',
-  },
-  {
-    src: photo('photo-1604854574958-59047362c165'),
-    alt: 'A white plaster bust on a black table',
-    title: 'Plaster',
-  },
+  { src: '/showcase/galeria-01.jpg', alt: 'Studio', title: 'Studio' },
+  { src: '/showcase/galeria-02.jpg', alt: 'Behind the scenes', title: 'Behind the scenes' },
+  { src: '/showcase/galeria-03.jpg', alt: 'Process', title: 'Process' },
+  { src: '/showcase/galeria-04.jpg', alt: 'Detail', title: 'Detail' },
+  { src: '/showcase/galeria-05.jpg', alt: 'Draft', title: 'Draft' },
+  { src: '/showcase/galeria-06.jpg', alt: 'Layout', title: 'Layout' },
+  { src: '/showcase/galeria-07.jpg', alt: 'Color', title: 'Color' },
+  { src: '/showcase/galeria-08.jpg', alt: 'Texture', title: 'Texture' },
+  { src: '/showcase/galeria-09.jpg', alt: 'Rhythm', title: 'Rhythm' },
+  { src: '/showcase/galeria-10.jpg', alt: 'Shape', title: 'Shape' },
+  { src: '/showcase/galeria-11.jpg', alt: 'Light', title: 'Light' },
+  { src: '/showcase/galeria-12.jpg', alt: 'Result', title: 'Result' },
 ]
 
 const BEND_PRESETS = {
@@ -572,11 +523,13 @@ export default function FlexCarousel({
       const image = new Image()
       image.crossOrigin = 'anonymous'
       image.decoding = 'async'
-      image.onload = () => {
+      const finish = () => {
         if (!alive || !slots.includes(slot)) return
+        const nw = image.naturalWidth || 1
+        const nh = image.naturalHeight || 1
         texture.image = image
         texture.update()
-        slot.image = [image.naturalWidth || 1, image.naturalHeight || 1]
+        slot.image = [nw, nh]
         slot.aspect = slot.image[0] / slot.image[1]
         try {
           const probe = document.createElement('canvas')
@@ -601,6 +554,7 @@ export default function FlexCarousel({
         dirty = true
         start()
       }
+      image.onload = finish
       image.onerror = () => {
         if (!alive) return
         slot.failed = true

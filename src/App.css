@@ -4431,11 +4431,25 @@ button.fan-card--contact:hover { background: #fff; }
 }
 
 .blog-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   margin-top: auto;
   padding-top: 0.4rem;
   font-family: var(--font-mono);
   font-size: var(--text-ui);
   color: var(--section-accent, var(--text));
+}
+
+.blog-card__cta svg {
+  flex: none;
+  font-size: 1.05em;
+  transition: transform 0.25s ease;
+}
+
+.blog-card__link:hover .blog-card__cta svg,
+.blog-card__link:focus-visible .blog-card__cta svg {
+  transform: translateX(3px);
 }
 
 .blog-tags {
@@ -4468,14 +4482,17 @@ button.fan-card--contact:hover { background: #fff; }
 .blog-post {
   box-sizing: border-box;
   width: 100%;
-  max-width: 780px;
+  max-width: 860px;
   margin: 0 auto;
-  /* Libera o cabeçalho fixo do topo. */
-  padding: calc(var(--gap) * 2.4) calc(var(--content-x) - var(--edge)) 0;
+  /* Libera o cabeçalho fixo do topo; laterais confortáveis (antes ficava só ~430px de texto). */
+  padding: calc(var(--gap) * 2.4) clamp(1.25rem, 5vw, 2.5rem) 0;
   flex-shrink: 0;
 }
 
 .blog-post__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   margin-bottom: var(--gap);
   padding: 0;
   border: 0;
@@ -4508,16 +4525,16 @@ button.fan-card--contact:hover { background: #fff; }
 .blog-post__title {
   margin: 0;
   font-family: var(--font-sans);
-  font-size: var(--text-display);
-  line-height: 1.15;
+  font-size: clamp(1.7rem, 1.3rem + 1.5vw, 2.4rem);
+  line-height: 1.2;
   font-weight: 600;
   color: var(--text);
 }
 
 .blog-post__body {
   font-family: var(--font-body, var(--font-sans));
-  font-size: var(--text-body);
-  line-height: 1.8;
+  font-size: clamp(1rem, 0.96rem + 0.18vw, 1.0625rem);
+  line-height: 1.75;
   color: var(--text);
 }
 
@@ -4533,7 +4550,7 @@ button.fan-card--contact:hover { background: #fff; }
 .blog-post__body h2 {
   margin-top: 2rem;
   font-family: var(--font-sans);
-  font-size: var(--text-lead);
+  font-size: clamp(1.15rem, 1.05rem + 0.5vw, 1.4rem);
   font-weight: 600;
 }
 
@@ -4569,13 +4586,9 @@ button.fan-card--contact:hover { background: #fff; }
     padding-top: calc(var(--gap) * 3);
   }
 
-  .blog-post__title {
-    font-size: calc(var(--text-display) * 0.9);
-  }
-
   .blog-post__body {
-    font-size: var(--text-ui);
-    line-height: 1.75;
+    font-size: 1rem;
+    line-height: 1.7;
   }
 }
 
@@ -4613,6 +4626,14 @@ button.fan-card--contact:hover { background: #fff; }
   width: 100%;
   max-width: 1240px;
   margin: 0 auto;
+  /* O navegador não deve reposicionar o scroll quando as pastas trocam de nível. */
+  overflow-anchor: none;
+}
+
+.showcase-folders-shell[data-locked] {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* Barra de caminho: voltar + migalhas clicáveis (estilo gerenciador de arquivos). */

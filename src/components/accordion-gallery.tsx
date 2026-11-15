@@ -37,11 +37,11 @@ export type AccordionGalleryProps = {
 }
 
 const DEFAULT_ITEMS: AccordionGalleryItem[] = [
-  { image: 'https://picsum.photos/id/1015/900/1200', label: 'Canyon', link: '#' },
-  { image: 'https://picsum.photos/id/1018/900/1200', label: 'Ridgeline', link: '#' },
-  { image: 'https://picsum.photos/id/1039/900/1200', label: 'Falls', link: '#' },
-  { image: 'https://picsum.photos/id/1043/900/1200', label: 'Harbour', link: '#' },
-  { image: 'https://picsum.photos/id/1044/900/1200', label: 'Skyline', link: '#' },
+  { image: '/showcase/accordion-1.svg', label: 'Canyon', link: '#' },
+  { image: '/showcase/accordion-2.svg', label: 'Ridgeline', link: '#' },
+  { image: '/showcase/accordion-3.svg', label: 'Falls', link: '#' },
+  { image: '/showcase/accordion-4.svg', label: 'Harbour', link: '#' },
+  { image: '/showcase/accordion-5.svg', label: 'Skyline', link: '#' },
 ]
 
 export default function AccordionGallery({

@@ -62,6 +62,10 @@ export type AboutPageCopy = PageCopy & {
     heading: string
     labels: readonly string[]
   }
+  /** Carrossel final (provisório): nome de cada imagem, na ordem. Troque junto com as imagens. */
+  gallery: {
+    labels: readonly string[]
+  }
   achievements: readonly AchievementEntry[]
   experience: readonly ExperienceEntry[]
   highlights: {
@@ -411,6 +415,9 @@ const pt: Dictionary = {
       moments: {
         heading: 'Momentos',
         labels: ['Na faculdade', 'Com o time', 'Em eventos', 'Na mentoria', 'No dia a dia'],
+      },
+      gallery: {
+        labels: ['Estúdio', 'Bastidores', 'Processo', 'Detalhe', 'Rascunho', 'Layout', 'Cor', 'Textura', 'Ritmo', 'Forma', 'Luz', 'Resultado'],
       },
       achievements: [
         {
@@ -869,6 +876,9 @@ const en: Dictionary = {
         heading: 'Moments',
         labels: ['At college', 'With the team', 'At events', 'Mentoring', 'Day to day'],
       },
+      gallery: {
+        labels: ['Studio', 'Behind the scenes', 'Process', 'Detail', 'Draft', 'Layout', 'Color', 'Texture', 'Rhythm', 'Shape', 'Light', 'Result'],
+      },
       achievements: [
         {
           image: ACHIEVEMENT_IMAGES.prouni,
@@ -1325,6 +1335,9 @@ const es: Dictionary = {
       moments: {
         heading: 'Momentos',
         labels: ['En la universidad', 'Con el equipo', 'En eventos', 'En la mentoría', 'Del día a día'],
+      },
+      gallery: {
+        labels: ['Estudio', 'Entre bastidores', 'Proceso', 'Detalle', 'Borrador', 'Diseño', 'Color', 'Textura', 'Ritmo', 'Forma', 'Luz', 'Resultado'],
       },
       achievements: [
         {

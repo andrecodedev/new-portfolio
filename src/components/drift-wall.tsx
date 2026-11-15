@@ -36,9 +36,8 @@ export type DriftWallProps = {
 }
 
 const DEFAULT_ITEMS: DriftWallItem[] = Array.from({ length: 15 }, (_, i) => {
-  const ids = [1015, 1025, 1039, 1043, 1044, 1050, 1062, 1069, 1074, 1080, 1084, 106, 110, 133, 164]
   return {
-    image: `https://picsum.photos/id/${ids[i % ids.length]}/600/400`,
+    image: `/showcase/galeria-${String((i % 12) + 1).padStart(2, '0')}.jpg`,
     title: `Tile ${i + 1}`,
     href: undefined,
   }

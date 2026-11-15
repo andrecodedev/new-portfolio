@@ -30,6 +30,8 @@ import AccordionGallery from './components/accordion-gallery'
 import { ClientsFolders } from './components/clients-folders'
 import ChromaGrid from './components/chroma-grid'
 import {
+  ArrowLeft,
+  ArrowRight,
   Briefcase,
   ChatCircleDots,
   Code,
@@ -1135,14 +1137,23 @@ function AboutFan({ onNavigate }: NavigateProps) {
   )
 }
 
+const FLEX_IMAGES = Array.from({ length: 12 }, (_, i) => `/showcase/galeria-${String(i + 1).padStart(2, '0')}.jpg`)
+
 function AboutExtras({ onNavigate }: NavigateProps) {
   const isMobile = useIsMobile()
+  const { t } = useLocale()
+  const flexLabels = t.pages.about.gallery.labels
   return (
     <>
       <AboutFan onNavigate={onNavigate} />
       <AboutJourney />
       <section className="page-block showcase-flex">
         <FlexCarousel
+          items={FLEX_IMAGES.map((src, index) => ({
+            src,
+            alt: flexLabels[index],
+            title: flexLabels[index],
+          }))}
           preset="liquid"
           intro="rise"
           cardHeight={isMobile ? 0.46 : 0.5}
@@ -1214,7 +1225,10 @@ function BlogCard({
         <h3 className="blog-card__title">{content.title}</h3>
         <p className="blog-card__excerpt">{content.excerpt}</p>
         <BlogTags tags={post.tags} />
-        <span className="blog-card__cta">{blog.readMore} →</span>
+        <span className="blog-card__cta">
+          {blog.readMore}
+          <ArrowRight weight="bold" aria-hidden />
+        </span>
       </a>
     </li>
   )
@@ -1277,7 +1291,8 @@ function BlogPostPage({ onNavigate }: NavigateProps) {
           className="blog-post__back"
           onClick={() => onNavigate(PAGE_META.blog.path)}
         >
-          ← {blog.backToList}
+          <ArrowLeft weight="bold" aria-hidden />
+          {blog.backToList}
         </button>
 
         {post ? (
@@ -1523,17 +1538,10 @@ const GALLERY_ITEMS = [
 /** Imagens provisórias da galeria de momentos (Sobre): artes em /public/showcase. Trocar por fotos reais. */
 const ACCORDION_IMAGES = [1, 2, 3, 4, 5].map((n) => `/showcase/accordion-${n}.svg`)
 
-/** Imagens de exemplo (Unsplash) até você definir o conteúdo real. */
-const SPIRAL_IMAGES = [
-  ['photo-1506744038136-46273834b3fb', 'Mountain valley'],
-  ['photo-1486406146926-c627a92ad1ab', 'Glass towers'],
-  ['photo-1502680390469-be75c86b636f', 'Surfer in a wave'],
-  ['photo-1519681393784-d120267933ba', 'Milky Way over peaks'],
-  ['photo-1493246507139-91e8fad9978e', 'Mountains in a lake'],
-  ['photo-1487958449943-2429e8be8625', 'White building'],
-].map(([id, alt]) => ({
-  src: `https://images.unsplash.com/${id}?w=400&q=80&auto=format&fit=crop`,
-  alt,
+/** Imagens genéricas locais (Contato) até você definir o conteúdo real. */
+const SPIRAL_IMAGES = [1, 2, 4, 5, 7, 9, 10, 11].map((n) => ({
+  src: `/showcase/galeria-${String(n).padStart(2, '0')}.jpg`,
+  alt: `Imagem ${n}`,
 }))
 
 function useDocumentTheme(): Theme {
