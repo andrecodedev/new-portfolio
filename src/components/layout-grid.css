@@ -65,8 +65,13 @@
   z-index: 200;
   border: 0;
   padding: 0;
-  background: rgba(0, 0, 0, 0.65);
+  /* Fundo suave: mais leve que antes (0.65) e ainda mais leve no tema claro. */
+  background: rgba(0, 0, 0, 0.38);
   cursor: pointer;
+}
+
+:root[data-theme='light'] .layout-grid__backdrop {
+  background: rgba(0, 0, 0, 0.16);
 }
 
 .layout-grid__modal-layer {

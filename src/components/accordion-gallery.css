@@ -32,16 +32,13 @@
   outline: none;
   transform-style: preserve-3d;
   transform-origin: center center;
-  background: #0a0713;
-  box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.8);
+  background: color-mix(in srgb, var(--ag-overlay) 85%, #808080);
   will-change: flex-grow, transform;
   -webkit-tap-highlight-color: transparent;
 }
 
 .ag-panel:focus-visible {
-  box-shadow:
-    0 0 0 2px var(--ag-accent),
-    0 10px 30px -18px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 0 2px var(--ag-accent);
 }
 
 .ag-panel__frame {
@@ -118,7 +115,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   opacity: 0;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
 }
 
 @media (prefers-reduced-motion: reduce) {

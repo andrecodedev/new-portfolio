@@ -9,6 +9,7 @@ import {
 } from 'react'
 import gsap from 'gsap'
 import { SkeletonImage } from './skeleton-image'
+import DigitCounter from './digit-counter'
 import './depth-carousel.css'
 
 export type DepthCarouselItem = {
@@ -35,6 +36,8 @@ export type DepthCarouselProps = {
   loop?: boolean
   showControls?: boolean
   showIndicators?: boolean
+  /** Tipo de paginação: pontinhos ou contador "01 / 06" (igual aos outros carrosséis). */
+  indicator?: 'dots' | 'counter'
   onChange?: (index: number, item: DepthCarouselItem) => void
   /** Quando definido, o card em foco pode ser clicado para virar e revelar este conteúdo. */
   renderBack?: (item: DepthCarouselItem, index: number) => ReactNode
@@ -75,6 +78,7 @@ export function DepthCarousel({
   loop = true,
   showControls = true,
   showIndicators = true,
+  indicator = 'dots',
   onChange,
   renderBack,
   className = '',
@@ -280,6 +284,9 @@ export function DepthCarousel({
         if (Math.abs(dy) > 8 && Math.abs(dy) >= Math.abs(dx)) {
           drag.undecided = false
           dragRef.current = null
+          // Era scroll vertical da página: o tween foi morto no pointerdown, então assenta
+          // no card mais próximo (senão a posição ficava fracionada e os cards travavam).
+          setFocus(Math.round(posRef.current), true)
           return
         }
         if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) {
@@ -300,14 +307,19 @@ export function DepthCarousel({
       posRef.current = drag.startPos - dx / stepPx
       layout(posRef.current)
     },
-    [layout],
+    [layout, setFocus],
   )
 
   const onPointerEnd = useCallback(() => {
     const drag = dragRef.current
     if (!drag) return
     dragRef.current = null
-    if (!drag.moved) return
+    if (!drag.moved) {
+      // Toque sem arrastar: o onPointerDown matou o tween em andamento e a posição ficava
+      // fracionada (cards travados/transparentes, flip no card errado). Assenta no mais próximo.
+      setFocus(Math.round(posRef.current), true)
+      return
+    }
     const cfg = cfgRef.current
     const stepPx = Math.max(cfg.cardWidth * 0.55 * scaleRef.current, 40)
     const projected = posRef.current - (drag.v * 180) / stepPx
@@ -487,7 +499,12 @@ export function DepthCarousel({
         </div>
       )}
 
-      {showIndicators && count > 1 && (
+      {showIndicators && count > 1 && indicator === 'counter' && (
+        <div className="depth-carousel__count">
+          <DigitCounter value={active + 1} total={count} />
+        </div>
+      )}
+      {showIndicators && count > 1 && indicator !== 'counter' && (
         <div className="depth-carousel__dots" role="tablist" aria-label="Slides">
           {data.map((_, i) => (
             <button

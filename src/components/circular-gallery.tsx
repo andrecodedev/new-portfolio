@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { CaretLeft, CaretRight } from '@phosphor-icons/react'
+import DigitCounter from './digit-counter'
 import './circular-gallery.css'
 
 /* Componente do React Bits (Circular Gallery), portado para TSX. WebGL2 puro, sem libs. */
@@ -547,7 +548,7 @@ export default function CircularGallery({
         desc.className = CLASSES.labelDesc
         el.append(title, desc)
         labelLayer.appendChild(el)
-        return { el, title, desc, slot: null, font: '', text: '', description: '' }
+        return { el, title, desc, slot: null, font: '', text: '', description: '', isActive: false }
       })
     }
 
@@ -719,6 +720,17 @@ export default function CircularGallery({
           if (entry.font !== labelFont) {
             entry.font = labelFont
             entry.el.style.font = labelFont
+          }
+          // Card passou a ser o ativo: reinicia a animação de entrada do título e da descrição
+          // (mesma do carrossel de Sobre: sobe 8px e aparece).
+          const isActive = card.slot === state.active
+          if (entry.isActive !== isActive) {
+            entry.isActive = isActive
+            if (isActive) {
+              entry.el.classList.remove('is-in')
+              void entry.el.offsetWidth
+              entry.el.classList.add('is-in')
+            }
           }
           const size = card.labelSize
           // Com descrição há uma segunda linha: afasta um pouco mais do card.
@@ -1207,7 +1219,7 @@ export default function CircularGallery({
       </button>
       {showCounter ? (
         <div className={CLASSES.counter} aria-hidden="true" data-arrows={showArrows ? '' : undefined}>
-          {String((active % count) + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}
+          <DigitCounter value={(active % count) + 1} total={count} />
         </div>
       ) : null}
       {showArrows ? (

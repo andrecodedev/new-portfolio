@@ -27,6 +27,7 @@ import FlexCarousel from './components/flex-carousel'
 import BounceCards from './components/bounce-cards'
 import { BLOG_POSTS, findBlogPost, formatBlogDate, type BlogBlock } from './data/blog-posts'
 import AccordionGallery from './components/accordion-gallery'
+import { ClientsFolders } from './components/clients-folders'
 import ChromaGrid from './components/chroma-grid'
 import {
   Briefcase,
@@ -104,6 +105,8 @@ import {
   ScrollRootContext,
   sectionStagger,
   useScrollReveal,
+  ScrollFade,
+  ScrollFadeItem,
   useScrollViewport,
   visibleRiseVariants,
 } from './motion/scroll-reveal'
@@ -1444,6 +1447,7 @@ function useIsMobile() {
 function WorkExtras() {
   const { t } = useLocale()
   const isMobile = useIsMobile()
+  const galleryDark = useDocumentTheme() === 'dark'
   const stats = t.pages.work.stats
 
   return (
@@ -1451,20 +1455,25 @@ function WorkExtras() {
       <WorkSkillsMarquee />
       <WorkGithub />
 
-      <section className="page-block work-stats">
+      <ScrollFade className="page-block work-stats" stagger={0.09}>
         <ul className="work-stats__grid">
           {stats.map((stat) => (
-            <li className="work-stats__item" key={stat.label}>
+            <ScrollFadeItem as="li" className="work-stats__item" key={stat.label}>
               <p className="work-stats__value">{stat.value}</p>
               <p className="work-stats__label">{stat.label}</p>
-            </li>
+            </ScrollFadeItem>
           ))}
         </ul>
-      </section>
+      </ScrollFade>
 
-      <section className="page-block about-journey" data-accent="work">
+      <ScrollFade className="page-block about-journey" data-accent="work">
         <h2 className="about-journey__title">{t.pages.about.tabs.experience}</h2>
         <AboutExperienceList items={t.pages.about.experience} accent="work" />
+      </ScrollFade>
+
+      <section className="page-block about-journey" data-accent="work">
+        <h2 className="about-journey__title">{t.pages.work.clients.heading}</h2>
+        <ClientsFolders clients={t.pages.work.clients} isMobile={isMobile} />
       </section>
 
       <section className="page-block showcase-gallery">
@@ -1473,7 +1482,7 @@ function WorkExtras() {
         <CircularGallery
           items={GALLERY_ITEMS}
           bend={3}
-          textColor="#ffffff"
+          textColor={galleryDark ? '#ffffff' : '#171717'}
           borderRadius={0.05}
           scrollEase={0.05}
           itemSize={0.84}
@@ -1552,7 +1561,7 @@ function githubStatsUrl(title: string, locale: Locale, dark: boolean) {
   const loc = locale === 'en' ? 'en' : locale === 'es' ? 'es' : 'pt-br'
   const themeParams = dark
     ? 'title_color=ffffff&text_color=a3a3a3&icon_color=26a641&theme=dark'
-    : 'title_color=1f2937&text_color=4b5563&icon_color=216e39&theme=light'
+    : 'title_color=1f2937&text_color=4b5563&icon_color=216e39&theme=default'
   return `${GITHUB_STATS_HOST}/api?username=${GITHUB_USERNAME}&show_icons=true&include_all_commits=true&count_private=true&hide_border=true&custom_title=${encodeURIComponent(title)}&locale=${loc}&${themeParams}&bg_color=00000000`
 }
 
@@ -1560,7 +1569,7 @@ function githubLangsUrl(title: string, locale: Locale, dark: boolean) {
   const loc = locale === 'en' ? 'en' : locale === 'es' ? 'es' : 'pt-br'
   const themeParams = dark
     ? 'title_color=ffffff&text_color=a3a3a3&theme=dark'
-    : 'title_color=1f2937&text_color=4b5563&theme=light'
+    : 'title_color=1f2937&text_color=4b5563&theme=default'
   return `${GITHUB_STATS_HOST}/api/top-langs/?username=${GITHUB_USERNAME}&layout=compact&langs_count=12&card_width=495&hide_border=true&custom_title=${encodeURIComponent(title)}&locale=${loc}&${themeParams}&bg_color=00000000`
 }
 
@@ -1590,7 +1599,7 @@ function WorkGithub() {
   }, [])
 
   return (
-    <section className="page-block work-github" data-accent="work">
+    <ScrollFade className="page-block work-github" data-accent="work">
       <div className="work-github__card">
         <div className="work-github__head">
           <SiteIcon id="github" className="work-github__icon" />
@@ -1615,9 +1624,10 @@ function WorkGithub() {
             username={GITHUB_USERNAME}
             year={year}
             colorScheme={dark ? 'dark' : 'light'}
+            style={{ color: 'var(--text)' }}
             theme={{
               light: ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'],
-              dark: ['var(--btn-bg)', '#0e4429', '#006d32', '#26a641', '#39d353'],
+              dark: ['rgba(255,255,255,0.07)', '#0e4429', '#006d32', '#26a641', '#39d353'],
             }}
             blockRadius={2}
             blockMargin={GITHUB_BLOCK_MARGIN}
@@ -1633,22 +1643,31 @@ function WorkGithub() {
           />
         </div>
 
+        {/* As duas versões (escuro e claro) ficam no DOM e o CSS mostra a do tema atual:
+            trocar de tema não recarrega as imagens (antes piscava e "bugava"). */}
         <div className="work-github__stats">
-          <SkeletonImage
-            frameClassName="work-github__stats-frame"
-            className="work-github__stats-img"
-            src={githubStatsUrl(copy.statsAlt, locale, dark)}
-            alt={copy.statsAlt}
-          />
-          <SkeletonImage
-            frameClassName="work-github__stats-frame"
-            className="work-github__stats-img"
-            src={githubLangsUrl(copy.langsAlt, locale, dark)}
-            alt={copy.langsAlt}
-          />
+          {([true, false] as const).map((isDark) => (
+            <div
+              key={isDark ? 'dark' : 'light'}
+              className={`work-github__variant work-github__variant--${isDark ? 'dark' : 'light'}`}
+            >
+              <SkeletonImage
+                frameClassName="work-github__stats-frame"
+                className="work-github__stats-img"
+                src={githubStatsUrl(copy.statsAlt, locale, isDark)}
+                alt={copy.statsAlt}
+              />
+              <SkeletonImage
+                frameClassName="work-github__stats-frame"
+                className="work-github__stats-img"
+                src={githubLangsUrl(copy.langsAlt, locale, isDark)}
+                alt={copy.langsAlt}
+              />
+            </div>
+          ))}
         </div>
       </div>
-    </section>
+    </ScrollFade>
   )
 }
 
@@ -1749,7 +1768,7 @@ function WorkSkillsMarquee() {
   }, [reduce])
 
   return (
-    <section className="page-block work-skills" aria-hidden="true">
+    <ScrollFade className="page-block work-skills" aria-hidden="true">
       <div className="work-skills__viewport">
         <div
           className={`work-skills__track${reduce ? ' work-skills__track--static' : ''}`}
@@ -1765,12 +1784,13 @@ function WorkSkillsMarquee() {
           ))}
         </div>
       </div>
-    </section>
+    </ScrollFade>
   )
 }
 
 function AboutAchievements({ items }: { items: readonly AchievementEntry[] }) {
   const isMobile = useIsMobile()
+  const dark = useDocumentTheme() === 'dark'
   const carouselItems = useMemo(
     () => items.map((item) => ({ image: item.image, alt: item.title })),
     [items],
@@ -1781,6 +1801,7 @@ function AboutAchievements({ items }: { items: readonly AchievementEntry[] }) {
       <div className="about-achievements__stage">
         <DepthCarousel
           items={carouselItems}
+          indicator="counter"
           cardWidth={isMobile ? 260 : 440}
           cardHeight={isMobile ? 350 : 560}
           radius={10}
@@ -1789,7 +1810,8 @@ function AboutAchievements({ items }: { items: readonly AchievementEntry[] }) {
           spread={isMobile ? 50 : 110}
           tilt={isMobile ? 14 : 20}
           visibleCards={2}
-          falloff={0.28}
+          // No claro, escurecer os cards de trás vira "mancha preta": usa bem menos.
+          falloff={dark ? 0.28 : 0.1}
           blur={5}
           duration={650}
           renderBack={(_, i) => (
@@ -1821,17 +1843,36 @@ function AboutExperienceList({
 function AboutHighlightsPanel({ items }: { items: readonly HighlightEntry[] }) {
   const [active, setActive] = useState(items[0]?.id ?? '')
   const current = items.find((item) => item.id === active) ?? items[0]
+  const listRef = useRef<HTMLDivElement>(null)
+  const swipeRef = useRef<{ x: number; y: number } | null>(null)
+
+  // Seleciona um item e, no celular (lista rolável na horizontal), traz o chip para o início.
+  const select = (id: string) => {
+    setActive(id)
+    const list = listRef.current
+    const chip = list?.querySelector<HTMLElement>(`[data-hid="${id}"]`)
+    if (list && chip && list.scrollWidth > list.clientWidth) {
+      list.scrollTo({ left: chip.offsetLeft - list.offsetLeft, behavior: 'smooth' })
+    }
+  }
+
+  const step = (delta: number) => {
+    const index = items.findIndex((item) => item.id === current?.id)
+    const next = items[index + delta]
+    if (next) select(next.id)
+  }
 
   return (
     <div className="about-highlights">
       <div className="about-highlights__layout">
-        <div className="about-highlights__list">
+        <div className="about-highlights__list" ref={listRef}>
           {items.map((item, index) => (
             <button
               key={item.id}
+              data-hid={item.id}
               type="button"
               className={`about-highlights__item${item.id === active ? ' is-active' : ''}`}
-              onClick={() => setActive(item.id)}
+              onClick={() => select(item.id)}
             >
               <span className="about-highlights__index">{String(index + 1).padStart(2, '0')}</span>
               <span className="about-highlights__item-title">{item.title}</span>
@@ -1839,7 +1880,25 @@ function AboutHighlightsPanel({ items }: { items: readonly HighlightEntry[] }) {
           ))}
         </div>
         {current ? (
-          <div className="about-highlights__panel">
+          <div
+            className="about-highlights__panel"
+            // Deslizar para o lado no card troca de item (toque).
+            onPointerDown={(event) => {
+              if (event.pointerType === 'mouse') return
+              swipeRef.current = { x: event.clientX, y: event.clientY }
+            }}
+            onPointerUp={(event) => {
+              const start = swipeRef.current
+              swipeRef.current = null
+              if (!start) return
+              const dx = event.clientX - start.x
+              const dy = event.clientY - start.y
+              if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1)
+            }}
+            onPointerCancel={() => {
+              swipeRef.current = null
+            }}
+          >
             <div className="about-highlights__panel-content" key={current.id}>
               <span className="about-highlights__panel-index" aria-hidden="true">
                 {String(items.findIndex((item) => item.id === current.id) + 1).padStart(2, '0')}
@@ -1867,20 +1926,21 @@ function AboutJourney() {
   const { t } = useLocale()
   const page = t.pages.about
   const isMobile = useIsMobile()
+  const dark = useDocumentTheme() === 'dark'
 
   return (
     <>
-      <section className="page-block about-journey" data-accent="about" aria-label={page.tabs.video}>
+      <ScrollFade className="page-block about-journey" data-accent="about" aria-label={page.tabs.video}>
         <AboutVideo />
-      </section>
-      <section className="page-block about-journey" data-accent="about">
+      </ScrollFade>
+      <ScrollFade className="page-block about-journey" data-accent="about">
         <h2 className="about-journey__title">{page.tabs.details}</h2>
         <AboutHighlightsPanel items={page.highlights.items} />
-      </section>
-      <section className="page-block about-journey" data-accent="about">
+      </ScrollFade>
+      <ScrollFade className="page-block about-journey" data-accent="about">
         <h2 className="about-journey__title">{page.tabs.achievements}</h2>
         <AboutAchievements items={page.achievements} />
-      </section>
+      </ScrollFade>
       <section className="page-block about-accordion" data-accent="about">
         <h2 className="about-journey__title">{page.moments.heading}</h2>
         <AccordionGallery
@@ -1897,7 +1957,8 @@ function AboutJourney() {
           trigger="hover"
           accentColor="var(--section-accent)"
           overlayColor="var(--bg-outer)"
-          textColor="#ffffff"
+          // Sem sombra no texto; a cor acompanha o tema (branco sobre fundo claro sumia).
+          textColor={dark ? '#ffffff' : '#171717'}
           grayscale
           showLabels
           duration={0.6}

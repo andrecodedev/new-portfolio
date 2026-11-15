@@ -42,9 +42,7 @@
   perspective: 1200px;
   background: var(--bg-outer);
   border: 1.5px solid var(--text);
-  box-shadow:
-    0 30px 60px -20px rgba(0, 0, 0, 0.5),
-    0 8px 20px -10px rgba(0, 0, 0, 0.4);
+  box-shadow: none;
   will-change: transform, opacity, filter;
   cursor: pointer;
   transform: translate(-50%, -50%);
@@ -106,9 +104,7 @@
 .depth-carousel__card--flip .depth-carousel__face {
   background: var(--bg-outer);
   border: 1.5px solid var(--text);
-  box-shadow:
-    0 30px 60px -20px rgba(0, 0, 0, 0.5),
-    0 8px 20px -10px rgba(0, 0, 0, 0.4);
+  box-shadow: none;
 }
 
 .depth-carousel__card--flip .depth-carousel__face--back {
@@ -251,4 +247,14 @@
     width: 16px;
     height: 16px;
   }
+}
+
+/* Contador no lugar dos pontinhos: mesma posição da paginação. */
+.depth-carousel__count {
+  position: absolute;
+  top: calc(50% + (var(--dc-card-h, 380px) * var(--dc-scale, 1) / 2) + 22px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3000;
+  pointer-events: none;
 }

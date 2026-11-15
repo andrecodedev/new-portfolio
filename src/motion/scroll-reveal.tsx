@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type HTMLAttributes,
   type ReactNode,
   type RefObject,
 } from 'react'
@@ -89,17 +90,20 @@ const slideHide = { duration: 0.55, ease: easeOutSoft } as const
 const slideShow = { duration: 0.78, ease: easeOutSoft } as const
 const exitQuick = slideHide
 
+/**
+ * Sem stagger de propósito: título, linha, texto e botão começam juntos, com a mesma
+ * duração e curva (slideShow/slideHide), então chegam ao mesmo tempo. Com stagger de
+ * 0.06s (e outro dentro do título) o botão terminava ~0.12s depois dos demais.
+ */
 export const sectionStagger: Variants = {
   hidden: {
     transition: {
-      staggerChildren: 0.06,
-      staggerDirection: -1,
-      when: 'afterChildren',
+      staggerChildren: 0,
     },
   },
   show: {
     transition: {
-      staggerChildren: 0.06,
+      staggerChildren: 0,
       delayChildren: 0,
     },
   },
@@ -414,5 +418,87 @@ export function RevealButton({
     >
       {children}
     </motion.button>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Bloco que entra com fade ao aparecer na tela (mesma família do resto). */
+
+const fadeShow = { duration: 0.9, ease: easeOutSoft } as const
+
+function fadeBlockVariants(reduce: boolean, stagger: number): Variants {
+  if (reduce) return stillSlide
+  return {
+    hidden: { opacity: 0, y: 34, scale: 0.985, transition: slideHide },
+    show: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { ...fadeShow, staggerChildren: stagger, delayChildren: 0.05 },
+    },
+  }
+}
+
+function fadeItemVariants(reduce: boolean): Variants {
+  if (reduce) return stillSlide
+  return {
+    hidden: { opacity: 0, y: 22, transition: slideHide },
+    show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: easeOutExpo } },
+  }
+}
+
+type ScrollFadeProps = {
+  as?: 'section' | 'div'
+  className?: string
+  /** Atraso entre os filhos `ScrollFadeItem` (segundos). 0 = entram juntos. */
+  stagger?: number
+  children: ReactNode
+} & Omit<HTMLAttributes<HTMLElement>, 'className' | 'children'>
+
+/**
+ * Envolve um bloco da página: ele sobe e aparece quando entra na tela (depois do loader),
+ * igual aos demais componentes. Mantém o mesmo elemento/classes no DOM (use `as` e `className`).
+ */
+export function ScrollFade({
+  as = 'section',
+  className,
+  stagger = 0,
+  children,
+  ...rest
+}: ScrollFadeProps) {
+  const { canAnimate, reduce, playId } = useScrollReveal()
+  const viewport = useScrollViewport()
+  const Tag = as === 'div' ? motion.div : motion.section
+  return (
+    <Tag
+      key={playId}
+      className={className}
+      initial="hidden"
+      whileInView={canAnimate ? 'show' : 'hidden'}
+      viewport={{ ...viewport, amount: 0.12 }}
+      variants={fadeBlockVariants(reduce, stagger)}
+      {...(rest as object)}
+    >
+      {children}
+    </Tag>
+  )
+}
+
+/** Filho de um `ScrollFade` com `stagger`: entra em sequência com os irmãos. */
+export function ScrollFadeItem({
+  as = 'div',
+  className,
+  children,
+}: {
+  as?: 'div' | 'li'
+  className?: string
+  children: ReactNode
+}) {
+  const reduce = Boolean(useReducedMotion())
+  const Tag = as === 'li' ? motion.li : motion.div
+  return (
+    <Tag className={className} variants={fadeItemVariants(reduce)}>
+      {children}
+    </Tag>
   )
 }

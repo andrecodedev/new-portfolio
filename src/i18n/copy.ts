@@ -100,6 +100,20 @@ export type WorkPageCopy = PageCopy & {
   gallery: {
     heading: string
   }
+  /** Pastas aninhadas: empresa → projetos → arquivos. Itens provisórios. */
+  clients: {
+    heading: string
+    back: string
+    folders: readonly {
+      label: string
+      color: string
+      projects: readonly {
+        label: string
+        color: string
+        items: readonly { title: string; subtitle: string }[]
+      }[]
+    }[]
+  }
 }
 
 export type SpotCopy = AccentedCopy & {
@@ -301,6 +315,78 @@ const pt: Dictionary = {
       },
       gallery: {
         heading: 'Projetos em destaque',
+      },
+      clients: {
+        heading: 'Clientes e projetos',
+        back: 'Voltar',
+        folders: [
+          {
+            label: 'TEC4U',
+            color: '#8b5cf6',
+            projects: [
+              {
+                label: 'Nuvemshop',
+                color: '#3d8bff',
+                items: [
+                  { title: 'Loja de moda', subtitle: 'E-commerce na Nuvemshop' },
+                  { title: 'Pet shop', subtitle: 'Catálogo e checkout otimizados' },
+                  { title: 'Casa e decoração', subtitle: 'Tema custom e landing' },
+                ],
+              },
+              {
+                label: 'Portal B2B',
+                color: '#f2d150',
+                items: [
+                  { title: 'Briefing', subtitle: 'Escopo e requisitos' },
+                  { title: 'Wireframes', subtitle: 'Fluxos principais' },
+                  { title: 'Entrega', subtitle: 'Handoff e QA' },
+                ],
+              },
+              {
+                label: 'Landing institucional',
+                color: '#eb6fb4',
+                items: [
+                  { title: 'Hero e CTA', subtitle: 'Seção de conversão' },
+                  { title: 'Cases', subtitle: 'Blocos de prova social' },
+                  { title: 'Contato', subtitle: 'Formulário e mapa' },
+                ],
+              },
+            ],
+          },
+          {
+            label: 'Pessoais',
+            color: '#22a06b',
+            projects: [
+              {
+                label: 'Dashboard analytics',
+                color: '#61adef',
+                items: [
+                  { title: 'Overview', subtitle: 'Métricas principais' },
+                  { title: 'Filtros', subtitle: 'Segmentação por período' },
+                  { title: 'Export', subtitle: 'CSV e PDF' },
+                ],
+              },
+              {
+                label: 'Landing de produto',
+                color: '#f06a66',
+                items: [
+                  { title: 'Hero', subtitle: 'Proposta de valor' },
+                  { title: 'Features', subtitle: 'Lista de benefícios' },
+                  { title: 'Pricing', subtitle: 'Planos e CTA' },
+                ],
+              },
+              {
+                label: 'App de tarefas',
+                color: '#f2d150',
+                items: [
+                  { title: 'Inbox', subtitle: 'Lista de tarefas' },
+                  { title: 'Detalhe', subtitle: 'Edição e status' },
+                  { title: 'Preferências', subtitle: 'Tema e atalhos' },
+                ],
+              },
+            ],
+          },
+        ],
       },
     },
     about: {
@@ -687,6 +773,78 @@ const en: Dictionary = {
       gallery: {
         heading: 'Featured projects',
       },
+      clients: {
+        heading: 'Clients and projects',
+        back: 'Back',
+        folders: [
+          {
+            label: 'TEC4U',
+            color: '#8b5cf6',
+            projects: [
+              {
+                label: 'Nuvemshop',
+                color: '#3d8bff',
+                items: [
+                  { title: 'Fashion store', subtitle: 'E-commerce on Nuvemshop' },
+                  { title: 'Pet shop', subtitle: 'Catalog and checkout tuned' },
+                  { title: 'Home and decor', subtitle: 'Custom theme and landing' },
+                ],
+              },
+              {
+                label: 'B2B portal',
+                color: '#f2d150',
+                items: [
+                  { title: 'Brief', subtitle: 'Scope and requirements' },
+                  { title: 'Wireframes', subtitle: 'Core flows' },
+                  { title: 'Delivery', subtitle: 'Handoff and QA' },
+                ],
+              },
+              {
+                label: 'Institutional landing',
+                color: '#eb6fb4',
+                items: [
+                  { title: 'Hero and CTA', subtitle: 'Conversion section' },
+                  { title: 'Cases', subtitle: 'Social proof blocks' },
+                  { title: 'Contact', subtitle: 'Form and map' },
+                ],
+              },
+            ],
+          },
+          {
+            label: 'Personal',
+            color: '#22a06b',
+            projects: [
+              {
+                label: 'Analytics dashboard',
+                color: '#61adef',
+                items: [
+                  { title: 'Overview', subtitle: 'Key metrics' },
+                  { title: 'Filters', subtitle: 'Segment by period' },
+                  { title: 'Export', subtitle: 'CSV and PDF' },
+                ],
+              },
+              {
+                label: 'Product landing',
+                color: '#f06a66',
+                items: [
+                  { title: 'Hero', subtitle: 'Value proposition' },
+                  { title: 'Features', subtitle: 'Benefits list' },
+                  { title: 'Pricing', subtitle: 'Plans and CTA' },
+                ],
+              },
+              {
+                label: 'Task app',
+                color: '#f2d150',
+                items: [
+                  { title: 'Inbox', subtitle: 'Task list' },
+                  { title: 'Detail', subtitle: 'Edit and status' },
+                  { title: 'Preferences', subtitle: 'Theme and shortcuts' },
+                ],
+              },
+            ],
+          },
+        ],
+      },
     },
     about: {
       menuLabel: 'About',
@@ -1071,6 +1229,78 @@ const es: Dictionary = {
       },
       gallery: {
         heading: 'Proyectos destacados',
+      },
+      clients: {
+        heading: 'Clientes y proyectos',
+        back: 'Volver',
+        folders: [
+          {
+            label: 'TEC4U',
+            color: '#8b5cf6',
+            projects: [
+              {
+                label: 'Nuvemshop',
+                color: '#3d8bff',
+                items: [
+                  { title: 'Tienda de moda', subtitle: 'E-commerce en Nuvemshop' },
+                  { title: 'Pet shop', subtitle: 'Catálogo y checkout optimizados' },
+                  { title: 'Hogar y decoración', subtitle: 'Tema custom y landing' },
+                ],
+              },
+              {
+                label: 'Portal B2B',
+                color: '#f2d150',
+                items: [
+                  { title: 'Briefing', subtitle: 'Alcance y requisitos' },
+                  { title: 'Wireframes', subtitle: 'Flujos principales' },
+                  { title: 'Entrega', subtitle: 'Handoff y QA' },
+                ],
+              },
+              {
+                label: 'Landing institucional',
+                color: '#eb6fb4',
+                items: [
+                  { title: 'Hero y CTA', subtitle: 'Sección de conversión' },
+                  { title: 'Cases', subtitle: 'Bloques de prueba social' },
+                  { title: 'Contacto', subtitle: 'Formulario y mapa' },
+                ],
+              },
+            ],
+          },
+          {
+            label: 'Personales',
+            color: '#22a06b',
+            projects: [
+              {
+                label: 'Dashboard analytics',
+                color: '#61adef',
+                items: [
+                  { title: 'Overview', subtitle: 'Métricas principales' },
+                  { title: 'Filtros', subtitle: 'Segmentación por período' },
+                  { title: 'Export', subtitle: 'CSV y PDF' },
+                ],
+              },
+              {
+                label: 'Landing de producto',
+                color: '#f06a66',
+                items: [
+                  { title: 'Hero', subtitle: 'Propuesta de valor' },
+                  { title: 'Features', subtitle: 'Lista de beneficios' },
+                  { title: 'Pricing', subtitle: 'Planes y CTA' },
+                ],
+              },
+              {
+                label: 'App de tareas',
+                color: '#f2d150',
+                items: [
+                  { title: 'Inbox', subtitle: 'Lista de tareas' },
+                  { title: 'Detalle', subtitle: 'Edición y estado' },
+                  { title: 'Preferencias', subtitle: 'Tema y atajos' },
+                ],
+              },
+            ],
+          },
+        ],
       },
     },
     about: {
