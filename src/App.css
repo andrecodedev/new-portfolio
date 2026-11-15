@@ -4644,7 +4644,7 @@ button.fan-card--contact:hover { background: #fff; }
   margin: 0 auto 0.5rem;
   padding: 0.3rem 0.9rem 0.3rem 0.3rem;
   border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
-  border-radius: 999px;
+  border-radius: 4px;
   background: color-mix(in srgb, var(--text) 5%, transparent);
   animation: folders-path-in 360ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
@@ -4665,7 +4665,7 @@ button.fan-card--contact:hover { background: #fff; }
   height: 30px;
   padding: 0;
   border: 0;
-  border-radius: 50%;
+  border-radius: 4px;
   background: color-mix(in srgb, var(--section-accent, var(--text)) 22%, transparent);
   color: var(--text);
   font-size: 15px;
@@ -4716,7 +4716,7 @@ button.fan-card--contact:hover { background: #fff; }
   gap: 0.35rem;
   padding: 0.28rem 0.55rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 4px;
   background: transparent;
   color: var(--muted);
   font-family: var(--font-mono, inherit);
@@ -4962,7 +4962,7 @@ button.folders-path__crumb:focus-visible {
   width: 44px;
   height: 44px;
   object-fit: contain;
-  border-radius: 10px;
+  border-radius: 4px;
   background: color-mix(in srgb, var(--platform) 18%, transparent);
   padding: 6px;
 }
@@ -4995,7 +4995,7 @@ button.folders-path__crumb:focus-visible {
 
 .study-panel__stats li {
   padding: 0.25rem 0.7rem;
-  border-radius: 999px;
+  border-radius: 4px;
   font-size: 0.8rem;
   border: 1px solid color-mix(in srgb, var(--platform) 55%, transparent);
   background: color-mix(in srgb, var(--platform) 12%, transparent);
@@ -5015,7 +5015,7 @@ button.folders-path__crumb:focus-visible {
 
 .study-group__title span {
   padding: 0 0.5rem;
-  border-radius: 999px;
+  border-radius: 4px;
   background: color-mix(in srgb, var(--text) 10%, transparent);
 }
 
@@ -5047,7 +5047,7 @@ button.folders-path__crumb:focus-visible {
   gap: 0.5rem;
   min-height: 132px;
   padding: 1rem 1rem 0.9rem;
-  border-radius: 6px;
+  border-radius: 4px;
   color: #1c1a24;
   filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.3));
   transform-origin: 50% 0;
@@ -5065,7 +5065,7 @@ button.folders-path__crumb:focus-visible {
   position: absolute;
   inset: 0;
   z-index: -1;
-  border-radius: 6px;
+  border-radius: 4px;
   background: #f6f4ef;
   clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%);
 }
@@ -5110,7 +5110,7 @@ button.folders-path__crumb:focus-visible {
 .study-card__bar {
   flex: 1;
   height: 6px;
-  border-radius: 999px;
+  border-radius: 4px;
   background: rgba(28, 26, 36, 0.14);
   overflow: hidden;
 }
@@ -5174,7 +5174,6 @@ button.folders-path__crumb:focus-visible {
   }
 }
 
-
 /* Conteúdo aparece depois que a folha já chegou na frente. */
 
 @keyframes study-body-in {
@@ -5214,7 +5213,7 @@ button.folders-path__crumb:focus-visible {
   height: 32px;
   padding: 0;
   border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 13px;
   color: color-mix(in srgb, var(--text) 85%, transparent);
   background: transparent;
@@ -5235,7 +5234,7 @@ button.folders-path__crumb:focus-visible {
 .skill-dome__chip {
   padding: 0.35rem 0.9rem;
   border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
-  border-radius: 6px;
+  border-radius: 4px;
   font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.04em;
@@ -5402,7 +5401,7 @@ button.folders-path__crumb:focus-visible {
     width: 32px;
     height: 32px;
     padding: 4px;
-    border-radius: 8px;
+    border-radius: 4px;
   }
 
   .study-panel__logo--letter {
@@ -5487,10 +5486,6 @@ button.folders-path__crumb:focus-visible {
   
 }
 
-
-
-
-
 /* Estudos nível 2: cada curso é uma pasta; nível 3: módulos dentro do curso. */
 .course-grid {
   display: grid;
@@ -5561,7 +5556,7 @@ button.folders-path__crumb:focus-visible {
 .study-progress__bar {
   flex: 1;
   height: 6px;
-  border-radius: 999px;
+  border-radius: 4px;
   background: rgba(28, 26, 36, 0.14);
   overflow: hidden;
 }
@@ -5620,7 +5615,7 @@ button.folders-path__crumb:focus-visible {
   align-items: center;
   gap: 0.4rem;
   padding: 0.45rem 0.9rem;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 0.8rem;
   font-weight: 600;
   color: #fff;
@@ -5724,7 +5719,7 @@ div.study-card:hover {
   place-items: center;
   width: 20px;
   height: 20px;
-  border-radius: 50%;
+  border-radius: 4px;
   color: #fff;
   background: #1f9d63;
 }
@@ -5763,5 +5758,583 @@ div.study-card:hover {
   .study-course__cert svg {
     width: 15px;
     height: 15px;
+  }
+}
+
+/* Gráfico de evolução das habilidades */
+.skill-chart {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.skill-chart__subtitle {
+  margin: -0.25rem auto 1.75rem;
+  max-width: 560px;
+  text-align: center;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--text) 62%, transparent);
+}
+
+/* Painel das evidências: abre animando a altura. */
+
+@media (max-width: 767px) {
+  
+
+  .skill-chart__subtitle {
+    margin-bottom: 1.1rem;
+    font-size: 0.7rem;
+  }
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  .skill-chart-block {
+    margin-top: calc(var(--section-space) * 0.4);
+  }
+}
+
+/* Busca e filtros da lista de habilidades */
+.skill-chart__tools {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.9rem;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto 1.5rem;
+}
+
+.skill-chart__count {
+  text-align: center;
+}
+
+.skill-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.skill-search__icon {
+  position: absolute;
+  left: 0.85rem;
+  width: 15px;
+  height: 15px;
+  color: color-mix(in srgb, var(--text) 55%, transparent);
+  pointer-events: none;
+}
+
+.skill-search__input {
+  width: 100%;
+  padding: 0.6rem 2.2rem 0.6rem 2.35rem;
+  border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+  outline: none;
+  transition: border-color 200ms ease, background 200ms ease;
+  appearance: none;
+}
+
+.skill-search__input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.skill-search__input:focus {
+  border-color: color-mix(in srgb, var(--text) 55%, transparent);
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.skill-search__clear {
+  position: absolute;
+  right: 0.45rem;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  color: color-mix(in srgb, var(--text) 70%, transparent);
+  background: transparent;
+  cursor: pointer;
+}
+
+.skill-search__clear svg {
+  width: 12px;
+  height: 12px;
+}
+
+.skill-chart__chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 767px) {
+  .skill-chart__tools {
+    gap: 0.7rem;
+    margin-bottom: 1rem;
+  }
+
+  .skill-search__input {
+    padding: 0.5rem 2rem 0.5rem 2.1rem;
+    font-size: 0.72rem;
+  }
+
+  .skill-chart__chips {
+    gap: 0.35rem;
+  }
+
+  .skill-chart__chips .skill-dome__chip {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.62rem;
+  }
+
+  
+}
+
+/* Habilidades: grade de cartões + painel de detalhes (comprovação). */
+.skill-chart__count {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--text) 50%, transparent);
+}
+
+.sk-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 1.75rem;
+  align-items: start;
+}
+
+.sk-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sk-grid > li {
+  display: flex;
+  animation: study-card-in 420ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(min(var(--i, 0), 14) * 28ms);
+}
+
+.sk-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 0.7rem;
+  row-gap: 0.65rem;
+  width: 100%;
+  padding: 0.85rem 0.9rem 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 220ms ease, background 220ms ease, transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sk-card:hover {
+  border-color: color-mix(in srgb, var(--text) 32%, transparent);
+  transform: translateY(-2px);
+}
+
+.sk-card[data-selected] {
+  border-color: var(--section-accent, var(--text));
+  background: color-mix(in srgb, var(--section-accent, var(--text)) 11%, transparent);
+}
+
+.sk-card__icon {
+  grid-row: 1;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.sk-card__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.sk-card__pct {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--section-accent, var(--text));
+}
+
+.sk-card__tag {
+  width: 6px;
+  height: 6px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--text) 28%, transparent);
+}
+
+.sk-card__bar {
+  grid-column: 1 / -1;
+  height: 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--text) 12%, transparent);
+  overflow: hidden;
+}
+
+.sk-card__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--section-accent, var(--text));
+}
+
+.sk-card__bar[data-empty] {
+  background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--text) 16%, transparent) 0 4px, transparent 4px 8px);
+}
+
+/* Painel de detalhes */
+.sk-detail-wrap {
+  position: sticky;
+  top: 5rem;
+}
+
+.sk-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: calc(100vh - 7rem);
+  overflow-y: auto;
+  padding: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+  scrollbar-width: thin;
+}
+
+.sk-detail__head {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.sk-detail__icon {
+  width: 46px;
+  height: 46px;
+  padding: 6px;
+  object-fit: contain;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.sk-detail__title {
+  flex: 1;
+  min-width: 0;
+}
+
+.sk-detail__title h3 {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+}
+
+.sk-detail__title p {
+  margin: 0.15rem 0 0;
+  font-size: 0.74rem;
+  color: color-mix(in srgb, var(--text) 58%, transparent);
+}
+
+.sk-detail__pct {
+  font-family: var(--font-mono);
+  font-size: 1.7rem;
+  line-height: 1;
+  color: var(--section-accent, var(--text));
+}
+
+.sk-detail__bar {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--text) 12%, transparent);
+  overflow: hidden;
+}
+
+.sk-detail__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--section-accent, var(--text)) 60%, transparent), var(--section-accent, var(--text)));
+  transform-origin: left;
+  animation: study-bar-in 800ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.sk-detail__sub {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.25rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--text) 58%, transparent);
+}
+
+.sk-detail__sub span {
+  padding: 0 0.45rem;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.sk-detail__note {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--text) 62%, transparent);
+}
+
+.sk-evidence {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sk-ev {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  border-left: 3px solid var(--platform);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 200ms ease, transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sk-ev:hover {
+  background: color-mix(in srgb, var(--platform) 14%, transparent);
+  transform: translateX(2px);
+}
+
+.sk-ev__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sk-ev__platform {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--platform);
+}
+
+.sk-ev__pct {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.sk-ev__title {
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.sk-ev__bar {
+  height: 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--text) 12%, transparent);
+  overflow: hidden;
+}
+
+.sk-ev__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--platform);
+}
+
+@media (max-width: 1023px) {
+  .sk-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Painel acima da grade e sem ficar preso: quem toca num cartão lá embaixo é levado até ele. */
+  .sk-detail-wrap {
+    position: static;
+    order: -1;
+  }
+
+  .sk-detail {
+    max-height: none;
+  }
+
+  .sk-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .skill-chart__count {
+    font-size: 0.62rem;
+  }
+
+  .sk-grid {
+    gap: 0.5rem;
+  }
+
+  .sk-card {
+    grid-template-columns: 26px 1fr auto;
+    column-gap: 0.5rem;
+    row-gap: 0.5rem;
+    padding: 0.65rem 0.65rem 0.6rem;
+    border-radius: 4px;
+  }
+
+  .sk-card__icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .sk-card__name,
+  .sk-card__pct {
+    font-size: 0.68rem;
+  }
+
+  .sk-detail {
+    padding: 0.9rem;
+    gap: 0.8rem;
+  }
+
+  .sk-detail__icon {
+    width: 38px;
+    height: 38px;
+    padding: 5px;
+  }
+
+  .sk-detail__title h3 {
+    font-size: 0.92rem;
+  }
+
+  .sk-detail__title p {
+    font-size: 0.66rem;
+  }
+
+  .sk-detail__pct {
+    font-size: 1.3rem;
+  }
+
+  .sk-detail__note {
+    font-size: 0.72rem;
+  }
+
+  .sk-ev__title {
+    font-size: 0.72rem;
+  }
+}
+
+/* Comprovantes: ~5 visíveis e o resto rola por dentro do painel (a lista cresce com os cursos). */
+.sk-detail {
+  max-height: none;
+  overflow: visible;
+}
+
+.sk-evidence {
+  max-height: 440px;
+  overflow-y: auto;
+  padding-right: 0.3rem;
+  overscroll-behavior: contain;
+  /* Barra nativa e fina (como era antes de eu estilizar). */
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text) 30%, transparent) transparent;
+}
+
+@media (max-width: 767px) {
+  .sk-evidence {
+    max-height: 395px;
+  }
+
+  /* Filtros em carrossel horizontal, igual aos da cúpula de habilidades. */
+  .skill-chart__chips {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    width: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding: 0.25rem 38% 0.25rem;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 16%, #000 84%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 16%, #000 84%, transparent 100%);
+  }
+
+  .skill-chart__chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .skill-chart__chips .skill-dome__chip {
+    flex: none;
+    scroll-snap-align: center;
+    white-space: nowrap;
+  }
+}
+
+/* Evolução das habilidades: menos ar entre a cúpula, o título e o conteúdo. */
+.skill-chart-block {
+  margin-top: calc(var(--section-space) * 0.55);
+}
+
+.skill-chart-block .about-journey__title {
+  margin-bottom: 0.6rem;
+}
+
+.skill-chart-block .skill-chart__subtitle {
+  margin: 0 auto 1.25rem;
+}
+
+@media (max-width: 767px) {
+  /* A cúpula acima puxa 2.5rem pra cima (margem negativa), então aqui precisa de mais. */
+  .skill-chart-block {
+    margin-top: calc(var(--section-space) * 0.85);
+  }
+
+  .skill-chart-block .skill-chart__subtitle {
+    margin-bottom: 0.9rem;
   }
 }

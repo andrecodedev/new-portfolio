@@ -175,7 +175,6 @@ export default function DomeGallery({
   const inertiaRAF = useRef<number | null>(null)
   const tileRefs = useRef<(HTMLDivElement | null)[]>([])
   const visibleRef = useRef<boolean[]>([])
-  const scrollingUntil = useRef(0)
 
   const tiles = useMemo(() => buildTiles(images, segments), [images, segments])
 
@@ -323,17 +322,12 @@ export default function DomeGallery({
       visible = entry.isIntersecting
     })
     io.observe(root)
-    // Enquanto a página rola (no celular, com o dedo), o giro espera: evita disputar o frame com o scroll.
-    const onScroll = () => {
-      scrollingUntil.current = performance.now() + 180
-    }
-    document.addEventListener('scroll', onScroll, { capture: true, passive: true })
     let frame = 0
     let last = performance.now()
     const tick = (time: number) => {
       const dt = Math.min((time - last) / 1000, 0.05)
       last = time
-      if (visible && !draggingRef.current && inertiaRAF.current === null && !document.hidden && time > scrollingUntil.current) {
+      if (visible && !draggingRef.current && inertiaRAF.current === null && !document.hidden) {
         const nextY = wrapAngleSigned(rotationRef.current.y + autoRotateSpeed * dt)
         rotationRef.current = { ...rotationRef.current, y: nextY }
         applyTransform(rotationRef.current.x, nextY)
@@ -344,7 +338,6 @@ export default function DomeGallery({
     return () => {
       cancelAnimationFrame(frame)
       io.disconnect()
-      document.removeEventListener('scroll', onScroll, { capture: true })
     }
   }, [autoRotate, autoRotateSpeed, applyTransform])
 

@@ -100,6 +100,15 @@ export type ReadingPageCopy = PageCopy & {
       emptyModules: string
       skillPlay: string
       skillPause: string
+      chartHeading: string
+      chartSubtitle: string
+      chartEvidence: string
+      chartOpen: string
+      chartSearch: string
+      chartEmpty: string
+      chartPractice: string
+      chartPracticeNote: string
+      chartCount: string
     }
     items: readonly { title: string; subtitle: string }[]
   }
@@ -655,6 +664,15 @@ const pt: Dictionary = {
           emptyModules: 'Módulos ainda não mapeados',
           skillPlay: 'Girar automaticamente',
           skillPause: 'Pausar giro',
+          chartHeading: 'Evolução das habilidades',
+          chartSubtitle: 'Percentual calculado pelas horas e pelo progresso dos cursos que comprovam cada habilidade.',
+          chartEvidence: 'Comprovado por',
+          chartOpen: 'Abrir curso',
+          chartSearch: 'Buscar habilidade (ex.: Java, React)',
+          chartEmpty: 'Nenhuma habilidade encontrada',
+          chartPractice: 'Prática',
+          chartPracticeNote: 'Habilidade desenvolvida na prática, em projetos e no trabalho. Ainda sem curso mapeado.',
+          chartCount: 'habilidades',
         },
         items: [
         { title: 'React', subtitle: 'Interfaces e componentes' },
@@ -1138,6 +1156,15 @@ const en: Dictionary = {
           emptyModules: 'Modules not mapped yet',
           skillPlay: 'Rotate automatically',
           skillPause: 'Pause rotation',
+          chartHeading: 'Skills progress',
+          chartSubtitle: 'Percentage based on the hours and progress of the courses that prove each skill.',
+          chartEvidence: 'Proven by',
+          chartOpen: 'Open course',
+          chartSearch: 'Search skills (e.g. Java, React)',
+          chartEmpty: 'No skills found',
+          chartPractice: 'Hands-on',
+          chartPracticeNote: 'Skill built hands-on, through projects and work. No course mapped yet.',
+          chartCount: 'skills',
         },
         items: [
         { title: 'React', subtitle: 'Interfaces and components' },
@@ -1621,6 +1648,15 @@ const es: Dictionary = {
           emptyModules: 'Módulos aún sin mapear',
           skillPlay: 'Girar automáticamente',
           skillPause: 'Pausar giro',
+          chartHeading: 'Evolución de las habilidades',
+          chartSubtitle: 'Porcentaje calculado con las horas y el progreso de los cursos que comprueban cada habilidad.',
+          chartEvidence: 'Comprobado por',
+          chartOpen: 'Abrir curso',
+          chartSearch: 'Buscar habilidad (ej.: Java, React)',
+          chartEmpty: 'Ninguna habilidad encontrada',
+          chartPractice: 'Práctica',
+          chartPracticeNote: 'Habilidad desarrollada en la práctica, en proyectos y en el trabajo. Aún sin curso mapeado.',
+          chartCount: 'habilidades',
         },
         items: [
         { title: 'React', subtitle: 'Interfaces y componentes' },

@@ -14,12 +14,16 @@ import {
 
 type Labels = ReadingPageCopy['studies']['platforms']
 
+export type StudiesPath = { platform: number | null; course: number | null }
+type Path = StudiesPath
+
 type StudiesFoldersProps = {
   labels: Labels
   isMobile: boolean
+  /** Opcional: controla a navegação por fora (ex.: o gráfico de habilidades abre um curso). */
+  path?: StudiesPath
+  onPathChange?: (next: StudiesPath) => void
 }
-
-type Path = { platform: number | null; course: number | null }
 
 const STATUS_ORDER: readonly StudyStatus[] = ['doing', 'queue', 'done']
 
@@ -201,8 +205,10 @@ function Crumbs({
   )
 }
 
-export function StudiesFolders({ labels, isMobile }: StudiesFoldersProps) {
-  const [path, setPath] = useState<Path>({ platform: null, course: null })
+export function StudiesFolders({ labels, isMobile, path: controlled, onPathChange }: StudiesFoldersProps) {
+  const [inner, setInner] = useState<Path>({ platform: null, course: null })
+  const path = controlled ?? inner
+  const setPath = onPathChange ?? setInner
   const shellRef = useRef<HTMLDivElement>(null)
   const [lockH, setLockH] = useState<number | null>(null)
 

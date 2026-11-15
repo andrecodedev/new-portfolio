@@ -171,7 +171,7 @@ export const studyPlatforms: readonly StudyPlatform[] = [
     color: '#22a06b',
     logo: '/studies/facens.svg',
     courses: [
-      { title: 'FACENS: Análise e Desenvolvimento de Sistemas', status: 'doing', hours: 2400, period: '08/2024 - 12/2026' },
+      { title: 'FACENS: Análise e Desenvolvimento de Sistemas', status: 'doing', progress: 90, hours: 2400, period: '08/2024 - 12/2026' },
       done('CCBEU: Inglês A1, A2 e B1', 120, '10/2024 - 06/2025'),
       done('Soul Bilíngue: Inglês como Segunda Língua', 88, '01/2024 - 06/2024'),
       done('ETEC: Análise e Desenvolvimento de Sistemas', 1500, '08/2022 - 12/2023'),

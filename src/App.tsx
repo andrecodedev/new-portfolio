@@ -28,7 +28,8 @@ import BounceCards from './components/bounce-cards'
 import { BLOG_POSTS, findBlogPost, formatBlogDate, type BlogBlock } from './data/blog-posts'
 import AccordionGallery from './components/accordion-gallery'
 import { ClientsFolders } from './components/clients-folders'
-import { StudiesFolders } from './components/studies-folders'
+import { StudiesFolders, type StudiesPath } from './components/studies-folders'
+import { SkillChart } from './components/skill-chart'
 import {
   ArrowLeft,
   ArrowRight,
@@ -57,6 +58,7 @@ import {
   type ContentPageId,
 } from './data/site'
 import { SKILLS } from './data/about'
+import { SKILL_GROUP_NAMES } from './data/skill-groups'
 import {
   type AchievementEntry,
   type ExperienceEntry,
@@ -1335,17 +1337,33 @@ function ReadingExtras() {
   const { t } = useLocale()
   const studies = t.pages.reading.studies
   const isMobile = useIsMobile()
+  // A navegação das pastas é controlada aqui para o gráfico de habilidades poder abrir um curso.
+  const [studiesPath, setStudiesPath] = useState<StudiesPath>({ platform: null, course: null })
 
   return (
     <>
       <section className="page-block about-journey" data-accent="reading">
         <h2 className="about-journey__title">{studies.platforms.heading}</h2>
-        <StudiesFolders labels={studies.platforms} isMobile={isMobile} />
+        <StudiesFolders
+          labels={studies.platforms}
+          isMobile={isMobile}
+          path={studiesPath}
+          onPathChange={setStudiesPath}
+        />
       </section>
 
       <section className="page-block about-journey skills-dome-block" data-accent="reading">
         <h2 className="about-journey__title">{studies.platforms.skillsHeading}</h2>
         <SkillDome isMobile={isMobile} labels={studies.platforms} />
+      </section>
+
+      <section className="page-block about-journey skill-chart-block" data-accent="reading">
+        <h2 className="about-journey__title">{studies.platforms.chartHeading}</h2>
+        <SkillChart
+          labels={studies.platforms}
+          isMobile={isMobile}
+          onOpenCourse={(platform, course) => setStudiesPath({ platform, course })}
+        />
       </section>
     </>
   )
@@ -1412,13 +1430,6 @@ function ContactExtras() {
 }
 
 /** Habilidades por categoria numa cúpula 3D arrastável. Clicar pesquisa a habilidade na web. */
-const SKILL_GROUP_NAMES: readonly (readonly string[])[] = [
-  ['HTML5', 'CSS3', 'JavaScript', 'TypeScript', 'Java', 'C', 'C++', 'C#', 'SQL', 'Twig', 'React', 'Node.js', 'Tailwind CSS', 'Bootstrap', 'Sass'],
-  ['Git', 'Vite', 'Figma', 'Postman', 'Canva', 'GIMP', 'Arduino', 'FileZilla', 'Obsidian', 'PageSpeed', 'VSCode', 'Visual Studio', 'Eclipse', 'IntelliJ', 'NetBeans', 'Antigravity', 'Office'],
-  ['MySQL', 'SQL Server', 'Supabase', 'Render', 'Nuvemshop', 'Nuvemshop Partners', 'Linux', 'Windows'],
-  ['Scrum', 'Kanban', 'Trello', 'Jira', 'ClickUp', 'Português', 'English', 'Español'],
-  ['ChatGPT', 'Gemini', 'DeepSeek', 'Perplexity', 'AI Studio Google', 'GitHub Copilot'],
-]
 
 function SkillDome({
   isMobile,
@@ -1490,7 +1501,7 @@ function SkillDome({
           segments={isMobile ? 26 : 36}
           maxVerticalRotationDeg={0}
           dragDampening={2}
-          imageBorderRadius="8px"
+          imageBorderRadius="4px"
           hint={labels.skillHint}
           fadeColor="var(--bg-stage)"
           autoRotate={playing}
