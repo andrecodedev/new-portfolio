@@ -193,3 +193,14 @@
     height: 3.75rem;
   }
 }
+
+@media (max-width: 767px) {
+  /* O carrossel rola na horizontal (overflow-x) e isso também corta no vertical:
+     sem folga, a subida do hover e a sombra de baixo eram cortadas. A folga é
+     compensada com margem negativa para o layout não mudar. */
+  .layout-grid {
+    padding: 1.25rem 0.5rem 2.5rem;
+    margin-block: -1.25rem -2.5rem;
+    margin-inline: -0.5rem;
+  }
+}

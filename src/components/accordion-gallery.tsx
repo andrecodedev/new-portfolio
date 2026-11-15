@@ -31,6 +31,8 @@ export type AccordionGalleryProps = {
   trigger?: 'hover' | 'click'
   showLabels?: boolean
   grayscale?: boolean
+  /** Mantém o nome visível (mais discreto) nos painéis fechados. */
+  showInactiveLabels?: boolean
   className?: string
 }
 
@@ -61,6 +63,7 @@ export default function AccordionGallery({
   trigger = 'hover',
   showLabels = true,
   grayscale = true,
+  showInactiveLabels = false,
   className = '',
 }: AccordionGalleryProps) {
   const rootRef = useRef<HTMLDivElement>(null)
@@ -134,7 +137,17 @@ export default function AccordionGallery({
               0,
             )
           } else {
-            tl.to([bar, text], { opacity: 0, x: -14, duration: dur * 0.6, ease }, 0)
+            tl.to(bar, { opacity: 0, x: -14, duration: dur * 0.6, ease }, 0)
+            tl.to(
+              text,
+              {
+                opacity: showInactiveLabels ? 0.9 : 0,
+                x: showInactiveLabels ? 0 : -14,
+                duration: dur * 0.6,
+                ease,
+              },
+              0,
+            )
           }
         }
       })
@@ -152,6 +165,7 @@ export default function AccordionGallery({
       parallax,
       grayscale,
       showLabels,
+      showInactiveLabels,
       stagger,
       prefersReduced,
     ],

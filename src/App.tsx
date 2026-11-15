@@ -1103,7 +1103,7 @@ function FanCard({ item, onNavigate }: { item: FanItem; onNavigate: (to: string)
   const inner = (
     <>
       <span className="fan-card__icon">
-        <Icon size={26} weight="bold" aria-hidden="true" />
+        <Icon size={22} weight="bold" aria-hidden="true" />
       </span>
       <span className="fan-card__copy">
         <span className="fan-card__title">{item.title}</span>
@@ -1128,12 +1128,12 @@ function AboutFan({ onNavigate }: NavigateProps) {
       <div className="about-fan__stack">
         <BounceCards
           containerWidth={1360}
-          containerHeight={230}
-          cardWidth={450}
-          cardHeight={150}
-          spread={212}
+          containerHeight={200}
+          cardWidth={385}
+          cardHeight={128}
+          spread={235}
           rotation={6}
-          pushDistance={170}
+          pushDistance={150}
         >
           {FAN_ITEMS.map((item) => (
             <FanCard key={item.key} item={item} onNavigate={onNavigate} />
@@ -1307,6 +1307,11 @@ function WorkExtras() {
         </ul>
       </section>
 
+      <section className="page-block about-journey" data-accent="work">
+        <h2 className="about-journey__title">{t.pages.about.tabs.experience}</h2>
+        <AboutExperienceList items={t.pages.about.experience} accent="work" />
+      </section>
+
       <section className="page-block showcase-gallery">
         <h2 className="showcase-gallery__title">{t.pages.work.gallery.heading}</h2>
         <div className="showcase-gallery__stage">
@@ -1351,11 +1356,8 @@ const GALLERY_ITEMS = [
   description,
 }))
 
-/** Painéis de exemplo da Accordion Gallery (Sobre): artes abstratas em /public/showcase. */
-const ACCORDION_ITEMS = ['Design', 'Código', 'Produto', 'Pessoas', 'Entrega'].map((label, index) => ({
-  image: `/showcase/accordion-${index + 1}.svg`,
-  label,
-}))
+/** Imagens provisórias da galeria de momentos (Sobre): artes em /public/showcase. Trocar por fotos reais. */
+const ACCORDION_IMAGES = [1, 2, 3, 4, 5].map((n) => `/showcase/accordion-${n}.svg`)
 
 /** Imagens de exemplo (Unsplash) até você definir o conteúdo real. */
 const SPIRAL_IMAGES = [
@@ -1624,12 +1626,12 @@ function AboutAchievements({ items }: { items: readonly AchievementEntry[] }) {
       <div className="about-achievements__stage">
         <DepthCarousel
           items={carouselItems}
-          cardWidth={isMobile ? 280 : 440}
-          cardHeight={isMobile ? 370 : 560}
+          cardWidth={isMobile ? 260 : 440}
+          cardHeight={isMobile ? 350 : 560}
           radius={10}
           tint="var(--bg-outer)"
           depth={isMobile ? 160 : 220}
-          spread={isMobile ? 14 : 110}
+          spread={isMobile ? 50 : 110}
           tilt={isMobile ? 14 : 20}
           visibleCards={2}
           falloff={0.28}
@@ -1647,10 +1649,16 @@ function AboutAchievements({ items }: { items: readonly AchievementEntry[] }) {
   )
 }
 
-function AboutExperienceList({ items }: { items: readonly ExperienceEntry[] }) {
+function AboutExperienceList({
+  items,
+  accent,
+}: {
+  items: readonly ExperienceEntry[]
+  accent?: string
+}) {
   return (
     <div className="about-experience">
-      <LayoutGrid items={items} />
+      <LayoutGrid items={items} accent={accent} />
     </div>
   )
 }
@@ -1715,18 +1723,22 @@ function AboutJourney() {
         <AboutHighlightsPanel items={page.highlights.items} />
       </section>
       <section className="page-block about-journey" data-accent="about">
-        <h2 className="about-journey__title">{page.tabs.experience}</h2>
-        <AboutExperienceList items={page.experience} />
-      </section>
-      <section className="page-block about-journey" data-accent="about">
         <h2 className="about-journey__title">{page.tabs.achievements}</h2>
         <AboutAchievements items={page.achievements} />
       </section>
       <section className="page-block about-accordion" data-accent="about">
+        <h2 className="about-journey__title">{page.moments.heading}</h2>
         <AccordionGallery
-          items={ACCORDION_ITEMS}
-          defaultIndex={2}
-          expandRatio={isMobile ? 0.62 : 0.52}
+          key={isMobile ? 'mobile' : 'desktop'}
+          items={ACCORDION_IMAGES.map((image, index) => ({
+            image,
+            label: page.moments.labels[index],
+          }))}
+          // Celular: faixas na horizontal (orientação vertical), com a última aberta:
+          // as fechadas ficam em cima e a foto grande embaixo, boa para imagem horizontal.
+          orientation={isMobile ? 'vertical' : 'horizontal'}
+          defaultIndex={isMobile ? ACCORDION_IMAGES.length - 1 : 2}
+          expandRatio={isMobile ? 0.6 : 0.52}
           trigger="hover"
           accentColor="var(--section-accent)"
           overlayColor="var(--bg-outer)"
@@ -1736,12 +1748,12 @@ function AboutJourney() {
           duration={0.6}
           ease="power3.out"
           parallax={0.5}
-          tilt={isMobile ? 4 : 8}
+          tilt={isMobile ? 0 : 8}
           stagger={0.06}
-          height={isMobile ? 400 : 460}
+          height={isMobile ? 360 : 460}
           gap={isMobile ? 6 : 10}
           radius={10}
-          orientation="horizontal"
+          showInactiveLabels={isMobile}
         />
       </section>
     </>

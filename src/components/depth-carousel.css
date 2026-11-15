@@ -235,3 +235,20 @@
     transition: none;
   }
 }
+
+@media (max-width: 767px) {
+  /* Setas proporcionais às do carrossel final (eram 40px, grandes demais no celular). */
+  .depth-carousel__nav {
+    gap: 14px;
+  }
+
+  .depth-carousel__arrow {
+    width: 32px;
+    height: 32px;
+  }
+
+  .depth-carousel__arrow svg {
+    width: 16px;
+    height: 16px;
+  }
+}

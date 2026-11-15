@@ -8,6 +8,8 @@ import './layout-grid.css'
 
 type LayoutGridProps = {
   items: readonly ExperienceEntry[]
+  /** Cor de destaque da página (o modal fica no body e não herda do contêiner). */
+  accent?: string
 }
 
 function cardId(item: ExperienceEntry) {
@@ -19,7 +21,7 @@ function cardId(item: ExperienceEntry) {
  * O modal só faz fade + subida curta: a versão antiga usava layout compartilhado
  * (layoutId) e o card/logo distorciam durante a transição.
  */
-export function LayoutGrid({ items }: LayoutGridProps) {
+export function LayoutGrid({ items, accent = 'about' }: LayoutGridProps) {
   const [selected, setSelected] = useState<number | null>(null)
   const reduce = Boolean(useReducedMotion())
   const item = selected !== null ? items[selected] : null
@@ -72,7 +74,7 @@ export function LayoutGrid({ items }: LayoutGridProps) {
               transition={{ duration: 0.2 }}
               onClick={() => setSelected(null)}
             />
-            <div key="layer" className="layout-grid__modal-layer" data-accent="about">
+            <div key="layer" className="layout-grid__modal-layer" data-accent={accent}>
               <motion.article
                 key={cardId(item)}
                 className="layout-grid__modal"

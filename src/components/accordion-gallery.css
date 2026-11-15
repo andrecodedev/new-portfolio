@@ -127,3 +127,15 @@
     will-change: auto;
   }
 }
+
+/* Faixas fechadas na vertical: o nome fica centralizado na faixa; o painel aberto mantém
+   o nome embaixo. */
+.accordion-gallery--vertical .ag-panel:not(.ag-panel--active) .ag-panel__label {
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
+}
+
+.accordion-gallery--vertical .ag-panel:not(.ag-panel--active) .ag-panel__text {
+  font-size: 0.9rem;
+}

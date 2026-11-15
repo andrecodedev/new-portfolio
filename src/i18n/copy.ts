@@ -57,6 +57,11 @@ export type AboutPageCopy = PageCopy & {
     experience: string
     details: string
   }
+  /** Galeria de momentos (acordeão): título e nome de cada painel, na ordem das imagens. */
+  moments: {
+    heading: string
+    labels: readonly string[]
+  }
   achievements: readonly AchievementEntry[]
   experience: readonly ExperienceEntry[]
   highlights: {
@@ -289,7 +294,11 @@ const pt: Dictionary = {
         achievements: 'Conquistas Profissionais',
         video: 'Vídeo Pitch',
         experience: 'Experiências Profissionais',
-        details: 'Mergulhando nos Detalhes',
+        details: 'Minha trajetória',
+      },
+      moments: {
+        heading: 'Momentos',
+        labels: ['Na faculdade', 'Com o time', 'Em eventos', 'Na mentoria', 'No dia a dia'],
       },
       achievements: [
         {
@@ -421,47 +430,52 @@ const pt: Dictionary = {
         },
       ],
       highlights: {
-        subtitle: 'Descubra o que me motiva e quais são meus principais diferenciais como desenvolvedor.',
+        subtitle: 'Conheça a pessoa por trás do código: de onde vim, por onde passei e o que me move.',
         items: [
           {
-            id: 'learning',
-            title: 'Sempre um passo à frente',
-            description: 'Minha rotina é movida pela curiosidade. Além da faculdade na FACENS, dedico boa parte do meu tempo livre explorando plataformas como OneBitCode e Alura, mergulhando de cabeça em novas stacks que podem otimizar meu fluxo de trabalho.\n\nAcredito que o setor tech não permite estagnação. Por isso, não estudo apenas por estudo; aplico cada conceito novo em projetos reais, transformando teoria em soluções práticas.\n\nPara mim, aprender é um processo contínuo e sem fim.',
+            id: 'who',
+            title: 'Quem sou eu',
+            description: 'Me chamo André Vitor, sou desenvolvedor web júnior e estudante de Análise e Desenvolvimento de Sistemas.\n\nGosto de tecnologia, mas gosto ainda mais de gente. Me considero uma boa pessoa: prestativo, curioso e que prefere construir junto. Tudo o que conto aqui é o caminho que me trouxe até este ponto.',
           },
           {
-            id: 'teamwork',
-            title: 'Construir junto é melhor',
-            description: 'Acredito que o software é um esforço coletivo. No meu dia a dia, valorizo a troca honesta de ideias, revisões de código construtivas e a colaboração direta com designers e outros devs para garantir que estamos todos na mesma página. Gosto de ser o elo que facilita a comunicação técnica, garantindo que a entrega final supere a expectativa inicial.\n\nUm time forte é o que cresce unido.',
+            id: 'start',
+            title: 'Meus primeiros passos',
+            description: 'Comecei a trabalhar cedo. De 2018 a 2023 atuei em meio período na Agro Pecuária Paineiras, em Araçariguama, atendendo clientes no balcão, no caixa e no telefone, cuidando do estoque e dos animais.\n\nFoi ali que aprendi o valor da responsabilidade, da empatia e de tratar cada pessoa com atenção, lições que levo para o código.',
           },
           {
-            id: 'resilience',
-            title: 'Foco total na solução',
-            description: 'Minha trajetória me ensinou que a resiliência é a chave. Encaro bugs bizarros e prazos apertados como quebra-cabeças que só precisam de paciência e a estratégia certa para serem resolvidos.\n\nManter a calma sob pressão é uma das minhas maiores forças. Seja ajustando um layout complexo na Nuvemshop ou depurando uma lógica de backend, eu não desisto até que a solução esteja rodando perfeitamente e o usuário esteja satisfeito. Desafios são apenas degraus para o sucesso.',
+            id: 'base',
+            title: 'A base técnica',
+            description: 'Fiz o curso técnico em Análise e Desenvolvimento de Sistemas na ETEC São Roque e participei de cursos profissionalizantes no SENAI e do programa Oracle Next Education.\n\nFoi nessa fase que a curiosidade virou direção: escolhi a tecnologia como caminho e passei a estudar por conta própria em plataformas como OneBitCode, DIO, Origamid e Udemy.',
           },
           {
-            id: 'tech',
-            title: 'Tecnologia com propósito',
-            description: "Sou fascinado pelo poder que algumas linhas de código têm de transformar negócios. Meu foco é dominar as ferramentas que fazem a diferença, como React e Tailwind CSS, sempre de olho no que há de mais moderno no ecossistema web. Não me limito apenas a 'fazer funcionar'. Busco entender o 'porquê' por trás de cada tecnologia, garantindo que as escolhas técnicas que tomo hoje criem uma base sólida para o crescimento do projeto amanhã.",
+            id: 'scholarship',
+            title: 'A bolsa que abriu portas',
+            description: 'Conquistei a bolsa integral do ProUni para cursar o bacharelado em Análise e Desenvolvimento de Sistemas na FACENS.\n\nPara mim foi mais que uma vaga na faculdade: foi a confirmação de que esforço constante abre portas.',
           },
           {
-            id: 'versatility',
-            title: 'Minha visão real do 360°',
-            description: "Minha bagagem vai além das telas.\n\nAntes de mergulhar de vez na tecnologia, passei por áreas como logística e vendas. Essa vivência me deu uma visão muito clara de como os negócios funcionam no 'mundo real', o que me ajuda a traduzir necessidades reais de mercado em código funcional. Entendo o lado do cliente, a pressa do setor de transportes e a precisão do atendimento.\n\nSou um dev que entende de gente tanto quanto entende de sintaxe.",
+            id: 'areas',
+            title: 'Passando por outras áreas',
+            description: 'Antes de viver só de tecnologia, passei por áreas bem diferentes. Em 2024 fui aprendiz no setor de transportes do CD Pernambucanas, com logística, notas fiscais e planilhas, e trabalhei como ajudante de garçom na Vila Don Patto, em ambiente de alto fluxo.\n\nEssa bagagem me ensinou organização, agilidade e trabalho em equipe, e me deu uma visão real de como as pessoas e os negócios funcionam.',
           },
           {
-            id: 'mentoring',
-            title: 'Multiplicar para crescer',
-            description: 'Ter atuado como mentor acadêmico na FACENS foi uma das experiências mais marcantes da minha trajetória. Ensinar algoritmos para quem estava começando me forçou a dominar os fundamentos e a exercitar a didática de forma constante.\n\nMesmo hoje, vejo a liderança e o compartilhamento de conhecimento como pilares fundamentais. Dividir o que sei com meus colegas e amigos não só os ajuda a superar obstáculos, mas também solidifica meu próprio aprendizado e cria um ambiente muito mais forte para todos.',
+            id: 'mentor',
+            title: 'Ensinar para aprender',
+            description: 'Em 2025 fui mentor acadêmico na FACENS, ajudando alunos iniciantes em algoritmos e lógica de programação.\n\nEnsinar me obrigou a dominar os fundamentos e me mostrou como compartilhar conhecimento faz todo mundo crescer, inclusive quem ensina.',
           },
           {
-            id: 'clean_code',
-            title: 'Código feito para humanos',
-            description: "Escrever código é, acima de tudo, um ato de comunicação. Minha prioridade é entregar soluções que não apenas resolvam o problema técnico, mas que sejam legíveis e fáceis de manter por qualquer desenvolvedor que chegue depois de mim. Um código 'sujo' é uma dívida que ninguém quer pagar.\n\nSigo os princípios do Clean Code por eficiência, não apenas por teoria. Um código bem estruturado hoje significa menos dor de cabeça amanhã e uma evolução muito mais rápida para o produto.",
+            id: 'tec4u',
+            title: 'Virando dev de verdade',
+            description: 'Fui chamado para uma entrevista de estágio na TEC4U Digital e acabei contratado diretamente como desenvolvedor júnior.\n\nHoje atuo em projetos web reais, criando interfaces e funcionalidades, e sigo estudando todos os dias para evoluir.',
           },
           {
-            id: 'ux_vision',
-            title: 'O usuário no centro',
-            description: 'Software sem uma boa UX é software incompleto.\n\nBusco entender profundamente a jornada de quem vai usar o que estou construindo. Trabalho de perto para transformar protótipos em interfaces vivas e fluidas, garantindo que a tecnologia seja invisível e a facilidade de uso seja o destaque. Meu objetivo final é sempre encantar o usuário com uma experiência impecável.',
+            id: 'curiosity',
+            title: 'Fora do código',
+            description: 'Quando não estou programando, gosto de ler e de jogar. A leitura me ajuda a pensar com calma e a enxergar os problemas por outros ângulos, e os jogos treinam estratégia, paciência e trabalho em equipe.\n\nTambém gosto de aprender coisas novas só por curiosidade, mesmo quando não têm nada a ver com tecnologia.',
+          },
+          {
+            id: 'pillars',
+            title: 'O que me move',
+            description: 'Meus pilares são a curiosidade, a parceria, a resiliência e a vontade de criar algo útil para as pessoas.\n\nAcredito em aprender sem parar, em construir junto, em não desistir diante de um problema e em usar a tecnologia com propósito. Quero ser lembrado como alguém bom de código e, principalmente, bom de convivência.',
           },
         ],
       },
@@ -631,7 +645,11 @@ const en: Dictionary = {
         achievements: 'Professional Achievements',
         video: 'Pitch Video',
         experience: 'Professional Experience',
-        details: 'Diving into the Details',
+        details: 'My journey',
+      },
+      moments: {
+        heading: 'Moments',
+        labels: ['At college', 'With the team', 'At events', 'Mentoring', 'Day to day'],
       },
       achievements: [
         {
@@ -763,47 +781,52 @@ const en: Dictionary = {
         },
       ],
       highlights: {
-        subtitle: 'Discover what motivates me and what makes me stand out as a developer.',
+        subtitle: 'Meet the person behind the code: where I come from, where I have been and what drives me.',
         items: [
           {
-            id: 'learning',
-            title: 'Always one step ahead',
-            description: "My routine is driven by curiosity. Beyond my college studies at FACENS, I spend much of my free time exploring platforms like OneBitCode and Alura, diving deep into new stacks that can optimize my workflow.\n\nI believe the tech sector doesn't allow for stagnation. That's why I don't just study for the sake of it; I apply every new concept to real projects, turning theory into practical solutions.\n\nTo me, learning is a continuous and endless process.",
+            id: 'who',
+            title: 'Who I am',
+            description: 'My name is André Vitor. I am a junior web developer and a Systems Analysis and Development student.\n\nI like technology, but I like people even more. I consider myself a good person: helpful, curious, and someone who prefers building together. Everything I share here is the path that brought me to this point.',
           },
           {
-            id: 'teamwork',
-            title: 'Building together is better',
-            description: "I believe software is a collective effort. In my day-to-day life, I value honest idea exchanges, constructive code reviews, and direct collaboration with designers and other devs to ensure we're all on the same page. I enjoy being the link that facilitates technical communication, ensuring the final delivery exceeds the initial expectation.\n\nA strong team is the one that grows together.",
+            id: 'start',
+            title: 'My first steps',
+            description: 'I started working early. From 2018 to 2023 I worked part-time at Agro Pecuária Paineiras, in Araçariguama, serving customers at the counter, the register and by phone, and taking care of stock and animals.\n\nThat is where I learned the value of responsibility, empathy and giving every person real attention, lessons I carry into my code.',
           },
           {
-            id: 'resilience',
-            title: 'Total focus on the solution',
-            description: "My path has taught me that resilience is the key. I face bizarre bugs and tight deadlines as puzzles that just need patience and the right strategy to be solved.\n\nStaying calm under pressure is one of my greatest strengths. Whether it's adjusting a complex layout in Nuvemshop or debugging backend logic, I don't give up until the solution is running perfectly and the user is satisfied. Challenges are just stepping stones to success.",
+            id: 'base',
+            title: 'The technical foundation',
+            description: 'I completed the technical course in Systems Analysis and Development at ETEC São Roque and took professional courses at SENAI and in the Oracle Next Education program.\n\nThat is when curiosity became direction: I chose technology as my path and started studying on my own on platforms like OneBitCode, DIO, Origamid and Udemy.',
           },
           {
-            id: 'tech',
-            title: 'Technology with purpose',
-            description: "I am fascinated by the power that a few lines of code have to transform businesses. My focus is on mastering the tools that make a difference, like React and Tailwind CSS, always keeping an eye on the latest trends in the web ecosystem. I don't limit myself to just 'making it work.' I seek to understand the 'why' behind each technology, ensuring that the technical choices I make today create a solid foundation for the project's growth tomorrow.",
+            id: 'scholarship',
+            title: 'The scholarship that opened doors',
+            description: 'I earned a full ProUni scholarship to study the bachelor\'s degree in Systems Analysis and Development at FACENS.\n\nFor me it was more than a seat in college: it confirmed that steady effort opens doors.',
           },
           {
-            id: 'versatility',
-            title: 'My real 360° vision',
-            description: "My background goes beyond the screens.\n\nBefore diving fully into technology, I worked in areas like logistics and sales. This experience gave me a very clear view of how businesses operate in the 'real world,' which helps me translate real market needs into functional code. I understand the customer side, the urgency of the transport sector, and the precision of customer service.\n\nI'm a dev who understands people as much as I understand syntax.",
+            id: 'areas',
+            title: 'Passing through other fields',
+            description: 'Before living on technology alone, I went through very different fields. In 2024 I was an apprentice in the transport sector at CD Pernambucanas, working with logistics, invoices and spreadsheets, and I worked as a waiter\'s assistant at Vila Don Patto, in a high-traffic environment.\n\nThat background taught me organization, agility and teamwork, and gave me a real view of how people and businesses work.',
           },
           {
-            id: 'mentoring',
-            title: 'Multiply to grow',
-            description: 'Having served as an academic mentor at FACENS was one of the most significant experiences of my career. Teaching algorithms to beginners forced me to master the fundamentals and practice teaching on a regular basis.\n\nEven today, I see leadership and knowledge sharing as fundamental pillars. Sharing what I know with my colleagues and friends not only helps them overcome obstacles but also solidifies my own learning and creates a much stronger environment for everyone.',
+            id: 'mentor',
+            title: 'Teaching to learn',
+            description: 'In 2025 I was an academic mentor at FACENS, helping beginner students with algorithms and programming logic.\n\nTeaching forced me to master the fundamentals and showed me how sharing knowledge makes everyone grow, including the one who teaches.',
           },
           {
-            id: 'clean_code',
-            title: 'Code made for humans',
-            description: "Writing code is, above all, an act of communication. My priority is to deliver solutions that not only solve the technical problem but are also readable and easy to maintain by any developer who arrives after me. 'Dirty' code is a debt no one wants to pay.\n\nI follow Clean Code principles for efficiency, not just theory. Well-structured code today means fewer headaches tomorrow and much faster evolution for the product.",
+            id: 'tec4u',
+            title: 'Becoming a real dev',
+            description: 'I was called for an internship interview at TEC4U Digital and ended up hired directly as a junior developer.\n\nToday I work on real web projects, building interfaces and features, and I keep studying every day to grow.',
           },
           {
-            id: 'ux_vision',
-            title: 'The user at the center',
-            description: "Software without good UX is incomplete software.\n\nI seek to deeply understand the journey of whoever will use what I'm building. I work closely to turn prototypes into living, fluid interfaces, ensuring technology is invisible and ease of use is the highlight. My final goal is always to delight the user with a flawless experience.",
+            id: 'curiosity',
+            title: 'Outside of code',
+            description: 'When I am not programming, I like to read and to play games. Reading helps me think calmly and see problems from other angles, and games train strategy, patience and teamwork.\n\nI also like learning new things out of pure curiosity, even when they have nothing to do with technology.',
+          },
+          {
+            id: 'pillars',
+            title: 'What drives me',
+            description: 'My pillars are curiosity, partnership, resilience and the will to create something useful for people.\n\nI believe in learning non-stop, in building together, in not giving up in front of a problem and in using technology with purpose. I want to be remembered as someone good at code and, above all, good to be around.',
           },
         ],
       },
@@ -973,7 +996,11 @@ const es: Dictionary = {
         achievements: 'Logros Profesionales',
         video: 'Vídeo Pitch',
         experience: 'Experiencias Profesionales',
-        details: 'Sumergiéndome en los Detalles',
+        details: 'Mi trayectoria',
+      },
+      moments: {
+        heading: 'Momentos',
+        labels: ['En la universidad', 'Con el equipo', 'En eventos', 'En la mentoría', 'Del día a día'],
       },
       achievements: [
         {
@@ -1105,47 +1132,52 @@ const es: Dictionary = {
         },
       ],
       highlights: {
-        subtitle: 'Descubre qué me motiva y cuáles son mis principales diferencias como desarrollador.',
+        subtitle: 'Conoce a la persona detrás del código: de dónde vengo, por dónde pasé y qué me mueve.',
         items: [
           {
-            id: 'learning',
-            title: 'Siempre un paso adelante',
-            description: 'Mi rutina está impulsada por la curiosidad. Más allá de mi carrera en FACENS, dedico gran parte de mi tiempo libre a explorar plataformas como OneBitCode y Alura, sumergiéndome en herramientas que puedan optimizar mi flujo de trabajo.\n\nCreo que el sector tecnológico no permite el estancamiento. Por eso, no estudio solo por estudiar; aplico cada nuevo concepto en proyectos reales, transformando la teoría en soluciones prácticas.\n\nPara mí, aprender es un proceso continuo y sin fin.',
+            id: 'who',
+            title: 'Quién soy',
+            description: 'Me llamo André Vitor, soy desarrollador web junior y estudiante de Análisis y Desarrollo de Sistemas.\n\nMe gusta la tecnología, pero me gustan aún más las personas. Me considero una buena persona: servicial, curioso y alguien que prefiere construir en equipo. Todo lo que cuento aquí es el camino que me trajo hasta este punto.',
           },
           {
-            id: 'teamwork',
-            title: 'Construir juntos es mejor',
-            description: 'Creo que el software es un esfuerzo colectivo. En mi día a día, valoro el intercambio honesto de ideas, las revisiones de código constructivas y la colaboración directa con diseñadores y otros desarrolladores para asegurar que todos estemos en la misma página. Me gusta ser el vínculo que facilita la comunicación técnica, asegurando que la entrega final supere la expectativa inicial.\n\nUn equipo fuerte es el que crece unido.',
+            id: 'start',
+            title: 'Mis primeros pasos',
+            description: 'Empecé a trabajar temprano. De 2018 a 2023 trabajé a tiempo parcial en Agro Pecuária Paineiras, en Araçariguama, atendiendo clientes en el mostrador, en la caja y por teléfono, y cuidando el stock y los animales.\n\nAllí aprendí el valor de la responsabilidad, la empatía y de tratar a cada persona con atención, lecciones que llevo al código.',
           },
           {
-            id: 'resilience',
-            title: 'Foco total en la solución',
-            description: 'Mi trayectoria me ha enseñado que la resiliencia es clave. Enfrento errores extraños y plazos ajustados como rompecabezas que solo necesitan paciencia y la estrategia adecuada para resolverse.\n\nMantener la calma bajo presión es una de mis mayores fortalezas. Ya sea ajustando un diseño complejo en Nuvemshop o depurando la lógica del backend, no me rindo hasta que la solución funcione perfectamente y el usuario esté satisfecho. Los desafíos son solo peldaños hacia el éxito.',
+            id: 'base',
+            title: 'La base técnica',
+            description: 'Hice el curso técnico en Análisis y Desarrollo de Sistemas en la ETEC São Roque y participé en cursos profesionales del SENAI y del programa Oracle Next Education.\n\nEn esa etapa la curiosidad se volvió dirección: elegí la tecnología como camino y empecé a estudiar por mi cuenta en plataformas como OneBitCode, DIO, Origamid y Udemy.',
           },
           {
-            id: 'tech',
-            title: 'Tecnología con propósito',
-            description: "Me fascina el poder que tienen unas pocas líneas de código para transformar negocios. Mi enfoque es dominar las herramientas que marcan la diferencia, como React y Tailwind CSS, siempre atento a lo más moderno en el ecosistema web. No me limito solo a 'hacer que funcione'. Busco entender el 'porqué' detrás de cada tecnología, asegurando que las decisiones técnicas que tomo hoy creen una base sólida para el crecimiento del proyecto mañana.",
+            id: 'scholarship',
+            title: 'La beca que abrió puertas',
+            description: 'Conseguí la beca integral del ProUni para cursar la licenciatura en Análisis y Desarrollo de Sistemas en la FACENS.\n\nPara mí fue más que un lugar en la universidad: fue la confirmación de que el esfuerzo constante abre puertas.',
           },
           {
-            id: 'versatility',
-            title: 'Mi visión real en 360°',
-            description: "Mi experiencia va más allá de las pantallas.\n\nAntes de sumergirme de lleno en la tecnología, trabajé en áreas como logística y ventas. Esta vivencia me dio una visión muy clara de cómo funcionan los negocios en el 'mundo real', lo que me ayuda a traducir las necesidades reales del mercado en código funcional. Entiendo el lado del cliente, la urgencia del sector transporte y la precisión del servicio al cliente.\n\nSoy un desarrollador que entiende a las personas tanto como entiende la sintaxis.",
+            id: 'areas',
+            title: 'Pasando por otras áreas',
+            description: 'Antes de vivir solo de tecnología, pasé por áreas muy distintas. En 2024 fui aprendiz en el sector de transporte del CD Pernambucanas, con logística, facturas y hojas de cálculo, y trabajé como ayudante de camarero en Vila Don Patto, en un entorno de mucho flujo.\n\nEsa experiencia me enseñó organización, agilidad y trabajo en equipo, y me dio una visión real de cómo funcionan las personas y los negocios.',
           },
           {
-            id: 'mentoring',
-            title: 'Multiplicar para crecer',
-            description: 'Haber actuado como mentor académico en FACENS fue una de las experiencias más significativas de mi trayectoria. Enseñar algoritmos a quienes estaban empezando me obligó a dominar los fundamentos y a practicar la enseñanza de forma constante.\n\nIncluso hoy, veo el liderazgo y el intercambio de conocimientos como pilares fundamentales. Compartir lo que sé con mis colegas y amigos no solo los ayuda a superar obstáculos, sino que también consolida mi propio aprendizaje y crea un ambiente mucho más fuerte para todos.',
+            id: 'mentor',
+            title: 'Enseñar para aprender',
+            description: 'En 2025 fui mentor académico en la FACENS, ayudando a estudiantes principiantes en algoritmos y lógica de programación.\n\nEnseñar me obligó a dominar los fundamentos y me mostró cómo compartir conocimiento hace crecer a todos, incluso a quien enseña.',
           },
           {
-            id: 'clean_code',
-            title: 'Código hecho para humanos',
-            description: "Escribir código es, ante todo, un acto de comunicación. Mi prioridad es entregar soluciones que no solo resuelvan el problema técnico, sino que sean fáciles de leer y mantener para cualquier desarrollador que llegue después de mí. Un código 'sucio' es una deuda que nadie quiere pagar.\n\nSigo los principios de Clean Code por eficiencia, no solo por teoría. Un código bien estructurado hoy significa menos dolores de cabeza mañana y una evolución mucho más rápida para el producto.",
+            id: 'tec4u',
+            title: 'Convirtiéndome en dev de verdad',
+            description: 'Me llamaron para una entrevista de prácticas en TEC4U Digital y terminé contratado directamente como desarrollador junior.\n\nHoy trabajo en proyectos web reales, creando interfaces y funcionalidades, y sigo estudiando todos los días para evolucionar.',
           },
           {
-            id: 'ux_vision',
-            title: 'El usuario en el centro',
-            description: 'El software sin una buena UX es un software incompleto.\n\nBusco entender profundamente el viaje de quien usará lo que estoy construyendo. Trabajo de cerca para transformar prototipos en interfaces vivas y fluidas, asegurando que la tecnología sea invisible y la facilidad de uso sea la protagonista. Mi objetivo final es siempre encantar al usuario con una experiencia impecable.',
+            id: 'curiosity',
+            title: 'Fuera del código',
+            description: 'Cuando no estoy programando, me gusta leer y jugar. La lectura me ayuda a pensar con calma y a ver los problemas desde otros ángulos, y los juegos entrenan estrategia, paciencia y trabajo en equipo.\n\nTambién me gusta aprender cosas nuevas solo por curiosidad, incluso cuando no tienen nada que ver con la tecnología.',
+          },
+          {
+            id: 'pillars',
+            title: 'Lo que me mueve',
+            description: 'Mis pilares son la curiosidad, la colaboración, la resiliencia y las ganas de crear algo útil para las personas.\n\nCreo en aprender sin parar, en construir en equipo, en no rendirme ante un problema y en usar la tecnología con propósito. Quiero que me recuerden como alguien bueno con el código y, sobre todo, bueno para convivir.',
           },
         ],
       },
