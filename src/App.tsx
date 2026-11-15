@@ -1496,9 +1496,9 @@ function SkillDome({
         <DomeGallery
           key={`${group}-${isMobile}`}
           images={images}
-          fit={isMobile ? 1.1 : 0.62}
-          minRadius={isMobile ? 330 : 560}
-          segments={isMobile ? 26 : 36}
+          fit={isMobile ? 0.8 : 0.62}
+          minRadius={isMobile ? 265 : 560}
+          segments={isMobile ? 20 : 36}
           maxVerticalRotationDeg={0}
           dragDampening={2}
           imageBorderRadius="4px"

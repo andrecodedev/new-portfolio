@@ -187,7 +187,7 @@ export default function DomeGallery({
       const el = sphereRef.current
       if (el) el.style.transform = `translateZ(calc(var(--radius) * -1)) rotateX(${xDeg}deg) rotateY(${yDeg}deg)`
       for (let i = 0; i < tileAngles.length; i++) {
-        const show = Math.abs(wrapAngleSigned(tileAngles[i] + yDeg)) < 105
+        const show = Math.abs(wrapAngleSigned(tileAngles[i] + yDeg)) < 85
         if (visibleRef.current[i] === show) continue
         visibleRef.current[i] = show
         const node = tileRefs.current[i]
@@ -312,6 +312,21 @@ export default function DomeGallery({
     }
   }, [])
 
+  // Fora da tela a cúpula some de verdade (visibility): são dezenas de camadas 3D que o navegador
+  // continuaria compondo a cada frame de scroll da página.
+  useEffect(() => {
+    const root = rootRef.current
+    if (!root) return
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        root.style.visibility = entry.isIntersecting ? '' : 'hidden'
+      },
+      { rootMargin: '120px' },
+    )
+    io.observe(root)
+    return () => io.disconnect()
+  }, [])
+
   // Giro automático: lento e suave. Só avança quando ninguém está arrastando e a inércia já acabou.
   useEffect(() => {
     const root = rootRef.current
@@ -322,22 +337,34 @@ export default function DomeGallery({
       visible = entry.isIntersecting
     })
     io.observe(root)
+    // Em tela de toque: o giro espera enquanto a página rola e roda a ~30fps, pra não competir com o scroll.
+    const touch = window.matchMedia('(pointer: coarse)').matches
+    let scrollingUntil = 0
+    const onScroll = () => {
+      scrollingUntil = performance.now() + 220
+    }
+    if (touch) document.addEventListener('scroll', onScroll, { capture: true, passive: true })
     let frame = 0
     let last = performance.now()
     const tick = (time: number) => {
-      const dt = Math.min((time - last) / 1000, 0.05)
+      frame = requestAnimationFrame(tick)
+      if (touch && (time - last < 32 || time < scrollingUntil)) {
+        if (time < scrollingUntil) last = time
+        return
+      }
+      const dt = Math.min((time - last) / 1000, 0.1)
       last = time
       if (visible && !draggingRef.current && inertiaRAF.current === null && !document.hidden) {
         const nextY = wrapAngleSigned(rotationRef.current.y + autoRotateSpeed * dt)
         rotationRef.current = { ...rotationRef.current, y: nextY }
         applyTransform(rotationRef.current.x, nextY)
       }
-      frame = requestAnimationFrame(tick)
     }
     frame = requestAnimationFrame(tick)
     return () => {
       cancelAnimationFrame(frame)
       io.disconnect()
+      document.removeEventListener('scroll', onScroll, { capture: true })
     }
   }, [autoRotate, autoRotateSpeed, applyTransform])
 

@@ -74,10 +74,8 @@
   border-radius: var(--tile-radius, 8px);
   background: color-mix(in srgb, var(--text) 8%, transparent);
   overflow: hidden;
-  backface-visibility: hidden;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transform: translateZ(0);
 }
 
 .dome-tile:focus-visible {
