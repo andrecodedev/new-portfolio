@@ -1378,7 +1378,6 @@ svg.menu__social-icon {
   transform: translateZ(0);
 }
 
-
 /* Página Trabalho: grade de estatísticas abaixo do scroll cue */
 .work-stats {
   padding-inline: calc(var(--content-x) - var(--edge));
@@ -2803,7 +2802,6 @@ svg.work-github__icon {
   color: var(--text);
   text-wrap: balance;
 }
-
 
 .spot--end .spot__title {
   text-align: right;
@@ -4883,4 +4881,816 @@ button.folders-path__crumb:focus-visible {
   .showcase-folder--focus {
     min-height: 380px;
   }
+}
+
+/* Estudos: pasta por plataforma → cursos como folhas com progresso. */
+.study-folders {
+  gap: 1rem 2.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.study-folder {
+  flex: 1 1 240px;
+  max-width: 340px;
+  min-height: 330px;
+  padding-bottom: 2.4rem;
+}
+
+/* Legenda embaixo da pasta: o nome aparece ao passar o mouse (sempre visível no toque). */
+.folder-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  margin: 0;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.folder-caption__name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 300ms ease, transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.folder-caption__sub {
+  font-size: 0.78rem;
+  color: color-mix(in srgb, var(--text) 60%, transparent);
+}
+
+.showcase-folder:hover .folder-caption__name,
+.showcase-folder:focus-within .folder-caption__name {
+  opacity: 1;
+  transform: none;
+}
+
+@media (hover: none) {
+  .folder-caption__name {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.study-panel {
+  --platform: #8b5cf6;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding: 1.25rem 1rem 3rem;
+  animation: folders-path-in 420ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.study-panel__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+.study-panel__logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--platform) 18%, transparent);
+  padding: 6px;
+}
+
+.study-panel__logo--letter {
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--platform);
+}
+
+.study-panel__name {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: clamp(1.1rem, 1rem + 0.6vw, 1.5rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.study-panel__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.study-panel__stats li {
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--platform) 55%, transparent);
+  background: color-mix(in srgb, var(--platform) 12%, transparent);
+}
+
+.study-group__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--text) 75%, transparent);
+}
+
+.study-group__title span {
+  padding: 0 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.study-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.study-card-wrap {
+  display: flex;
+  perspective: 700px;
+  animation: study-card-in 480ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+
+.study-card {
+  position: relative;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 132px;
+  padding: 1rem 1rem 0.9rem;
+  border-radius: 6px;
+  color: #1c1a24;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.3));
+  transform-origin: 50% 0;
+  transition: transform 380ms cubic-bezier(0.22, 1, 0.36, 1), filter 380ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.study-card:hover {
+  transform: translateY(-4px) rotate(-0.6deg);
+  filter: drop-shadow(0 14px 16px rgba(0, 0, 0, 0.38));
+}
+
+/* Papel com o canto superior direito cortado (transparente) e a aba dobrada. */
+.study-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 6px;
+  background: #f6f4ef;
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%);
+}
+
+@keyframes study-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) rotate(1.5deg);
+  }
+}
+
+.study-card__fold {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 0 0 0 6px;
+  background: linear-gradient(225deg, transparent 50%, color-mix(in srgb, var(--platform) 45%, #e4e0d6) 50%);
+}
+
+.study-card__title {
+  margin: 0;
+  padding-right: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.study-card__meta {
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba(28, 26, 36, 0.62);
+}
+
+.study-card__foot {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: auto;
+}
+
+.study-card__bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(28, 26, 36, 0.14);
+  overflow: hidden;
+}
+
+.study-card__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--platform);
+  transform-origin: left;
+  animation: study-bar-in 900ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@keyframes study-bar-in {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.study-card__pct {
+  display: inline-flex;
+  min-width: 2.2rem;
+  justify-content: flex-end;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.study-card[data-status='done'] .study-card__pct {
+  color: #1f9d63;
+  font-size: 1rem;
+}
+
+.study-card[data-status='queue'] {
+  opacity: 0.82;
+}
+
+.study-card__cert {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--platform);
+}
+
+@media (max-width: 640px) {
+  .study-panel__stats {
+    margin-left: 0;
+  }
+  .study-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .study-card,
+  .study-card__bar span,
+  .study-panel {
+    animation: none;
+  }
+}
+
+
+/* Conteúdo aparece depois que a folha já chegou na frente. */
+
+@keyframes study-body-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Estudos: cúpula 3D de habilidades com filtro por categoria. */
+.skill-dome {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.skill-dome__chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.skill-dome__bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 4rem;
+}
+
+.skill-dome__play {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
+  border-radius: 6px;
+  font-size: 13px;
+  color: color-mix(in srgb, var(--text) 85%, transparent);
+  background: transparent;
+  cursor: pointer;
+  transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+
+.skill-dome__play:hover {
+  border-color: color-mix(in srgb, var(--text) 45%, transparent);
+}
+
+.skill-dome__play[aria-pressed='true'] {
+  color: #111;
+  background: var(--text);
+  border-color: var(--text);
+}
+
+.skill-dome__chip {
+  padding: 0.35rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--text) 80%, transparent);
+  background: transparent;
+  cursor: pointer;
+  transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+
+.skill-dome__chip:hover {
+  border-color: color-mix(in srgb, var(--text) 45%, transparent);
+}
+
+.skill-dome__chip[data-active] {
+  color: #111;
+  background: var(--text);
+  border-color: var(--text);
+}
+
+.skill-dome__stage {
+  position: relative;
+  width: 100%;
+  height: 640px;
+}
+
+@media (max-width: 767px) {
+  .skill-dome__stage {
+    height: 400px;
+    margin-top: 0;
+  }
+
+  /* Filtros em carrossel horizontal, com as pontas dissolvendo. */
+  .skill-dome__bar {
+    position: relative;
+    z-index: 2;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .skill-dome__play {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .skill-dome__chips {
+    position: relative;
+    z-index: 2;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    flex: 1;
+    min-width: 0;
+    padding: 0.25rem 40% 0.25rem;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 18%, #000 82%, transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 18%, #000 82%, transparent 100%);
+  }
+
+  .skill-dome__chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .skill-dome__chip {
+    flex: none;
+    scroll-snap-align: center;
+    white-space: nowrap;
+    padding: 0.28rem 0.7rem;
+    font-size: 0.66rem;
+  }
+}
+
+/* Habilidades logo depois das pastas: menos ar que o espaço padrão entre seções. */
+.skills-dome-block {
+  margin-top: calc(var(--section-space) * 0.4);
+}
+
+/* Mobile: pastas de estudo em 2 colunas, legendas menores e menos ar entre as seções. */
+@media (max-width: 767px) {
+  .study-folders {
+    gap: 0.25rem 0.5rem;
+    padding-inline: 0.5rem;
+  }
+
+  .study-folder {
+    flex: 1 1 42%;
+    min-width: 0;
+    max-width: none;
+    min-height: 215px;
+    padding-bottom: 1.8rem;
+  }
+
+  .folder-caption__name {
+    font-size: 0.7rem;
+  }
+
+  .folder-caption__sub {
+    font-size: 0.6rem;
+  }
+
+  .skills-dome-block {
+    margin-top: calc(var(--section-space) * 0.6);
+    margin-bottom: -2.5rem;
+  }
+}
+
+/* Mobile: tudo das pastas (trabalho e estudos) em escala menor e com menos ar. */
+@media (max-width: 767px) {
+  /* Breadcrumb */
+  .folders-path {
+    gap: 0.2rem;
+    margin-bottom: 0.25rem;
+    padding: 0.2rem 0.6rem 0.2rem 0.2rem;
+  }
+
+  .folders-path__back {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+
+  .folders-path__crumb {
+    padding: 0.18rem 0.45rem;
+    font-size: 0.66rem;
+  }
+
+  .folders-path__crumb--home {
+    padding: 0.18rem 0.3rem;
+    font-size: 12px;
+  }
+
+  .folders-path__sep {
+    font-size: 9px;
+  }
+
+  /* Pastas (trabalho): menos altura reservada e menos folga em volta */
+  .showcase-folders {
+    gap: 0.5rem 1rem;
+    padding: 0.5rem 0.5rem 1rem;
+  }
+
+  .showcase-folder {
+    min-height: 250px;
+  }
+
+  .showcase-folder--focus {
+    min-height: 280px;
+    max-width: 360px;
+  }
+
+  /* Estudos: painel da plataforma */
+  .study-panel {
+    gap: 1.1rem;
+    padding: 0.75rem 0.25rem 1.5rem;
+  }
+
+  .study-panel__head {
+    gap: 0.5rem 0.6rem;
+    padding-bottom: 0.7rem;
+  }
+
+  .study-panel__logo {
+    width: 32px;
+    height: 32px;
+    padding: 4px;
+    border-radius: 8px;
+  }
+
+  .study-panel__logo--letter {
+    font-size: 1rem;
+  }
+
+  .study-panel__name {
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+  }
+
+  .study-panel__stats {
+    gap: 0.35rem;
+  }
+
+  .study-panel__stats li {
+    padding: 0.15rem 0.5rem;
+    font-size: 0.66rem;
+  }
+
+  .study-group__title {
+    margin-bottom: 0.6rem;
+    font-size: 0.68rem;
+  }
+
+  .study-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .study-card {
+    min-height: 98px;
+    gap: 0.3rem;
+    padding: 0.65rem 0.65rem 0.6rem;
+  }
+
+  /* O corte do papel (::before) e a aba da dobra precisam ter o mesmo tamanho. */
+  .study-card::before {
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+  }
+
+  .study-card__fold {
+    width: 16px;
+    height: 16px;
+  }
+
+  .study-card__title {
+    padding-right: 0.5rem;
+    font-size: 0.74rem;
+    line-height: 1.25;
+  }
+
+  .study-card__meta {
+    font-size: 0.62rem;
+  }
+
+  .study-card__pct {
+    min-width: 1.6rem;
+    font-size: 0.64rem;
+  }
+
+  .study-card__bar {
+    height: 5px;
+  }
+
+    
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+}
+
+
+
+
+
+/* Estudos nível 2: cada curso é uma pasta; nível 3: módulos dentro do curso. */
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: 1.5rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.course-folder-wrap {
+  display: flex;
+  animation: study-card-in 480ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+
+.course-folder {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.course-folder__art {
+  display: block;
+  padding: 0.25rem 0.5rem 0;
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.course-folder:hover .course-folder__art {
+  transform: translateY(-5px);
+}
+
+.course-folder .mini-folder {
+  width: 100%;
+}
+
+.course-folder[data-status='queue'] .course-folder__art {
+  opacity: 0.8;
+}
+
+.course-folder__meta {
+  font-size: 0.72rem;
+  color: color-mix(in srgb, var(--text) 60%, transparent);
+}
+
+/* Barra de progresso em fundo escuro (pastas e cabeçalho do curso) */
+.course-folder .study-progress__bar,
+.study-course .study-progress__bar {
+  background: color-mix(in srgb, var(--text) 16%, transparent);
+}
+
+.study-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  margin-top: auto;
+}
+
+.study-progress__bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(28, 26, 36, 0.14);
+  overflow: hidden;
+}
+
+.study-progress__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--platform);
+  transform-origin: left;
+  animation: study-bar-in 900ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.study-progress__pct {
+  display: inline-flex;
+  min-width: 2.2rem;
+  justify-content: flex-end;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.study-card[data-status='done'] .study-progress__pct,
+.course-folder[data-status='done'] .study-progress__pct {
+  color: #1f9d63;
+  font-size: 1rem;
+}
+
+.study-panel__head--course {
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.study-course {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.study-course__title {
+  margin: 0;
+  font-size: clamp(1.05rem, 1rem + 0.6vw, 1.4rem);
+  line-height: 1.25;
+}
+
+.study-course__meta {
+  margin: 0;
+  font-size: 0.82rem;
+  color: color-mix(in srgb, var(--text) 62%, transparent);
+}
+
+.study-course__cert {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--platform);
+  text-decoration: none;
+}
+
+.study-course__cert--soon {
+  color: color-mix(in srgb, var(--text) 65%, transparent);
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+  font-weight: 500;
+}
+
+.study-empty {
+  margin: 1rem 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: color-mix(in srgb, var(--text) 55%, transparent);
+}
+
+.folders-path__crumb--course {
+  max-width: 46vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 767px) {
+  .course-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 0.6rem;
+  }
+
+  .course-folder__meta {
+    font-size: 0.62rem;
+  }
+
+  .study-course__title {
+    font-size: 0.95rem;
+  }
+
+  .study-course__meta {
+    font-size: 0.7rem;
+  }
+
+  .study-course__cert {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.68rem;
+  }
+
+  .study-panel__head--course {
+    gap: 0.75rem;
+  }
+
+  .study-progress__pct {
+    min-width: 1.6rem;
+    font-size: 0.64rem;
+  }
+
+  .study-empty {
+    font-size: 0.7rem;
+  }
+}
+
+/* Módulos não são clicáveis: sem cursor de link nem levantar no hover. */
+div.study-card {
+  cursor: default;
+}
+
+div.study-card:hover {
+  transform: none;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.3));
 }

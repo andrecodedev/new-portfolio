@@ -39,7 +39,7 @@ function MiniPaper() {
   )
 }
 
-function MiniFolder({ label, color, variant }: { label: string; color: string; variant: 'peek' | 'open' }) {
+export function MiniFolder({ label, color, variant }: { label: string; color: string; variant: 'peek' | 'open' | 'rest' }) {
   const ink = hexLuma(color) > 0.62 ? 'rgba(20, 16, 8, 0.82)' : 'rgba(255, 255, 255, 0.96)'
   return (
     <div className={`mini-folder mini-folder--${variant}`} style={{ '--mini-color': color, '--mini-ink': ink } as CSSProperties}>
@@ -72,10 +72,10 @@ export function ClientsFolders({ clients, isMobile }: ClientsFoldersProps) {
   const [lockH, setLockH] = useState<number | null>(null)
   const go = (next: Path) => {
     if (next.level === 'root') setLockH(null)
-    else if (path.level === 'root' && shellRef.current) setLockH(shellRef.current.offsetHeight)
+    else if (path.level === 'root' && shellRef.current && !isMobile) setLockH(shellRef.current.offsetHeight)
     setPath(next)
   }
-  const size = isMobile ? 1 : 1.2
+  const size = isMobile ? 0.8 : 1.2
 
   const rootFolder: RootFolder | null =
     path.level !== 'root' ? clients.folders[path.rootIndex] ?? null : null
@@ -180,6 +180,9 @@ export function ClientsFolders({ clients, isMobile }: ClientsFoldersProps) {
                   if (open) go({ level: 'projects', rootIndex })
                 }}
               />
+              <p className="folder-caption">
+                <span className="folder-caption__name">{folder.label}</span>
+              </p>
             </div>
           ))}
 
@@ -195,7 +198,7 @@ export function ClientsFolders({ clients, isMobile }: ClientsFoldersProps) {
               tabPosition="right"
               openOn="click"
               defaultOpen
-              size={isMobile ? 1 : 1.35}
+              size={isMobile ? 0.9 : 1.35}
               spread={isMobile ? 1.35 : undefined}
               tilt={0.5}
               speed={1}
@@ -228,7 +231,7 @@ export function ClientsFolders({ clients, isMobile }: ClientsFoldersProps) {
               tabPosition="right"
               openOn="click"
               defaultOpen
-              size={isMobile ? 1 : 1.35}
+              size={isMobile ? 0.9 : 1.35}
               spread={isMobile ? 1.35 : undefined}
               tilt={0.5}
               speed={1}

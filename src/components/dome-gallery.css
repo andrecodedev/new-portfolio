@@ -1,0 +1,176 @@
+.dome-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  --radius: 520px;
+  --circ: calc(var(--radius) * 3.14);
+  --rot-y: calc((360deg / var(--segments-x)) / 2);
+  --rot-x: calc((360deg / var(--segments-y)) / 2);
+  --item-width: calc(var(--circ) / var(--segments-x));
+  --item-height: calc(var(--circ) / var(--segments-y));
+}
+
+.dome-root *,
+.dome-root *::before,
+.dome-root *::after {
+  box-sizing: border-box;
+}
+
+.dome-sphere,
+.dome-item,
+.dome-tile {
+  transform-style: preserve-3d;
+}
+
+.dome-main {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  /* pan-y: arrastar na horizontal gira a cúpula, na vertical ainda rola a página no celular */
+  touch-action: pan-y;
+  /* Corte duro nas pontas: os tiles de perfil não vazam nem brilham fora da cúpula. */
+  clip-path: inset(0 3%);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.dome-stage {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  perspective: calc(var(--radius) * 2);
+  perspective-origin: 50% 50%;
+  contain: layout paint size;
+}
+
+.dome-sphere {
+  transform: translateZ(calc(var(--radius) * -1));
+  will-change: transform;
+}
+
+.dome-item {
+  width: calc(var(--item-width) * var(--item-size-x));
+  height: calc(var(--item-height) * var(--item-size-y));
+  position: absolute;
+  inset: -999px;
+  margin: auto;
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
+  transform: rotateY(calc(var(--rot-y) * (var(--offset-x) + ((var(--item-size-x) - 1) / 2))))
+    rotateX(calc(var(--rot-x) * (var(--offset-y) - ((var(--item-size-y) - 1) / 2)))) translateZ(var(--radius));
+}
+
+.dome-tile {
+  position: absolute;
+  inset: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6%;
+  border-radius: var(--tile-radius, 8px);
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+  backface-visibility: hidden;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transform: translateZ(0);
+}
+
+.dome-tile:focus-visible {
+  outline: 2px solid var(--text);
+}
+
+.dome-tile img {
+  width: 46%;
+  height: 46%;
+  object-fit: contain;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.dome-tile__label {
+  max-width: 92%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-mono);
+  font-size: clamp(0.5rem, calc(var(--item-width) * 0.1), 0.66rem);
+  color: color-mix(in srgb, var(--text) 80%, transparent);
+  transition: opacity 220ms ease;
+}
+
+.dome-tile__hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 8px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: clamp(0.44rem, calc(var(--item-width) * 0.08), 0.56rem);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+  opacity: 0;
+  transition: opacity 220ms ease;
+  pointer-events: none;
+}
+
+@media (hover: hover) {
+  .dome-tile:hover img,
+  .dome-tile:hover .dome-tile__label {
+    opacity: 0;
+  }
+  .dome-tile:hover .dome-tile__hint {
+    opacity: 1;
+  }
+}
+
+/* Bordas se dissolvem na cor do fundo em vez de cortar seco. */
+.dome-fade {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.dome-fade--vignette {
+  inset: 0;
+  background-image: radial-gradient(rgba(0, 0, 0, 0) 62%, var(--fade-color) 100%);
+}
+
+.dome-fade--top,
+.dome-fade--bottom {
+  left: 0;
+  right: 0;
+  height: 18%;
+}
+
+.dome-fade--top {
+  top: 0;
+  background: linear-gradient(to top, transparent, var(--fade-color));
+}
+
+.dome-fade--bottom {
+  bottom: 0;
+  background: linear-gradient(to bottom, transparent, var(--fade-color));
+}
+
+/*
+ * Laterais: máscara em vez de gradiente de cor. Os tiles das pontas aparecem de lado (quase de perfil) e
+ * viram fiapos claros; um gradiente translúcido não esconde isso, a máscara apaga de verdade.
+ */
+/* A máscara chega a 0 exatamente onde o corte duro (clip-path de 3%) começa, então não sobra borda marcada. */
+.dome-stage {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, transparent 3%, #000 24%, #000 76%, transparent 97%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, transparent 3%, #000 24%, #000 76%, transparent 97%, transparent 100%);
+}

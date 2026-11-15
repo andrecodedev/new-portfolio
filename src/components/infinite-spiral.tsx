@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react'
+import { MagnifyingGlass } from '@phosphor-icons/react'
 import './infinite-spiral.css'
 
 /* Componente do React Bits (Infinite Spiral), portado para TSX. */
@@ -33,6 +34,11 @@ export type InfiniteSpiralProps = {
   edgeBlur?: number
   pauseOnHover?: boolean
   imageFit?: 'cover' | 'contain' | 'fill'
+  /** Tamanho da imagem dentro do card (0-1). Abaixo de 1 deixa uma margem ao redor. */
+  imageScale?: number
+  /** Nome (alt) fixo dentro do card; no hover a imagem some e aparece a lupa com `hint`. */
+  showCaption?: boolean
+  hint?: string
   grayscale?: number
   className?: string
 }
@@ -63,6 +69,9 @@ export default function InfiniteSpiral({
   edgeBlur = 6,
   pauseOnHover = true,
   imageFit = 'cover',
+  imageScale = 1,
+  showCaption = false,
+  hint = '',
   grayscale = 0,
   className = '',
 }: InfiniteSpiralProps) {
@@ -291,6 +300,7 @@ export default function InfiniteSpiral({
                 : {})}
               role="listitem"
               aria-label={row.label ?? row.alt}
+              title={row.href && !showCaption ? row.label : undefined}
             >
               <img
                 className="infinite-spiral__image"
@@ -299,14 +309,24 @@ export default function InfiniteSpiral({
                 loading={index < 6 ? 'eager' : 'lazy'}
                 draggable={false}
                 style={{
-                  width: cardWidth,
-                  height: cardHeight,
+                  width: cardWidth * imageScale,
+                  height: cardHeight * imageScale,
+                  margin: 'auto',
                   maxWidth: 'none',
                   maxHeight: 'none',
                   objectFit: imageFit,
                   filter: `grayscale(${Math.min(1, Math.max(0, grayscale))})`,
                 }}
               />
+              {showCaption && (
+                <>
+                  <span className="infinite-spiral__name">{row.alt}</span>
+                  <span className="infinite-spiral__hint" aria-hidden>
+                    <MagnifyingGlass weight="bold" />
+                    {hint}
+                  </span>
+                </>
+              )}
             </Card>
           )
         })}

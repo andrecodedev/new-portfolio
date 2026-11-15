@@ -21,14 +21,14 @@ import { GitHubCalendar } from 'react-github-calendar'
 import { AccentedText } from './components/accented-text'
 import { DepthCarousel } from './components/depth-carousel'
 import CircularCarousel from './components/circular-carousel'
-import InfiniteSpiral from './components/infinite-spiral'
+import DomeGallery from './components/dome-gallery'
 import DriftWall from './components/drift-wall'
 import FlexCarousel from './components/flex-carousel'
 import BounceCards from './components/bounce-cards'
 import { BLOG_POSTS, findBlogPost, formatBlogDate, type BlogBlock } from './data/blog-posts'
 import AccordionGallery from './components/accordion-gallery'
 import { ClientsFolders } from './components/clients-folders'
-import ChromaGrid from './components/chroma-grid'
+import { StudiesFolders } from './components/studies-folders'
 import {
   ArrowLeft,
   ArrowRight,
@@ -36,6 +36,8 @@ import {
   ChatCircleDots,
   Code,
   GraduationCap,
+  Pause,
+  Play,
   Stack,
   type Icon,
 } from '@phosphor-icons/react'
@@ -59,6 +61,7 @@ import {
   type AchievementEntry,
   type ExperienceEntry,
   type HighlightEntry,
+  type ReadingPageCopy,
   type Locale,
 } from './i18n/copy'
 import AdminAuth from './admin/admin-auth'
@@ -1182,7 +1185,6 @@ function AboutExtras({ onNavigate }: NavigateProps) {
   )
 }
 
-const STUDY_ACCENTS = ['#61dafb', '#68d391', '#60a5fa', '#fbbf24', '#f472b6', '#a78bfa']
 
 function BlogTags({ tags }: { tags: string[] }) {
   return (
@@ -1332,58 +1334,18 @@ function BlogPostPage({ onNavigate }: NavigateProps) {
 function ReadingExtras() {
   const { t } = useLocale()
   const studies = t.pages.reading.studies
+  const isMobile = useIsMobile()
 
   return (
     <>
       <section className="page-block about-journey" data-accent="reading">
-        <h2 className="about-journey__title">{studies.heading}</h2>
-        <ChromaGrid
-          items={studies.items.map((item, index) => ({
-            image: `/showcase/projeto-${index + 1}.svg`,
-            title: item.title,
-            subtitle: item.subtitle,
-            accent: STUDY_ACCENTS[index % STUDY_ACCENTS.length],
-          }))}
-          columns={3}
-          minCardWidth={220}
-          gap={14}
-          radius={260}
-          reveal="spotlight"
-          aspectRatio="3 / 2"
-          cardRadius={14}
-          softness={0.6}
-          damping={0.45}
-          fadeOut={0.6}
-          grayscale={1}
-          dim={0.12}
-          glow={0.5}
-          borderGlow={1}
-        />
+        <h2 className="about-journey__title">{studies.platforms.heading}</h2>
+        <StudiesFolders labels={studies.platforms} isMobile={isMobile} />
       </section>
 
-      <section className="page-block showcase-drift">
-        <DriftWall
-          columns={5}
-          tileWidth={200}
-          tileHeight={132}
-          gap={18}
-          tilt={16}
-          turn={-14}
-          perspective={1200}
-          depth={120}
-          speed={42}
-          direction="up"
-          variance={0.45}
-          parallax={0.6}
-          lift={64}
-          fade={0.6}
-          dim={0.55}
-          overlayColor="#060010"
-          radius={14}
-          roll={0}
-          pauseOnHover={false}
-          grayscale={false}
-        />
+      <section className="page-block about-journey skills-dome-block" data-accent="reading">
+        <h2 className="about-journey__title">{studies.platforms.skillsHeading}</h2>
+        <SkillDome isMobile={isMobile} labels={studies.platforms} />
       </section>
     </>
   )
@@ -1417,32 +1379,128 @@ function HireExtras() {
 }
 
 function ContactExtras() {
+  const isMobile = useIsMobile()
+
   return (
     <>
-      <section className="page-block showcase-spiral">
-        <InfiniteSpiral
-          items={SPIRAL_IMAGES}
-          animationMode="auto"
-          speed={0.55}
-          radius={170}
-          cardWidth={100}
-          cardHeight={100}
-          verticalSpacing={60}
-          perspective={1000}
-          cardRadius={10}
-          centerScale={1.2}
-          edgeBlur={6}
-          cardsPerTurn={7}
-          pauseOnHover
+      <section className="page-block showcase-drift">
+        <DriftWall
+          columns={isMobile ? 3 : 5}
+          tileWidth={isMobile ? 130 : 200}
+          tileHeight={isMobile ? 190 : 132}
+          gap={18}
+          tilt={16}
+          turn={-14}
+          perspective={1200}
+          depth={120}
+          speed={42}
           direction="up"
-          rotation={0}
-          cardTilt={0}
-          edgeFade={0.3}
-          imageFit="cover"
-          grayscale={1}
+          variance={0.45}
+          parallax={0.6}
+          lift={64}
+          fade={0.4}
+          dim={0.2}
+          overlayColor="#060010"
+          radius={14}
+          roll={0}
+          pauseOnHover={false}
+          grayscale={false}
         />
       </section>
     </>
+  )
+}
+
+/** Habilidades por categoria numa cúpula 3D arrastável. Clicar pesquisa a habilidade na web. */
+const SKILL_GROUP_NAMES: readonly (readonly string[])[] = [
+  ['HTML5', 'CSS3', 'JavaScript', 'TypeScript', 'Java', 'C', 'C++', 'C#', 'SQL', 'Twig', 'React', 'Node.js', 'Tailwind CSS', 'Bootstrap', 'Sass'],
+  ['Git', 'Vite', 'Figma', 'Postman', 'Canva', 'GIMP', 'Arduino', 'FileZilla', 'Obsidian', 'PageSpeed', 'VSCode', 'Visual Studio', 'Eclipse', 'IntelliJ', 'NetBeans', 'Antigravity', 'Office'],
+  ['MySQL', 'SQL Server', 'Supabase', 'Render', 'Nuvemshop', 'Nuvemshop Partners', 'Linux', 'Windows'],
+  ['Scrum', 'Kanban', 'Trello', 'Jira', 'ClickUp', 'Português', 'English', 'Español'],
+  ['ChatGPT', 'Gemini', 'DeepSeek', 'Perplexity', 'AI Studio Google', 'GitHub Copilot'],
+]
+
+function SkillDome({
+  isMobile,
+  labels,
+}: {
+  isMobile: boolean
+  labels: Pick<ReadingPageCopy['studies']['platforms'], 'skillGroups' | 'searchSkill' | 'skillHint' | 'skillAll' | 'skillPlay' | 'skillPause'>
+}) {
+  const [group, setGroup] = useState(-1)
+  const [playing, setPlaying] = useState(true)
+
+  const images = useMemo(() => {
+    const names = group < 0 ? SKILL_GROUP_NAMES.flat() : SKILL_GROUP_NAMES[group]
+    return names.flatMap((name) => {
+      const skill = SKILLS.find((item) => item.name === name)
+      if (!skill) return []
+      return [
+        {
+          src: skill.icon,
+          alt: `${labels.searchSkill} ${skill.name}`,
+          label: skill.name,
+          href: `https://www.google.com/search?q=${encodeURIComponent(`${skill.name} tecnologia`)}`,
+        },
+      ]
+    })
+  }, [group, labels.searchSkill])
+
+  const chips = [labels.skillAll, ...labels.skillGroups]
+
+  return (
+    <div className="skill-dome">
+      <div className="skill-dome__bar">
+      <div className="skill-dome__chips" role="tablist">
+        {chips.map((chip, index) => (
+          <button
+            key={chip}
+            type="button"
+            role="tab"
+            aria-selected={group === index - 1}
+            className="skill-dome__chip"
+            data-active={group === index - 1 ? '' : undefined}
+            onClick={(event) => {
+              setGroup(index - 1)
+              // No mobile os filtros são um carrossel: o clicado vai para o centro.
+              event.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+            }}
+          >
+            {chip}
+          </button>
+        ))}
+      </div>
+      <button
+        type="button"
+        className="skill-dome__play"
+        aria-pressed={playing}
+        aria-label={playing ? labels.skillPause : labels.skillPlay}
+        title={playing ? labels.skillPause : labels.skillPlay}
+        onClick={() => setPlaying((value) => !value)}
+      >
+        {playing ? <Pause weight="fill" aria-hidden /> : <Play weight="fill" aria-hidden />}
+      </button>
+      </div>
+      <div className="skill-dome__stage">
+        <DomeGallery
+          key={`${group}-${isMobile}`}
+          images={images}
+          fit={isMobile ? 1.1 : 0.62}
+          minRadius={isMobile ? 330 : 560}
+          segments={isMobile ? 26 : 36}
+          maxVerticalRotationDeg={0}
+          dragDampening={2}
+          imageBorderRadius="8px"
+          hint={labels.skillHint}
+          fadeColor="var(--bg-stage)"
+          autoRotate={playing}
+          autoRotateSpeed={4}
+          onItemClick={(item) => {
+            if (item.href) window.open(item.href, '_blank', 'noopener,noreferrer')
+          }}
+        />
+      </div>
+    </div>
   )
 }
 
@@ -1537,12 +1595,6 @@ const GALLERY_ITEMS = [
 
 /** Imagens provisórias da galeria de momentos (Sobre): artes em /public/showcase. Trocar por fotos reais. */
 const ACCORDION_IMAGES = [1, 2, 3, 4, 5].map((n) => `/showcase/accordion-${n}.svg`)
-
-/** Imagens genéricas locais (Contato) até você definir o conteúdo real. */
-const SPIRAL_IMAGES = [1, 2, 4, 5, 7, 9, 10, 11].map((n) => ({
-  src: `/showcase/galeria-${String(n).padStart(2, '0')}.jpg`,
-  alt: `Imagem ${n}`,
-}))
 
 function useDocumentTheme(): Theme {
   const [theme, setTheme] = useState<Theme>(readDocumentTheme)

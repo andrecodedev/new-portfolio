@@ -77,6 +77,30 @@ export type AboutPageCopy = PageCopy & {
 export type ReadingPageCopy = PageCopy & {
   studies: {
     heading: string
+    /** Pastas por plataforma de estudo → cursos. Os cursos ficam em data/studies.ts. */
+    platforms: {
+      heading: string
+      back: string
+      doing: string
+      queue: string
+      done: string
+      lessons: string
+      hours: string
+      certificate: string
+      courses: string
+      close: string
+      modules: string
+      progress: string
+      noCertificate: string
+      skillsHeading: string
+      skillGroups: readonly [string, string, string, string, string]
+      searchSkill: string
+      skillHint: string
+      skillAll: string
+      emptyModules: string
+      skillPlay: string
+      skillPause: string
+    }
     items: readonly { title: string; subtitle: string }[]
   }
 }
@@ -609,6 +633,29 @@ const pt: Dictionary = {
       imageAlt: 'Ilustração de estudos e projetos',
       studies: {
         heading: 'O que estudo',
+        platforms: {
+          heading: 'Cursos por plataforma',
+          back: 'Voltar',
+          doing: 'Em andamento',
+          queue: 'Na fila',
+          done: 'Concluídos',
+          lessons: 'aulas',
+          hours: 'h',
+          certificate: 'Certificado',
+          courses: 'cursos',
+          close: 'Fechar',
+          modules: 'Grade do curso',
+          progress: 'Progresso',
+          noCertificate: 'Certificado em breve',
+          skillsHeading: 'Habilidades',
+          skillGroups: ['Tecnologias', 'Ferramentas', 'Plataformas e dados', 'Gestão e idiomas', 'Inteligência artificial'],
+          searchSkill: 'Pesquisar',
+          skillHint: 'Clique para saber mais',
+          skillAll: 'Todas',
+          emptyModules: 'Módulos ainda não mapeados',
+          skillPlay: 'Girar automaticamente',
+          skillPause: 'Pausar giro',
+        },
         items: [
         { title: 'React', subtitle: 'Interfaces e componentes' },
         { title: 'Node.js', subtitle: 'APIs e back-end' },
@@ -1069,6 +1116,29 @@ const en: Dictionary = {
       imageAlt: 'Studies and projects illustration',
       studies: {
         heading: 'What I study',
+        platforms: {
+          heading: 'Courses by platform',
+          back: 'Back',
+          doing: 'In progress',
+          queue: 'Queued',
+          done: 'Completed',
+          lessons: 'lessons',
+          hours: 'h',
+          certificate: 'Certificate',
+          courses: 'courses',
+          close: 'Close',
+          modules: 'Course outline',
+          progress: 'Progress',
+          noCertificate: 'Certificate coming soon',
+          skillsHeading: 'Skills',
+          skillGroups: ['Technologies', 'Tools', 'Platforms and data', 'Management and languages', 'Artificial intelligence'],
+          searchSkill: 'Search',
+          skillHint: 'Click to learn more',
+          skillAll: 'All',
+          emptyModules: 'Modules not mapped yet',
+          skillPlay: 'Rotate automatically',
+          skillPause: 'Pause rotation',
+        },
         items: [
         { title: 'React', subtitle: 'Interfaces and components' },
         { title: 'Node.js', subtitle: 'APIs and back end' },
@@ -1529,6 +1599,29 @@ const es: Dictionary = {
       imageAlt: 'Ilustración de estudios y proyectos',
       studies: {
         heading: 'Lo que estudio',
+        platforms: {
+          heading: 'Cursos por plataforma',
+          back: 'Volver',
+          doing: 'En curso',
+          queue: 'En cola',
+          done: 'Completados',
+          lessons: 'clases',
+          hours: 'h',
+          certificate: 'Certificado',
+          courses: 'cursos',
+          close: 'Cerrar',
+          modules: 'Contenido del curso',
+          progress: 'Progreso',
+          noCertificate: 'Certificado próximamente',
+          skillsHeading: 'Habilidades',
+          skillGroups: ['Tecnologías', 'Herramientas', 'Plataformas y datos', 'Gestión e idiomas', 'Inteligencia artificial'],
+          searchSkill: 'Buscar',
+          skillHint: 'Haz clic para saber más',
+          skillAll: 'Todas',
+          emptyModules: 'Módulos aún sin mapear',
+          skillPlay: 'Girar automáticamente',
+          skillPause: 'Pausar giro',
+        },
         items: [
         { title: 'React', subtitle: 'Interfaces y componentes' },
         { title: 'Node.js', subtitle: 'APIs y back end' },
