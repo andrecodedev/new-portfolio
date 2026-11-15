@@ -36,6 +36,8 @@ export type CircularGalleryProps = Omit<React.HTMLAttributes<HTMLDivElement>, 's
   intro?: boolean
   /** Setas embaixo para navegar sem depender de arrastar/rolar. */
   showArrows?: boolean
+  /** Contador único "01 / 05" (card ativo), acima das setas. */
+  showCounter?: boolean
   /** Espaço (px) reservado embaixo, p.ex. para as setas: os cards sobem metade disso. */
   bottomSpace?: number
   onItemClick?: (item: CircularGalleryItem, index: number) => void
@@ -57,6 +59,7 @@ const CLASSES = {
   labels: 'circular-gallery-labels',
   label: 'circular-gallery-label',
   labelDesc: 'circular-gallery-label-desc',
+  counter: 'circular-gallery-counter',
   arrows: 'circular-gallery-arrows',
   arrow: 'circular-gallery-arrow',
   caption: 'circular-gallery-caption',
@@ -293,6 +296,7 @@ export default function CircularGallery({
   openOnClick = true,
   intro = true,
   showArrows = true,
+  showCounter = true,
   bottomSpace = 0,
   onItemClick,
   onActiveChange,
@@ -337,6 +341,7 @@ export default function CircularGallery({
     openOnClick,
     intro,
     bottomSpace: Math.max(0, bottomSpace),
+    showCounter,
     onItemClick,
     onActiveChange,
     dpr,
@@ -1200,6 +1205,11 @@ export default function CircularGallery({
           />
         </svg>
       </button>
+      {showCounter ? (
+        <div className={CLASSES.counter} aria-hidden="true" data-arrows={showArrows ? '' : undefined}>
+          {String((active % count) + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}
+        </div>
+      ) : null}
       {showArrows ? (
         <div className={CLASSES.arrows}>
           <button

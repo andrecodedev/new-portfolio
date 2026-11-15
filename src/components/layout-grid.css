@@ -89,11 +89,15 @@
   max-height: min(80vh, 36rem);
   overflow: auto;
   padding: var(--gap);
-  border: 1.5px solid color-mix(in srgb, var(--text) 40%, transparent);
+  /* Borda na cor de destaque da página (amarelo em Trabalho, verde em Sobre), bem suave:
+     55% de opacidade e um brilho discreto. */
+  border: 1.5px solid color-mix(in srgb, var(--section-accent, var(--text)) 55%, transparent);
   border-radius: var(--stage-radius);
   /* Mesmo fundo escuro da página (o cinza antigo destoava). */
   background: var(--bg-outer);
-  box-shadow: 0 24px 46px -24px rgba(0, 0, 0, 0.6);
+  box-shadow:
+    0 24px 46px -24px rgba(0, 0, 0, 0.6),
+    0 0 28px -10px color-mix(in srgb, var(--section-accent, var(--text)) 35%, transparent);
 }
 
 /* Logo pequeno ao lado do título/empresa/datas; a descrição ocupa a linha toda. */

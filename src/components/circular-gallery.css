@@ -167,3 +167,29 @@
     font-size: 14px;
   }
 }
+
+.circular-gallery-counter {
+  position: absolute;
+  left: 50%;
+  bottom: 52px;
+  z-index: 2;
+  transform: translateX(-50%);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.circular-gallery-counter:not([data-arrows]) {
+  bottom: 12px;
+}
+
+@media (max-width: 767px) {
+  .circular-gallery-counter {
+    bottom: 44px;
+    font-size: 0.72rem;
+  }
+}
