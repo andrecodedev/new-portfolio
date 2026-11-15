@@ -1061,26 +1061,6 @@ function ContentPage({
   )
 }
 
-function AboutHeroActions({ onNavigate }: NavigateProps) {
-  const { t } = useLocale()
-  const hero = t.pages.about.hero
-
-  return (
-    <div className="about-hero__actions">
-      <button
-        type="button"
-        className="works__btn"
-        onClick={() => onNavigate(PAGE_META.work.path)}
-      >
-        {hero.projectsCta}
-      </button>
-      <a className="works__btn" href="/cv/curriculoAndreVitor.pdf" download>
-        {hero.cvCta}
-      </a>
-    </div>
-  )
-}
-
 type FanItem = {
   key: string
   title: string
@@ -2163,10 +2143,7 @@ function PortfolioShell() {
                 <Route
                   path={PAGE_META.about.path}
                   element={
-                    <ContentPage
-                      pageId="about"
-                      actions={<AboutHeroActions onNavigate={navigateTo} />}
-                    >
+                    <ContentPage pageId="about">
                       <AboutExtras onNavigate={navigateTo} />
                     </ContentPage>
                   }

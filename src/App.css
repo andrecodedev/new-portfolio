@@ -1378,12 +1378,6 @@ svg.menu__social-icon {
   transform: translateZ(0);
 }
 
-/* Página Sobre: botões (Ver Projetos / Baixar Currículo) sob o texto do hero */
-.about-hero__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--gap-sm);
-}
 
 /* Página Trabalho: grade de estatísticas abaixo do scroll cue */
 .work-stats {
