@@ -135,10 +135,29 @@ export function highlightAccents(text: string, accents: readonly string[]) {
     })
 }
 
+/**
+ * Páginas ocultas por enquanto (sem conteúdo interno ainda): somem do menu, da home, das rotas e
+ * dos atalhos, e o caminho cai na página 404. Para reativar, tire o id desta lista.
+ */
+export const HIDDEN_PAGES: readonly ContentPageId[] = ['blog', 'hire', 'contact']
+
+export function isPageHidden(id: ContentPageId): boolean {
+  return HIDDEN_PAGES.includes(id)
+}
+
+/** O caminho (ou um subcaminho dele) pertence a uma página oculta? */
+export function isPathHidden(path: string): boolean {
+  return HIDDEN_PAGES.some((id) => {
+    const base = PAGE_META[id].path
+    return path === base || path.startsWith(`${base}/`)
+  })
+}
+
 /** Página dona do caminho: igual ao path ou subcaminho (ex.: /blog/meu-post pertence a /blog). */
 function pageForPath(path: string): PageMeta | undefined {
   return Object.values(PAGE_META).find(
-    (item) => path === item.path || path.startsWith(`${item.path}/`),
+    (item) =>
+      !isPageHidden(item.id) && (path === item.path || path.startsWith(`${item.path}/`)),
   )
 }
 

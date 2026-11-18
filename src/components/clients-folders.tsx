@@ -1,6 +1,7 @@
 import { useRef, useState, type CSSProperties } from 'react'
 import { ArrowLeft, CaretRight, FolderSimple } from '@phosphor-icons/react'
 import Folder from './Folder'
+import { accentGlow } from './ui/accent-glow'
 import { useScrollToSectionOnChange } from '../navigation/use-scroll-to-section'
 import type { WorkPageCopy } from '../i18n/copy'
 
@@ -8,23 +9,19 @@ type Clients = WorkPageCopy['clients']
 type RootFolder = Clients['folders'][number]
 type Project = RootFolder['projects'][number]
 
-type Path =
+export type WorkFoldersPath =
   | { level: 'root' }
   | { level: 'projects'; rootIndex: number }
   | { level: 'files'; rootIndex: number; projectIndex: number }
 
+type Path = WorkFoldersPath
+
 type ClientsFoldersProps = {
   clients: Clients
   isMobile: boolean
-}
-
-function hexLuma(hex: string) {
-  const raw = hex.replace('#', '')
-  if (raw.length !== 6) return 0.5
-  const r = Number.parseInt(raw.slice(0, 2), 16)
-  const g = Number.parseInt(raw.slice(2, 4), 16)
-  const b = Number.parseInt(raw.slice(4, 6), 16)
-  return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
+  /** Opcional: controla a navegação por fora (ex.: "Ferramentas de atuação" abre a pasta de um projeto). */
+  path?: WorkFoldersPath
+  onPathChange?: (next: WorkFoldersPath) => void
 }
 
 /** Arquivo com o mesmo desenho dos arquivos que aparecem ao abrir a pasta do projeto. */
@@ -34,39 +31,91 @@ function MiniPaper() {
       <span className="folder-doc-heading" />
       <span className="folder-doc-line" style={{ width: '92%' }} />
       <span className="folder-doc-line" style={{ width: '84%' }} />
-      <span className="folder-doc-line" style={{ width: '88%' }} />
-      <span className="folder-doc-block" />
+      <span className="mini-folder__bar" aria-hidden>
+        <i />
+      </span>
+      <span className="mini-folder__fold" aria-hidden />
     </span>
   )
 }
 
-export function MiniFolder({ label, color, variant }: { label: string; color: string; variant: 'peek' | 'open' | 'rest' }) {
-  const ink = hexLuma(color) > 0.62 ? 'rgba(20, 16, 8, 0.82)' : 'rgba(255, 255, 255, 0.96)'
+/** Mini pasta: dentro das pastas de cliente (trabalho) e na grade de cursos (estudos). */
+export function MiniFolder({
+  label,
+  meta,
+  color,
+  variant,
+}: {
+  label: string
+  /** Linha pequena embaixo do nome (ex.: quantidade de arquivos). */
+  meta?: string
+  color: string
+  variant: 'peek' | 'open' | 'rest'
+}) {
+  // Raio em px + data-folder-radii: o vidro lê o atributo (CSS %/calc saía com quina reta).
+  const r = 5
+  // Cada mini-pasta tem o brilho num canto e ângulo próprios, fixos para a mesma cor e nome.
+  const glow = accentGlow(`${color}|${label}`)
   return (
-    <div className={`mini-folder mini-folder--${variant}`} style={{ '--mini-color': color, '--mini-ink': ink } as CSSProperties}>
-      <span className="mini-folder__tab" aria-hidden />
-      <span className="mini-folder__back" aria-hidden />
+    <div
+      className={`mini-folder mini-folder--${variant}`}
+      style={
+        {
+          '--mini-color': color,
+          '--mini-radius': `${r}px`,
+          '--mini-angle': `${glow.angle}deg`,
+          '--mini-reach': `${Math.round(glow.reach * 100)}%`,
+          '--mini-alpha': `${Math.round(glow.alpha * 100)}%`,
+        } as CSSProperties
+      }
+    >
+      <span
+        className="mini-folder__tab"
+        aria-hidden
+        data-folder-radii={`${r},0,0,0`}
+        style={{ borderRadius: `${r}px 0 0 0` }}
+      />
+      <span
+        className="mini-folder__back"
+        aria-hidden
+        data-folder-radii={`0,${r},${r},${r}`}
+        style={{ borderRadius: `0 ${r}px ${r}px ${r}px` }}
+      />
       <span className="mini-folder__papers" aria-hidden>
         <MiniPaper />
         <MiniPaper />
         <MiniPaper />
       </span>
-      <span className="mini-folder__front">
+      <span
+        className="mini-folder__front"
+        data-folder-radii={`${r},${r},${r},${r}`}
+        style={{ borderRadius: r }}
+      >
         <span className="mini-folder__label">{label}</span>
+        {meta && <span className="mini-folder__meta">{meta}</span>}
       </span>
     </div>
   )
 }
 
-function projectItems(projects: readonly Project[], variant: 'peek' | 'open') {
+function projectItems(projects: readonly Project[], variant: 'peek' | 'open', filesLabel: string) {
   return projects.map((project) => ({
-    content: <MiniFolder label={project.label} color={project.color} variant={variant} />,
+    content: (
+      <MiniFolder
+        label={project.label}
+        meta={`${project.items.length} ${filesLabel}`}
+        color={project.color}
+        variant={variant}
+      />
+    ),
     bare: true,
   }))
 }
 
-export function ClientsFolders({ clients, isMobile }: ClientsFoldersProps) {
-  const [path, setPath] = useState<Path>({ level: 'root' })
+export function ClientsFolders({ clients, isMobile, path: controlled, onPathChange }: ClientsFoldersProps) {
+  const [inner, setInner] = useState<Path>({ level: 'root' })
+  const path = controlled ?? inner
+  const setPath = onPathChange ?? setInner
   const shellRef = useRef<HTMLDivElement>(null)
   // Ao entrar numa pasta o conteúdo muda de altura (duas pastas viram uma). Travar a altura
   // evita o documento encolher e a página "pular" de posição enquanto o usuário olha.
@@ -77,7 +126,7 @@ export function ClientsFolders({ clients, isMobile }: ClientsFoldersProps) {
     setPath(next)
   }
   useScrollToSectionOnChange(shellRef, JSON.stringify(path))
-  const size = isMobile ? 0.8 : 1.2
+  const size = isMobile ? 0.9 : 1.35
 
   const rootFolder: RootFolder | null =
     path.level !== 'root' ? clients.folders[path.rootIndex] ?? null : null
@@ -163,8 +212,10 @@ export function ClientsFolders({ clients, isMobile }: ClientsFoldersProps) {
             <div className="showcase-folder" key={folder.label}>
               <Folder
                 label={folder.label}
+                meta={`${folder.projects.length} ${clients.projectsLabel}`}
                 mode="flap"
-                variant="solid"
+                variant="glass"
+                frost={0.12}
                 layout="spread"
                 color={folder.color}
                 paperColor="#ffffff"
@@ -177,14 +228,14 @@ export function ClientsFolders({ clients, isMobile }: ClientsFoldersProps) {
                 peek
                 intro
                 theme="dark"
-                items={projectItems(folder.projects, 'peek')}
+                items={projectItems(folder.projects, 'peek', clients.filesLabel)}
+                // Projeto puxado para fora da pasta e clicado: abre direto, sem passar pela pasta do cliente.
+                zoomOnClick={false}
+                onItemClick={(_item, index) => go({ level: 'files', rootIndex, projectIndex: index })}
                 onOpenChange={(open) => {
                   if (open) go({ level: 'projects', rootIndex })
                 }}
               />
-              <p className="folder-caption">
-                <span className="folder-caption__name">{folder.label}</span>
-              </p>
             </div>
           ))}
 
@@ -192,8 +243,10 @@ export function ClientsFolders({ clients, isMobile }: ClientsFoldersProps) {
           <div className="showcase-folder showcase-folder--focus">
             <Folder
               label={rootFolder.label}
+              meta={`${rootFolder.projects.length} ${clients.projectsLabel}`}
               mode="flap"
-              variant="solid"
+              variant="glass"
+              frost={0.12}
               layout="spread"
               color={rootFolder.color}
               paperColor="#ffffff"
@@ -209,7 +262,7 @@ export function ClientsFolders({ clients, isMobile }: ClientsFoldersProps) {
               intro
               draggable
               theme="dark"
-              items={projectItems(rootFolder.projects, 'open')}
+              items={projectItems(rootFolder.projects, 'open', clients.filesLabel)}
               onItemClick={(_item, index) => {
                 go({
                   level: 'files',
@@ -225,8 +278,10 @@ export function ClientsFolders({ clients, isMobile }: ClientsFoldersProps) {
           <div className="showcase-folder showcase-folder--focus">
             <Folder
               label={project.label}
+              meta={`${project.items.length} ${clients.filesLabel}`}
               mode="flap"
-              variant="solid"
+              variant="glass"
+              frost={0.12}
               layout="spread"
               color={project.color}
               paperColor="#ffffff"

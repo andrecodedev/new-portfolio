@@ -27,7 +27,8 @@ import FlexCarousel from './components/flex-carousel'
 import BounceCards from './components/bounce-cards'
 import { BLOG_POSTS, findBlogPost, formatBlogDate, type BlogBlock } from './data/blog-posts'
 import AccordionGallery from './components/accordion-gallery'
-import { ClientsFolders } from './components/clients-folders'
+import { ClientsFolders, type WorkFoldersPath } from './components/clients-folders'
+import { WorkTools } from './components/work-tools'
 import { StudiesFolders, type StudiesPath } from './components/studies-folders'
 import { SkillChart } from './components/skill-chart'
 import {
@@ -55,6 +56,8 @@ import {
   getAccentForPath,
   getLoaderBgForPath,
   isKnownSitePath,
+  isPageHidden,
+  isPathHidden,
   type ContentPageId,
 } from './data/site'
 import { SKILLS } from './data/about'
@@ -353,7 +356,9 @@ function Header({
         ) : null}
       </motion.div>
 
-      {header.modulesOrder.includes('cta') && header.ctaEnabled ? (
+      {header.modulesOrder.includes('cta') &&
+      header.ctaEnabled &&
+      !isPathHidden(header.ctaTo || PAGE_META.contact.path) ? (
         <motion.a
           className="header__btn"
           href={header.ctaTo || PAGE_META.contact.path}
@@ -631,7 +636,7 @@ function Menu({ id, open, onNavigate }: MenuProps) {
 
   const navLinks = header.modulesOrder.includes('nav')
     ? header.navItems
-        .filter((item) => item.enabled)
+        .filter((item) => item.enabled && !isPathHidden(item.path))
         .map((item) => ({
           id: item.id,
           label: item.label[locale] || item.name,
@@ -1089,7 +1094,7 @@ const FAN_ITEMS: FanItem[] = [
   { key: 'stack', title: 'Stack', text: 'React, Node e banco de dados', Icon: Code },
   { key: 'work', title: 'Projetos', text: 'Casos reais e estudos', Icon: Stack, to: PAGE_META.work.path },
   { key: 'contact', title: 'Contato', text: 'Vamos conversar', Icon: ChatCircleDots, to: PAGE_META.contact.path },
-]
+].filter((item) => !item.to || !isPathHidden(item.to))
 
 function FanCard({ item, onNavigate }: { item: FanItem; onNavigate: (to: string) => void }) {
   const { Icon } = item
@@ -1533,6 +1538,8 @@ function WorkExtras() {
   const isMobile = useIsMobile()
   const galleryDark = useDocumentTheme() === 'dark'
   const stats = t.pages.work.stats
+  // Navegação das pastas controlada aqui: "Ferramentas de atuação" abre a pasta de um projeto.
+  const [clientsPath, setClientsPath] = useState<WorkFoldersPath>({ level: 'root' })
 
   return (
     <>
@@ -1556,8 +1563,22 @@ function WorkExtras() {
       </ScrollFade>
 
       <section className="page-block about-journey" data-accent="work">
+        <h2 className="about-journey__title">{t.pages.work.tools.heading}</h2>
+        <WorkTools
+          copy={t.pages.work.tools}
+          clients={t.pages.work.clients}
+          onOpenProject={(rootIndex, projectIndex) => setClientsPath({ level: 'files', rootIndex, projectIndex })}
+        />
+      </section>
+
+      <section className="page-block about-journey" data-accent="work">
         <h2 className="about-journey__title">{t.pages.work.clients.heading}</h2>
-        <ClientsFolders clients={t.pages.work.clients} isMobile={isMobile} />
+        <ClientsFolders
+          clients={t.pages.work.clients}
+          isMobile={isMobile}
+          path={clientsPath}
+          onPathChange={setClientsPath}
+        />
       </section>
 
       <section className="page-block showcase-gallery">
@@ -1567,7 +1588,7 @@ function WorkExtras() {
           items={GALLERY_ITEMS}
           bend={3}
           textColor={galleryDark ? '#ffffff' : '#171717'}
-          borderRadius={0.05}
+          borderRadius={0.015}
           scrollEase={0.05}
           itemSize={0.84}
           bottomSpace={isMobile ? 64 : 110}
@@ -1799,6 +1820,8 @@ const SKILLS_MARQUEE_SPEED = 55
 function WorkSkillsMarquee() {
   const reduce = Boolean(useReducedMotion())
   const trackRef = useRef<HTMLDivElement>(null)
+  // Mouse em cima de um logo: o carrossel para e o nome aparece embaixo.
+  const pausedRef = useRef(false)
   const items = reduce ? SKILLS : [...SKILLS, ...SKILLS]
 
   useEffect(() => {
@@ -1806,10 +1829,20 @@ function WorkSkillsMarquee() {
     const track = trackRef.current
     if (!track) return
 
+    const viewport = track.parentElement as HTMLElement
     let halfWidth = 0
+    let itemW = 0
+    let viewW = 0
+    let curve = 0
 
     const measure = () => {
       halfWidth = track.scrollWidth / 2
+      const first = track.firstElementChild as HTMLElement | null
+      itemW = first?.offsetWidth ?? 0
+      viewW = viewport.clientWidth
+      // Fundo em U: a fileira desce no meio e sobe nas pontas. Profundidade proporcional à largura.
+      curve = Math.round(Math.min(64, Math.max(24, viewW * 0.045)))
+      viewport.style.setProperty('--skills-curve', `${curve}px`)
     }
     measure()
 
@@ -1823,9 +1856,21 @@ function WorkSkillsMarquee() {
     const tick = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
-      x -= SKILLS_MARQUEE_SPEED * dt
+      if (!pausedRef.current) x -= SKILLS_MARQUEE_SPEED * dt
       if (halfWidth > 0 && x <= -halfWidth) x += halfWidth
       track.style.transform = `translateX(${x}px)`
+      // Cada logo acompanha a parábola: y = curve * (1 - t²), com t de -1 (borda) a 1 (borda).
+      const half = viewW / 2
+      if (itemW > 0 && half > 0) {
+        const children = track.children
+        for (let i = 0; i < children.length; i += 1) {
+          const t = (i * itemW + itemW / 2 + x - half) / half
+          const c = Math.max(-1.2, Math.min(1.2, t))
+          const y = curve * (1 - c * c)
+          const angle = Math.atan((-2 * curve * c) / half) * (180 / Math.PI)
+          ;(children[i] as HTMLElement).style.transform = `translateY(${y.toFixed(2)}px) rotate(${angle.toFixed(2)}deg)`
+        }
+      }
 
       raf = requestAnimationFrame(tick)
     }
@@ -1849,8 +1894,15 @@ function WorkSkillsMarquee() {
             <div
               className="work-skills__item"
               key={`${skill.name}-${index}`}
+              onPointerEnter={(event) => {
+                if (event.pointerType !== 'touch') pausedRef.current = true
+              }}
+              onPointerLeave={() => {
+                pausedRef.current = false
+              }}
             >
               <img src={skill.icon} alt="" loading="lazy" draggable={false} />
+              <span className="work-skills__name">{skill.name}</span>
             </div>
           ))}
         </div>
@@ -2088,6 +2140,7 @@ function HomePage({ onNavigate }: NavigateProps) {
         to={PAGE_META.reading.path}
         onNavigate={onNavigate}
       />
+      {!isPageHidden('blog') && (
       <Spot
         id="blog"
         ariaLabel={t.home.blog.ariaLabel}
@@ -2105,6 +2158,8 @@ function HomePage({ onNavigate }: NavigateProps) {
         to={PAGE_META.blog.path}
         onNavigate={onNavigate}
       />
+      )}
+      {!isPageHidden('hire') && (
       <Spot
         id="contrato"
         ariaLabel={t.home.hire.ariaLabel}
@@ -2122,6 +2177,8 @@ function HomePage({ onNavigate }: NavigateProps) {
         to={PAGE_META.hire.path}
         onNavigate={onNavigate}
       />
+      )}
+      {!isPageHidden('contact') && (
       <Spot
         id="juntos"
         ariaLabel={t.home.contact.ariaLabel}
@@ -2139,6 +2196,7 @@ function HomePage({ onNavigate }: NavigateProps) {
         to={PAGE_META.contact.path}
         onNavigate={onNavigate}
       />
+      )}
       <Copyright />
     </>
   )
@@ -2480,34 +2538,42 @@ function PortfolioShell() {
                     </ContentPage>
                   }
                 />
-                <Route
-                  path={PAGE_META.blog.path}
-                  element={
-                    <ContentPage pageId="blog">
-                      <BlogExtras onNavigate={navigateTo} />
-                    </ContentPage>
-                  }
-                />
-                <Route
-                  path={`${PAGE_META.blog.path}/:slug`}
-                  element={<BlogPostPage onNavigate={navigateTo} />}
-                />
-                <Route
-                  path={PAGE_META.hire.path}
-                  element={
-                    <ContentPage pageId="hire">
-                      <HireExtras />
-                    </ContentPage>
-                  }
-                />
-                <Route
-                  path={PAGE_META.contact.path}
-                  element={
-                    <ContentPage pageId="contact">
-                      <ContactExtras />
-                    </ContentPage>
-                  }
-                />
+                {!isPageHidden('blog') && (
+                  <Route
+                    path={PAGE_META.blog.path}
+                    element={
+                      <ContentPage pageId="blog">
+                        <BlogExtras onNavigate={navigateTo} />
+                      </ContentPage>
+                    }
+                  />
+                )}
+                {!isPageHidden('blog') && (
+                  <Route
+                    path={`${PAGE_META.blog.path}/:slug`}
+                    element={<BlogPostPage onNavigate={navigateTo} />}
+                  />
+                )}
+                {!isPageHidden('hire') && (
+                  <Route
+                    path={PAGE_META.hire.path}
+                    element={
+                      <ContentPage pageId="hire">
+                        <HireExtras />
+                      </ContentPage>
+                    }
+                  />
+                )}
+                {!isPageHidden('contact') && (
+                  <Route
+                    path={PAGE_META.contact.path}
+                    element={
+                      <ContentPage pageId="contact">
+                        <ContactExtras />
+                      </ContentPage>
+                    }
+                  />
+                )}
                 <Route
                   path="*"
                   element={<NotFoundPage onGoHome={() => navigateTo('/')} />}

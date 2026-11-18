@@ -126,6 +126,15 @@ export type BlogPageCopy = PageCopy & {
 
 export type WorkPageCopy = PageCopy & {
   stats: readonly WorkStat[]
+  /** Ferramentas de atuação: resumo de cada uma (mesma ordem de data/work-tools.ts). */
+  tools: {
+    heading: string
+    subtitle: string
+    projects: string
+    empty: string
+    open: string
+    items: readonly { summary: string }[]
+  }
   github: {
     heading: string
     yearLast: string
@@ -141,6 +150,8 @@ export type WorkPageCopy = PageCopy & {
   clients: {
     heading: string
     back: string
+    projectsLabel: string
+    filesLabel: string
     folders: readonly {
       label: string
       color: string
@@ -353,9 +364,24 @@ const pt: Dictionary = {
       gallery: {
         heading: 'Projetos em destaque',
       },
+      tools: {
+        heading: 'Ferramentas de atuação',
+        subtitle: 'Plataformas de e-commerce em que eu trabalho. Escolha uma para ver o que é e onde atuei.',
+        projects: 'Projetos de referência',
+        empty: 'Projetos de referência em breve.',
+        open: 'Abrir a pasta do projeto',
+        items: [
+          { summary: 'Plataforma brasileira de e-commerce para criar e gerir lojas virtuais. Tem temas personalizáveis, checkout integrado e um ecossistema de aplicativos e parceiros.' },
+          { summary: 'Plataforma para construir lojas online rápidas com edição visual: o time edita o conteúdo sem depender de deploy, e o código segue um modelo headless.' },
+          { summary: 'Plataforma de commerce para operações médias e grandes, com catálogo, marketplace e lojas headless. Costuma ser a base de e-commerces com muitas integrações.' },
+          { summary: 'Plataforma global de e-commerce, com temas em Liquid, aplicativos e opção de loja headless. Atende desde lojas pequenas até grandes operações.' },
+        ],
+      },
       clients: {
         heading: 'Clientes e projetos',
         back: 'Voltar',
+        projectsLabel: 'projetos',
+        filesLabel: 'arquivos',
         folders: [
           {
             label: 'TEC4U',
@@ -845,9 +871,24 @@ const en: Dictionary = {
       gallery: {
         heading: 'Featured projects',
       },
+      tools: {
+        heading: 'Tools I work with',
+        subtitle: 'E-commerce platforms I work on. Pick one to see what it is and where I worked with it.',
+        projects: 'Reference projects',
+        empty: 'Reference projects coming soon.',
+        open: 'Open the project folder',
+        items: [
+          { summary: 'Brazilian e-commerce platform to build and run online stores. It offers customizable themes, built-in checkout and an ecosystem of apps and partners.' },
+          { summary: 'Platform to build fast online stores with visual editing: the team edits content without waiting for a deploy, and the code follows a headless model.' },
+          { summary: 'Commerce platform for mid-size and large operations, with catalog, marketplace and headless storefronts. Often the base of integration-heavy e-commerce.' },
+          { summary: 'Global e-commerce platform, with Liquid themes, apps and a headless store option. It serves everything from small shops to large operations.' },
+        ],
+      },
       clients: {
         heading: 'Clients and projects',
         back: 'Back',
+        projectsLabel: 'projects',
+        filesLabel: 'files',
         folders: [
           {
             label: 'TEC4U',
@@ -1337,9 +1378,24 @@ const es: Dictionary = {
       gallery: {
         heading: 'Proyectos destacados',
       },
+      tools: {
+        heading: 'Herramientas de trabajo',
+        subtitle: 'Plataformas de e-commerce en las que trabajo. Elige una para ver qué es y dónde participé.',
+        projects: 'Proyectos de referencia',
+        empty: 'Proyectos de referencia próximamente.',
+        open: 'Abrir la carpeta del proyecto',
+        items: [
+          { summary: 'Plataforma brasileña de e-commerce para crear y gestionar tiendas online. Ofrece temas personalizables, checkout integrado y un ecosistema de apps y socios.' },
+          { summary: 'Plataforma para construir tiendas online rápidas con edición visual: el equipo edita el contenido sin esperar un deploy y el código sigue un modelo headless.' },
+          { summary: 'Plataforma de commerce para operaciones medianas y grandes, con catálogo, marketplace y tiendas headless. Suele ser la base de e-commerce con muchas integraciones.' },
+          { summary: 'Plataforma global de e-commerce, con temas en Liquid, apps y opción de tienda headless. Atiende desde tiendas pequeñas hasta grandes operaciones.' },
+        ],
+      },
       clients: {
         heading: 'Clientes y proyectos',
         back: 'Volver',
+        projectsLabel: 'proyectos',
+        filesLabel: 'archivos',
         folders: [
           {
             label: 'TEC4U',

@@ -1,6 +1,8 @@
 .layout-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* Flex com quebra em vez de grid: a última linha (quando sobram 1 ou 2 cards) fica centralizada. */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: var(--gap-sm);
   width: 100%;
   max-width: 1240px;
@@ -11,6 +13,8 @@
 .layout-grid__cell {
   position: relative;
   display: flex;
+  flex: 0 0 calc((100% - 2 * var(--gap-sm)) / 3);
+  min-width: 0;
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
@@ -47,7 +51,7 @@
   height: 3.75rem;
   padding: 0.5rem;
   object-fit: contain;
-  border-radius: 0.75rem;
+  border-radius: 4px;
   background: color-mix(in srgb, var(--text) 7%, transparent);
 }
 
@@ -67,6 +71,8 @@
   padding: 0;
   /* Fundo suave: mais leve que antes (0.65) e ainda mais leve no tema claro. */
   background: rgba(0, 0, 0, 0.38);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
   cursor: pointer;
 }
 
@@ -119,7 +125,7 @@
   height: 4.5rem;
   padding: 0.55rem;
   object-fit: contain;
-  border-radius: 0.85rem;
+  border-radius: 4px;
   background: color-mix(in srgb, var(--text) 7%, transparent);
 }
 
@@ -161,6 +167,8 @@
 @media (max-width: 767px) {
   .layout-grid {
     display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
     gap: var(--gap-sm);
     overflow-x: auto;
     scroll-snap-type: x mandatory;

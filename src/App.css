@@ -1455,7 +1455,7 @@ svg.menu__social-icon {
   gap: var(--gap-sm);
   width: 100%;
   max-width: 1240px;
-  border: 1.5px solid var(--text);
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
   border-radius: var(--stage-radius);
   /* Transparente: a chuva de código aparece atrás. */
   background: transparent;
@@ -1493,7 +1493,7 @@ svg.work-github__icon {
 }
 
 .work-github__year {
-  border: 1.5px solid var(--text);
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
   border-radius: var(--stage-radius);
   background: var(--bg-outer);
   color: var(--text);
@@ -1552,7 +1552,7 @@ svg.work-github__icon {
   min-height: 0;
   display: flex;
   align-items: center;
-  border: 1.5px solid var(--text);
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
   border-radius: var(--stage-radius);
 }
 
@@ -1712,7 +1712,8 @@ svg.work-github__icon {
 .work-skills__viewport {
   overflow: hidden;
   width: 100%;
-  padding-block: 16px;
+  /* --skills-curve: folga embaixo para a curva em U (definida no JS; 0 sem animação). */
+  padding-block: 16px calc(16px + var(--skills-curve, 0px));
   /* Some mais cedo: o fade começa a 18% da largura em vez de 8%. */
   mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
@@ -1753,6 +1754,32 @@ svg.work-github__icon {
 
 .work-skills__item:hover img {
   opacity: 1;
+}
+
+.work-skills__item {
+  position: relative;
+}
+
+/* Nome da ferramenta: aparece embaixo do logo no hover (o carrossel para). */
+.work-skills__name {
+  position: absolute;
+  top: calc(100% - var(--gap-sm) + 8px);
+  left: 50%;
+  transform: translate(-50%, -4px);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--text) 68%, transparent);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.work-skills__item:hover .work-skills__name {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 /* Página Sobre: abas (Conquistas / Experiências / Detalhes) */
@@ -4758,28 +4785,60 @@ button.folders-path__crumb:focus-visible {
   position: relative;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-end;
   flex: 1 1 280px;
   min-width: 240px;
   max-width: 420px;
-  min-height: 380px;
+  min-height: 340px;
+  padding-bottom: 0.5rem;
 }
 
 .showcase-folder--focus {
   flex-basis: 100%;
   max-width: 520px;
-  min-height: 440px;
+  min-height: 400px;
 }
 
 /* Mini pastas dentro da pasta (itens do Folder, sem papel branco ao redor). */
 .mini-folder {
   --mini-color: #3d8bff;
+  --mini-radius: 5px;
+  /* Cor do tema do site: o degradê da pasta é puxado para ela. */
+  --mini-tone: #000;
+  /* Pasta cinza (paleta do site). A cor do projeto só aparece num gradiente pequeno na lateral
+     esquerda (--mini-edge), que se dissipa no cinza. */
+  --mini-gray: #55555b;
+  --mini-base: var(--mini-gray);
+  /* Papel das mini-pastas fora de um Folder (grade de cursos): as variáveis do papel não existem lá. */
+  --folder-paper: #fff;
+  --folder-paper-ink: rgba(0, 0, 0, 0.11);
+  --folder-paper-ink-strong: rgba(0, 0, 0, 0.22);
+  /* Lado da dobra do papel (também usado no recorte do canto). */
+  --mini-fold: clamp(9px, 11cqw, 16px);
+  --mini-angle: 135deg;
+  --mini-reach: 80%;
+  --mini-alpha: 40%;
+  --mini-edge: linear-gradient(
+    var(--mini-angle),
+    color-mix(in srgb, var(--mini-color) var(--mini-alpha), transparent) 0%,
+    transparent var(--mini-reach)
+  );
+  --mini-back: color-mix(in srgb, var(--mini-base) 72%, #000 28%);
   container-type: inline-size;
   position: relative;
-  width: 112%;
+  /* 100%: o vidro fotografa o item num canvas do tamanho dele. Acima disso as laterais
+     eram cortadas pelo canvas e as quinas arredondadas viravam 90 graus. */
+  width: 100%;
   aspect-ratio: 1.34;
   flex: none;
-  filter: drop-shadow(0 calc(3px + var(--folder-lift, 0) * 10px) calc(5px + var(--folder-lift, 0) * 12px) rgba(0, 0, 0, 0.3));
+  /* box-shadow no lugar de filter: filter quebrava o offsetParent do raster do vidro. */
+  filter: none;
+}
+
+[data-theme='light'] .mini-folder {
+  --mini-tone: #fff;
+  --mini-gray: #c4c4ca;
+  --mini-back: color-mix(in srgb, var(--mini-base) 84%, #000 16%);
 }
 
 .mini-folder__tab {
@@ -4788,21 +4847,97 @@ button.folders-path__crumb:focus-visible {
   left: 0;
   width: 44%;
   height: 20%;
-  border-radius: 9% 0 0 0 / 38% 0 0 0;
-  background: color-mix(in srgb, var(--mini-color) 72%, #000 28%);
+  border-radius: var(--mini-radius) 0 0 0;
+  background: var(--mini-edge), var(--mini-back);
   clip-path: polygon(0 0, 84% 0, 100% 100%, 0 100%);
 }
 
 .mini-folder__back {
   position: absolute;
   inset: 14% 0 0;
-  border-radius: 0 9% 9% 9% / 0 11% 11% 11%;
-  background: color-mix(in srgb, var(--mini-color) 72%, #000 28%);
+  border-radius: 0 var(--mini-radius) var(--mini-radius) var(--mini-radius);
+  background:
+    var(--mini-edge),
+    linear-gradient(
+      160deg,
+      var(--mini-back) 0%,
+      color-mix(in srgb, var(--mini-back) 70%, var(--mini-tone) 30%) 100%
+    );
+  box-shadow: 0 calc(3px + var(--folder-lift, 0) * 10px) calc(8px + var(--folder-lift, 0) * 12px) rgba(0, 0, 0, 0.28);
 }
 
-/* Arquivos (papel) aparecendo para fora da pasta. */
+/* Só a ponta do papel aparece acima da frente: espaçamento curto para caber título e linhas. */
+.mini-folder__paper.folder-doc {
+  gap: calc(4px * var(--folder-scale, 1));
+  padding: calc(7px * var(--folder-scale, 1)) calc(10px * var(--folder-scale, 1));
+}
+
+.mini-folder__paper .folder-doc-heading {
+  height: calc(1.5px * var(--folder-scale, 1));
+  margin-bottom: 0;
+  background: var(--folder-paper-ink);
+}
+
+.mini-folder__paper .folder-doc-line {
+  height: calc(1.5px * var(--folder-scale, 1));
+}
+
+/* Canto de cima direito recortado de verdade. A folha da frente leva a dobra; as de trás são
+   recortadas num triângulo maior para não sobrar folha branca embaixo da dobra (o recorte mostra
+   o fundo da página). */
+.mini-folder__paper {
+  clip-path: polygon(0 0, calc(100% - 3 * var(--mini-fold)) 0, 100% calc(3 * var(--mini-fold)), 100% 100%, 0 100%);
+}
+
+.mini-folder__paper:nth-child(3) {
+  clip-path: polygon(0 0, calc(100% - var(--mini-fold)) 0, 100% var(--mini-fold), 100% 100%, 0 100%);
+}
+
+.mini-folder__paper:not(:nth-child(3)) .mini-folder__fold {
+  display: none;
+}
+
+/* Barra de progresso fictícia do papel: trilho cinza e preenchimento na cor do projeto. */
+.mini-folder__bar {
+  display: block;
+  flex: none;
+  height: calc(3px * var(--folder-scale, 1));
+  margin-top: calc(1px * var(--folder-scale, 1));
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.09);
+  overflow: hidden;
+}
+
+.mini-folder__bar i {
+  display: block;
+  height: 100%;
+  width: 70%;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--mini-color) 85%, transparent);
+}
+
+.mini-folder__paper:nth-child(2) .mini-folder__bar i {
+  width: 45%;
+}
+
+.mini-folder__paper:nth-child(3) .mini-folder__bar i {
+  width: 20%;
+}
+
+/* Dobra no canto superior direito (mesma dos cards de módulo): recorte + aba na cor do projeto. */
+.mini-folder__fold {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--mini-fold);
+  aspect-ratio: 1;
+  background: linear-gradient(225deg, transparent 50%, color-mix(in srgb, var(--mini-color) 50%, #e4e0d6) 50%);
+}
+
+/* Arquivos (papel) aparecendo na boca da pasta. */
 .mini-folder__papers {
   position: absolute;
+  z-index: 1;
   inset: 6% 7% 30%;
   pointer-events: none;
 }
@@ -4811,19 +4946,17 @@ button.folders-path__crumb:focus-visible {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  border-radius: calc(7px * var(--folder-scale, 1));
+  border-radius: calc(3px * var(--folder-scale, 1));
   background: var(--folder-paper, #fff);
   box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.12);
 }
 
-/* Pasta principal fechada: as mini pastas sobem um pouco (sem cobrir o nome da pasta). */
 .mini-folder--peek {
-  transform: translateY(-16%);
+  transform: translateY(-10%);
 }
 
-/* Pasta principal aberta: as mini pastas ficam um pouco mais baixas. */
 .mini-folder--open {
-  transform: translateY(12%);
+  transform: translateY(10%);
 }
 
 .mini-folder__paper:nth-child(1) {
@@ -4840,17 +4973,24 @@ button.folders-path__crumb:focus-visible {
 
 .mini-folder__front {
   position: absolute;
+  z-index: 2;
   inset: 40% 0 0;
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 0.12em;
   padding: 0 9% 9%;
   box-sizing: border-box;
-  border-radius: 9% / 14%;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--mini-color) 88%, #fff 12%) 0%,
-    color-mix(in srgb, var(--mini-color) 84%, #000 16%) 100%
-  );
+  border-radius: var(--mini-radius);
+  background-color: var(--mini-base);
+  background-image:
+    var(--mini-edge),
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--mini-gray) 88%, #fff 12%) 0%,
+      color-mix(in srgb, var(--mini-base) 70%, var(--mini-tone) 30%) 100%
+    );
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
@@ -4860,7 +5000,9 @@ button.folders-path__crumb:focus-visible {
   -webkit-box-orient: vertical;
   overflow: hidden;
   width: 100%;
-  color: var(--mini-ink, rgba(255, 255, 255, 0.96));
+  /* Sempre branco (com sombra leve p/ ler também sobre amarelo). */
+  color: rgba(255, 255, 255, 0.97);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
   font-size: clamp(9px, 10.5cqw, 15px);
   font-weight: 650;
   line-height: 1.15;
@@ -4892,8 +5034,8 @@ button.folders-path__crumb:focus-visible {
 .study-folder {
   flex: 1 1 240px;
   max-width: 340px;
-  min-height: 330px;
-  padding-bottom: 2.4rem;
+  min-height: 300px;
+  padding-bottom: 0.75rem;
 }
 
 /* Legenda embaixo da pasta: o nome aparece ao passar o mouse (sempre visível no toque). */
@@ -6337,4 +6479,441 @@ div.study-card:hover {
   .skill-chart-block .skill-chart__subtitle {
     margin-bottom: 0.9rem;
   }
+}
+
+/* Ferramentas de atuação (página Trabalho) */
+.wt {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.wt__head {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+.wt__subtitle {
+  margin: 0;
+  max-width: 640px;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--text) 66%, transparent);
+}
+
+/* Faixa de ferramentas em loop contínuo; pausa no hover; as pontas se dissolvem. */
+.wt-marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+.wt-marquee__track {
+  display: flex;
+  width: max-content;
+  gap: 1rem;
+  padding: 1.25rem 1rem 1.25rem 0;
+  animation: wt-marquee 48s linear infinite;
+}
+
+.wt-marquee:hover .wt-marquee__track,
+.wt-marquee:focus-within .wt-marquee__track {
+  animation-play-state: paused;
+}
+
+@keyframes wt-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.wt-tile {
+  position: relative;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 168px;
+  height: 104px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+  color: inherit;
+  font: inherit;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 240ms ease;
+}
+
+/* Degradê suave na cor da ferramenta: discreto em repouso, mais presente no hover e no selecionado. */
+.wt-tile__glow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--via) 34%, transparent),
+    color-mix(in srgb, var(--via) 6%, transparent) 75%
+  );
+  opacity: 0.45;
+  transition: opacity 500ms ease-out;
+}
+
+.wt-tile:hover .wt-tile__glow,
+.wt-tile:focus-visible .wt-tile__glow,
+.wt-tile[data-selected] .wt-tile__glow {
+  opacity: 1;
+}
+
+.wt-tile[data-selected] {
+  border-color: var(--via);
+}
+
+.wt-tile__logo {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+.wt-tile__logo--letter {
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--via);
+}
+
+.wt-tile__name {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wt-marquee__track {
+    animation: none;
+  }
+}
+
+.wt-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 2rem;
+  padding: 1.5rem;
+  animation: study-card-in 420ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.wt-detail__about {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.wt-detail__logo {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  padding: 8px;
+  object-fit: contain;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.wt-detail__logo--letter {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--tool);
+  background: color-mix(in srgb, var(--tool) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tool) 38%, transparent);
+}
+
+.wt-detail__name {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+}
+
+.wt-detail__summary {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--text) 72%, transparent);
+}
+
+.wt-detail__sub {
+  margin: 0 0 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--text) 58%, transparent);
+}
+
+.wt-detail__empty {
+  margin: 0;
+  font-size: 0.82rem;
+  color: color-mix(in srgb, var(--text) 55%, transparent);
+}
+
+.wt-refs {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Projeto de referência = link: leva pra pasta do projeto em "Clientes e projetos". */
+.wt-link {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.7rem 0;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wt-link__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--project);
+}
+
+.wt-link__name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition: text-decoration-color 200ms ease;
+}
+
+.wt-link:hover .wt-link__name,
+.wt-link:focus-visible .wt-link__name {
+  text-decoration-color: currentColor;
+}
+
+.wt-link__client {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--text) 55%, transparent);
+}
+
+.wt-link__arrow {
+  width: 14px;
+  height: 14px;
+  color: color-mix(in srgb, var(--text) 55%, transparent);
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), color 200ms ease;
+}
+
+.wt-link:hover .wt-link__arrow {
+  color: var(--text);
+  transform: translateX(4px);
+}
+
+@media (max-width: 767px) {
+  .wt__subtitle {
+    font-size: 0.7rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .wt-detail {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    padding: 1rem;
+  }
+
+  .wt-detail__logo {
+    width: 42px;
+    height: 42px;
+    padding: 6px;
+  }
+
+  .wt-detail__name {
+    font-size: 0.98rem;
+  }
+
+  .wt-detail__summary {
+    font-size: 0.76rem;
+  }
+
+  .wt-refs {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 767px) {
+  .wt__head {
+    padding: 0.9rem 1rem;
+  }
+
+  .wt__subtitle {
+    font-size: 0.72rem;
+  }
+
+  .wt-marquee__track {
+    gap: 0.6rem;
+    padding: 0.9rem 0.6rem 0.9rem 0;
+  }
+
+  .wt-tile {
+    width: 128px;
+    height: 84px;
+    gap: 0.35rem;
+  }
+
+  .wt-tile__logo {
+    width: 28px;
+    height: 28px;
+  }
+
+  .wt-tile__name {
+    font-size: 0.66rem;
+  }
+}
+
+/*
+  Compatibilidade: versão em lista do "Ferramentas de atuação" (wt__tabs / wt-tab), sem a faixa em loop.
+  Mantida porque o arquivo work-tools.tsx também é editado pelo Cursor e pode voltar a essa marcação.
+*/
+.wt > .wt__subtitle {
+  max-width: none;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+.wt__tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 1.25rem 1.5rem;
+  list-style: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+.wt-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+  border-radius: 4px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--tool) 22%, transparent), color-mix(in srgb, var(--tool) 4%, transparent) 75%);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 220ms ease, background 220ms ease;
+}
+
+.wt-tab:hover {
+  border-color: color-mix(in srgb, var(--text) 32%, transparent);
+}
+
+.wt-tab[data-selected] {
+  border-color: var(--tool);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--tool) 34%, transparent), color-mix(in srgb, var(--tool) 8%, transparent) 75%);
+}
+
+.wt-tab__logo {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.wt-tab__logo--letter {
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--tool);
+}
+
+.wt-tab__name {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+@media (max-width: 767px) {
+  .wt > .wt__subtitle {
+    padding: 0.9rem 1rem;
+  }
+
+  .wt__tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    padding: 0.9rem 1rem;
+  }
+
+  .wt-tab {
+    gap: 0.5rem;
+    padding: 0.6rem 0.7rem;
+  }
+
+  .wt-tab__logo {
+    width: 24px;
+    height: 24px;
+  }
+
+  .wt-tab__name {
+    font-size: 0.72rem;
+  }
+}
+
+.mini-folder__meta {
+  width: 100%;
+  color: rgba(255, 255, 255, 0.82);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  font-size: clamp(7px, 7.5cqw, 11px);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+
+/* Pasta cinza clara (tema claro): texto escuro para ler. */
+[data-theme='light'] .mini-folder .mini-folder__label {
+  color: rgba(18, 18, 22, 0.9);
+  text-shadow: none;
+}
+
+[data-theme='light'] .mini-folder .mini-folder__meta {
+  color: rgba(18, 18, 22, 0.62);
+  text-shadow: none;
 }

@@ -17,6 +17,8 @@ export type FolderItem =
 export type FolderProps = {
   items?: FolderItem[]
   label?: string
+  /** Linha pequena embaixo do nome, na frente da pasta de vidro (ex.: quantidade de itens). */
+  meta?: string
   mode?: 'flap' | 'book'
   variant?: 'solid' | 'glass' | 'matte'
   color?: string

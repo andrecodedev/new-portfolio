@@ -1,3 +1,4 @@
+import { accentGlow, cssLinearGradient } from './ui/accent-glow';
 import { Children, isValidElement, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import './Folder.css';
 
@@ -101,12 +102,15 @@ const turnZ = degrees => {
 const toCss = m => `matrix3d(${m.map(v => (Math.abs(v) < 1e-7 ? 0 : Number(v.toFixed(6)))).join(', ')})`;
 
 const measureFolder = (book, scale, labelWidth, hasLabel, tabPosition) => {
-  const w = (book ? 180 : 224) * scale;
-  const h = (book ? 232 : 176) * scale;
-  const tabH = 20 * scale;
-  const r = 12 * scale;
+  // Pasta de aba (flap): mesmas proporções da pasta de vidro de cursos, desenhada em 340 x 272.
+  // `unit` converte essas medidas para a escala pedida (a largura continua ~224 * scale).
+  const unit = (scale * 224) / 340;
+  const w = book ? 180 * scale : 340 * unit;
+  const h = book ? 232 * scale : 238 * unit;
+  const tabH = book ? 20 * scale : 34 * unit;
+  const r = book ? 12 * scale : 22 * unit;
   const shoulder = tabH * 0.75;
-  const frontTop = book ? tabH : tabH + h * 0.3;
+  const frontTop = book ? tabH : 74 * unit;
   const corners = book ? [0, r, r, 0] : [r, r, r, r];
   const maxTab = w - corners[0] - corners[1] - shoulder * 2 - 10 * scale;
   const tabW = clamp(hasLabel ? labelWidth + 14 * scale + shoulder : w * 0.34, Math.min(w * 0.3, maxTab), maxTab);
@@ -135,7 +139,20 @@ const measureFolder = (book, scale, labelWidth, hasLabel, tabPosition) => {
   };
 };
 
+// Contorno de trás da pasta de cursos (BACK_PATH de glass-folder-cards), escalado por `u`.
+const flapBackPath = u => {
+  const n = v => +(v * u).toFixed(2);
+  return [
+    `M0 ${n(56)}A${n(22)} ${n(22)} 0 0 1 ${n(22)} ${n(34)}`,
+    `L${n(146)} ${n(34)}C${n(170)} ${n(34)} ${n(172)} 0 ${n(198)} 0`,
+    `L${n(318)} 0A${n(22)} ${n(22)} 0 0 1 ${n(340)} ${n(22)}`,
+    `L${n(340)} ${n(250)}A${n(22)} ${n(22)} 0 0 1 ${n(318)} ${n(272)}`,
+    `L${n(22)} ${n(272)}A${n(22)} ${n(22)} 0 0 1 0 ${n(250)}Z`
+  ].join('');
+};
+
 const backPath = g => {
+  if (!g.book) return flapBackPath(g.w / 340);
   const { w, h, tabX, tabW, tabH, shoulder } = g;
   const [tl, tr, br, bl] = g.corners;
   const top = tabH;
@@ -227,6 +244,7 @@ uniform vec2 uOrigin;
 uniform vec4 uView;
 uniform sampler2D uBehind;
 uniform vec4 uRadii;
+uniform vec3 uNotch;
 uniform float uSpine;
 uniform float uLens;
 uniform float uMorph;
@@ -238,6 +256,9 @@ uniform float uBevel;
 uniform float uStrength;
 uniform float uSplit;
 uniform vec4 uTint;
+uniform vec3 uAccent;
+uniform vec4 uGlow;
+uniform vec4 uBottom;
 uniform float uHaze;
 uniform float uDim;
 uniform float uGlint;
@@ -251,9 +272,26 @@ float box(vec2 p, vec2 b, vec4 r) {
   return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - k;
 }
 
+float smoothJoin(float a, float b, float k) {
+  float h = max(k - abs(a - b), 0.0) / k;
+  return min(a, b) - h * h * k * 0.25;
+}
+
 float shape(vec2 p) {
   vec2 halfSize = vec2(uSize.x + uSpine, uSize.y) * 0.5;
-  return box(p - vec2(uSize.x - halfSize.x, halfSize.y), halfSize, uRadii);
+  float plain = box(p - vec2(uSize.x - halfSize.x, halfSize.y), halfSize, uRadii);
+  if (uNotch.x <= 0.0) return plain;
+  // Frente com aba levantada à esquerda (como a pasta de cursos): o corpo desce uNotch.x e a
+  // parte esquerda, de largura uNotch.y, sobe até o topo. A união suave faz a curva em S.
+  vec2 bodyHalf = vec2(uSize.x, uSize.y - uNotch.x) * 0.5;
+  float body = box(p - vec2(bodyHalf.x, uNotch.x + bodyHalf.y), bodyHalf, uRadii);
+  vec2 tabHalf = vec2(uNotch.y, uSize.y) * 0.5;
+  float tab = box(p - tabHalf, tabHalf, vec4(uRadii.x, uNotch.x * 0.9, 0.0, uRadii.w));
+  // A união suave só vale perto da dobra (uNotch.y, uNotch.x). Longe dela as duas formas coincidem
+  // na lateral e no fundo, e suavizar ali inchava o contorno para fora da área de desenho
+  // (o lado esquerdo ficava reto, com a quina cortada).
+  float nearFold = 1.0 - smoothstep(uNotch.z * 1.2, uNotch.z * 2.4, length(p - vec2(uNotch.y, uNotch.x)));
+  return smoothJoin(body, tab, max(uNotch.z * nearFold, 0.001));
 }
 
 vec2 locate(vec2 p) {
@@ -288,6 +326,14 @@ void main() {
     seen.b = texture(uBehind, uv - split).b;
   }
   vec4 color = vec4(uTint.rgb, 1.0) * uTint.a + seen * (1.0 - uTint.a);
+  // Vidro fumê da pasta de cursos: transparente no alto e quase opaco (preto, ou branco no tema claro) embaixo.
+  color.rgb = mix(color.rgb, uBottom.rgb, smoothstep(0.18, 1.0, vLocal.y / uSize.y) * uBottom.a);
+  // Brilho diagonal da cor de destaque: mesma geometria do linear-gradient do CSS (uGlow = direção, alcance, força).
+  vec2 glowPos = vLocal - uSize * 0.5;
+  float glowLen = abs(uSize.x * uGlow.x) + abs(uSize.y * uGlow.y);
+  float glowT = dot(glowPos, uGlow.xy) / glowLen + 0.5;
+  float lateral = (1.0 - smoothstep(0.0, uGlow.z, glowT)) * uGlow.w;
+  color.rgb = mix(color.rgb, uAccent, lateral);
   color.rgb = mix(color.rgb, vec3(color.a), uHaze + uGlint);
   color.rgb *= 1.0 - uDim;
   float band = 0.0;
@@ -308,6 +354,11 @@ void main() {
   color = color * (1.0 - shade) + vec4(0.0, 0.0, 0.0, shade);
   light = clamp(light * edge * (1.0 - band), 0.0, 1.0);
   color = color * (1.0 - light) + vec4(light);
+  if (uNotch.x > 0.0) {
+    // Borda de luz da pasta de cursos: fio claro em volta da frente, forte no alto e fraco embaixo.
+    float rim = (1.0 - smoothstep(0.0, 2.0, inside)) * mix(0.85, 0.1, clamp(vLocal.y / uSize.y * 1.3, 0.0, 1.0));
+    color = color * (1.0 - rim) + vec4(rim);
+  }
   outColor = color * cover;
 }`;
 
@@ -353,11 +404,15 @@ const createGlass = canvas => {
     ...PLACED,
     'uBehind',
     'uRadii',
+    'uNotch',
     'uSpine',
     'uLens',
     'uMorph',
     'uInsideTop',
     'uInsideBottom',
+    'uAccent',
+    'uGlow',
+    'uBottom',
     'uTabRatio',
     'uGutter',
     'uBevel',
@@ -493,11 +548,15 @@ const createGlass = canvas => {
       gl.uniform2f(u.uSize, pane.width, pane.height);
       gl.uniform1f(u.uBleed, pane.bleed);
       gl.uniform4fv(u.uRadii, pane.radii);
+      gl.uniform3fv(u.uNotch, pane.notch);
       gl.uniform1f(u.uSpine, pane.spine);
       gl.uniform1f(u.uLens, pane.lens);
       gl.uniform1f(u.uMorph, pane.morph);
       gl.uniform3fv(u.uInsideTop, pane.insideTop);
       gl.uniform3fv(u.uInsideBottom, pane.insideBottom);
+      gl.uniform3fv(u.uAccent, pane.accent);
+      gl.uniform4fv(u.uGlow, pane.glow);
+      gl.uniform4fv(u.uBottom, pane.bottom);
       gl.uniform1f(u.uTabRatio, pane.tabRatio);
       gl.uniform2fv(u.uGutter, pane.gutter);
       gl.uniform1f(u.uBevel, pane.bevel);
@@ -527,27 +586,51 @@ const createGlass = canvas => {
   };
 };
 
+const parseRadiusPart = (part, size) => {
+  if (!part) return 0;
+  const value = Number.parseFloat(part);
+  if (!Number.isFinite(value)) return 0;
+  return part.includes('%') ? (value / 100) * size : value;
+};
+
+/** Aceita "12px", "12px 8px", "9%", "9% 14%" — usa o eixo horizontal p/ o canto circular. */
+const readCorner = (raw, width, height) => {
+  const parts = String(raw || '0').trim().split(/\s+/);
+  return parseRadiusPart(parts[0], width);
+};
+
 const roundedRect = (ctx, x, y, width, height, radius) => {
-  const r = Math.max(0, Math.min(radius, width / 2, height / 2));
+  const list = typeof radius === 'number' ? [radius, radius, radius, radius] : radius;
+  const maxR = Math.min(width, height) / 2;
+  const tl = Math.max(0, Math.min(list[0] || 0, maxR));
+  const tr = Math.max(0, Math.min(list[1] || 0, maxR));
+  const br = Math.max(0, Math.min(list[2] || 0, maxR));
+  const bl = Math.max(0, Math.min(list[3] || 0, maxR));
   ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + width, y, x + width, y + height, r);
-  ctx.arcTo(x + width, y + height, x, y + height, r);
-  ctx.arcTo(x, y + height, x, y, r);
-  ctx.arcTo(x, y, x + width, y, r);
+  ctx.moveTo(x + tl, y);
+  ctx.lineTo(x + width - tr, y);
+  if (tr) ctx.quadraticCurveTo(x + width, y, x + width, y + tr);
+  else ctx.lineTo(x + width, y);
+  ctx.lineTo(x + width, y + height - br);
+  if (br) ctx.quadraticCurveTo(x + width, y + height, x + width - br, y + height);
+  else ctx.lineTo(x + width, y + height);
+  ctx.lineTo(x + bl, y + height);
+  if (bl) ctx.quadraticCurveTo(x, y + height, x, y + height - bl);
+  else ctx.lineTo(x, y + height);
+  ctx.lineTo(x, y + tl);
+  if (tl) ctx.quadraticCurveTo(x, y, x + tl, y);
+  else ctx.lineTo(x, y);
   ctx.closePath();
 };
 
 const offsetWithin = (element, root) => {
-  let x = 0;
-  let y = 0;
-  let node = element;
-  while (node && node !== root) {
-    x += node.offsetLeft;
-    y += node.offsetTop;
-    node = node.offsetParent;
-  }
-  return node === root ? [x, y] : null;
+  // getBoundingClientRect: offsetParent quebra com filter/transform na mini-pasta.
+  const er = element.getBoundingClientRect();
+  const rr = root.getBoundingClientRect();
+  if (!rr.width || !rr.height) return null;
+  const sx = root.offsetWidth / rr.width;
+  const sy = root.offsetHeight / rr.height;
+  return [(er.left - rr.left) * sx, (er.top - rr.top) * sy];
 };
 
 const isClear = color => !color || color === 'transparent' || /rgba?\([^)]*[,/]\s*0\s*\)$/.test(color);
@@ -592,6 +675,164 @@ const drawText = (ctx, element, x, y, width, style) => {
   if (line) ctx.fillText(line, left, top + lineHeight * (row + 0.5));
 };
 
+/** Cor do tema do site: o degradê das mini-pastas é puxado para ela (preto no escuro, branco no claro). */
+const siteTone = () =>
+  document.documentElement.getAttribute('data-theme') === 'light' ? [255, 255, 255] : [0, 0, 0];
+
+/** Desenha mini-pasta com quinas arredondadas de verdade (o raster DOM→canvas perdia o radius). */
+const paintMiniFolder = (ctx, x, y, w, h, element) => {
+  const color =
+    getComputedStyle(element).getPropertyValue('--mini-color').trim() ||
+    element.querySelector('.mini-folder__front')?.style.backgroundColor ||
+    '#3d8bff';
+  const r = Math.min(5, w * 0.1, h * 0.12);
+  // Mesma conta do CSS (.mini-folder): cinza do tema; a cor do projeto só entra na lateral esquerda.
+  const tone = siteTone();
+  const gray = tone[0] === 255 ? [196, 196, 202] : [85, 85, 91];
+  const tint = parseColor(color);
+  const back = mixRgb(gray, [0, 0, 0], tone[0] === 255 ? 0.16 : 0.28);
+  const frontTop = mixRgb(gray, [255, 255, 255], 0.12);
+  const frontBottom = mixRgb(gray, tone, 0.3);
+  // Brilho diagonal da cor do projeto: ângulo, alcance e força vêm das variáveis CSS do elemento
+  // (a mesma fonte que o DOM usa), para o reflexo não divergir da pasta solta.
+  const miniStyle = getComputedStyle(element);
+  const glowAngle = parseFloat(miniStyle.getPropertyValue('--mini-angle')) || 135;
+  const glowReach = (parseFloat(miniStyle.getPropertyValue('--mini-reach')) || 80) / 100;
+  const glowAlpha = (parseFloat(miniStyle.getPropertyValue('--mini-alpha')) || 40) / 100;
+  // Pinta a forma já traçada (caixa px,py,pw,ph) com o brilho por cima.
+  const edgeGlow = (px, py, pw, ph) => {
+    const glowFill = cssLinearGradient(ctx, px, py, pw, ph, glowAngle, glowReach);
+    glowFill.addColorStop(0, `rgba(${tint[0]}, ${tint[1]}, ${tint[2]}, ${glowAlpha})`);
+    glowFill.addColorStop(1, `rgba(${tint[0]}, ${tint[1]}, ${tint[2]}, 0)`);
+    ctx.fillStyle = glowFill;
+    ctx.fill();
+  };
+  const tabH = h * 0.14;
+  const bodyTop = h * 0.14;
+  const frontY = h * 0.4;
+
+  // Aba
+  roundedRect(ctx, x, y, w * 0.42, tabH + 1, [r, 0, 0, 0]);
+  ctx.fillStyle = rgbString(back);
+  ctx.fill();
+  edgeGlow(x, y, w * 0.42, tabH + 1);
+
+  // Corpo (atrás)
+  roundedRect(ctx, x, y + bodyTop, w, h - bodyTop, [0, r, r, r]);
+  ctx.fillStyle = rgbString(back);
+  ctx.fill();
+  edgeGlow(x, y + bodyTop, w, h - bodyTop);
+
+  // Papéis (só a ponta acima da frente)
+  const paperX = x + w * 0.08;
+  const paperW = w * 0.84;
+  const paperTop = y + h * 0.06;
+  const paperH = frontY - h * 0.06 + h * 0.08;
+  const paperR = Math.min(3, paperW * 0.06);
+  [
+    { dx: -0.04, dy: 0, rot: -0.1 },
+    { dx: 0.04, dy: 0.03, rot: 0.08 },
+    { dx: 0, dy: 0.07, rot: -0.02 }
+  ].forEach((p, paperIndex) => {
+    ctx.save();
+    ctx.translate(paperX + paperW / 2 + p.dx * w, paperTop + paperH / 2 + p.dy * h);
+    ctx.rotate(p.rot);
+    // O canto de cima direito é recortado de verdade (transparente): clip "evenodd" com o triângulo.
+    const fold = Math.max(9, Math.min(16, w * 0.11));
+    // Folhas de trás: recorte 3x maior, para não ficar folha branca embaixo da dobra da frente.
+    const cut = paperIndex === 2 ? fold : fold * 3;
+    const foldRight = paperW / 2;
+    const foldTop = -paperH / 2;
+    ctx.beginPath();
+    ctx.rect(-10000, -10000, 20000, 20000);
+    ctx.moveTo(foldRight - cut, foldTop);
+    ctx.lineTo(foldRight + 1, foldTop - 1);
+    ctx.lineTo(foldRight + 1, foldTop + cut);
+    ctx.closePath();
+    ctx.clip('evenodd');
+    roundedRect(ctx, -paperW / 2, -paperH / 2, paperW, paperH, paperR);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    // Título e linhas do papel, iguais ao DOM (senão o reflexo mostra papel em branco).
+    const padX = paperW * 0.1;
+    const left = -paperW / 2 + padX;
+    const inner = paperW - padX * 2;
+    let rowY = -paperH / 2 + h * 0.065;
+    ctx.fillStyle = 'rgba(0,0,0,0.11)';
+    roundedRect(ctx, left, rowY, inner * 0.56, 1.5, 0.75);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,0.11)';
+    [0.92, 0.84].forEach(f => {
+      rowY += 7;
+      roundedRect(ctx, left, rowY, inner * f, 1.5, 0.75);
+      ctx.fill();
+    });
+    // Barra de progresso fictícia: trilho cinza e preenchimento na cor do projeto (igual ao DOM).
+    rowY += 8;
+    roundedRect(ctx, left, rowY, inner, 3, 1.5);
+    ctx.fillStyle = 'rgba(0,0,0,0.09)';
+    ctx.fill();
+    roundedRect(ctx, left, rowY, inner * [0.7, 0.45, 0.2][paperIndex], 3, 1.5);
+    ctx.fillStyle = `rgba(${tint[0]}, ${tint[1]}, ${tint[2]}, 0.85)`;
+    ctx.fill();
+    // Aba dobrada do canto, só na folha da frente, na cor do projeto (o recorte fica transparente).
+    ctx.restore();
+    if (paperIndex !== 2) return;
+    ctx.save();
+    ctx.translate(paperX + paperW / 2 + p.dx * w, paperTop + paperH / 2 + p.dy * h);
+    ctx.rotate(p.rot);
+    ctx.beginPath();
+    ctx.moveTo(foldRight - fold, foldTop);
+    ctx.lineTo(foldRight, foldTop + fold);
+    ctx.lineTo(foldRight - fold, foldTop + fold);
+    ctx.closePath();
+    ctx.fillStyle = `rgba(${Math.round((tint[0] + 228) / 2)}, ${Math.round((tint[1] + 224) / 2)}, ${Math.round((tint[2] + 214) / 2)}, 1)`;
+    ctx.fill();
+    ctx.restore();
+  });
+
+  // Frente arredondada (por cima dos papéis)
+  const frontH = h - frontY;
+  roundedRect(ctx, x, y + frontY, w, frontH, r);
+  const grad = ctx.createLinearGradient(x, y + frontY, x, y + h);
+  grad.addColorStop(0, rgbString(frontTop));
+  grad.addColorStop(1, rgbString(frontBottom));
+  ctx.fillStyle = grad;
+  ctx.fill();
+  edgeGlow(x, y + frontY, w, frontH);
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+  ctx.lineWidth = 1;
+  roundedRect(ctx, x + 0.5, y + frontY + 0.5, w - 1, frontH - 1, Math.max(0, r - 0.5));
+  ctx.stroke();
+
+  // Label
+  const label = element.querySelector('.mini-folder__label')?.textContent?.trim();
+  const meta = element.querySelector('.mini-folder__meta')?.textContent?.trim();
+  if (label) {
+    const pad = w * 0.09;
+    const fontPx = Math.max(9, Math.min(15, w * 0.105));
+    ctx.fillStyle = tone[0] === 255 ? 'rgba(18,18,22,0.9)' : 'rgba(255,255,255,0.97)';
+    ctx.textBaseline = 'alphabetic';
+    ctx.font = `650 ${fontPx}px ui-sans-serif, system-ui, sans-serif`;
+    ctx.shadowColor = 'rgba(0,0,0,0.35)';
+    ctx.shadowBlur = tone[0] === 255 ? 0 : 3;
+    const textY = y + h - pad - (meta ? fontPx * 1.3 : 0);
+    const maxW = w - pad * 2;
+    let text = label;
+    if (ctx.measureText(text).width > maxW) {
+      while (text.length > 1 && ctx.measureText(`${text}…`).width > maxW) text = text.slice(0, -1);
+      text = `${text.trimEnd()}…`;
+    }
+    ctx.fillText(text, x + pad, textY);
+    if (meta) {
+      ctx.font = `500 ${Math.max(7, fontPx * 0.72)}px ui-sans-serif, system-ui, sans-serif`;
+      ctx.fillStyle = tone[0] === 255 ? 'rgba(18,18,22,0.62)' : 'rgba(255,255,255,0.82)';
+      ctx.fillText(meta, x + pad, y + h - pad * 0.55);
+    }
+    ctx.shadowBlur = 0;
+  }
+};
+
 const rasterize = (node, dpr, skipImages) => {
   const width = Math.max(1, node.offsetWidth);
   const height = Math.max(1, node.offsetHeight);
@@ -601,58 +842,106 @@ const rasterize = (node, dpr, skipImages) => {
   const pending = [];
   const ctx = canvas.getContext('2d');
   if (!ctx) return { canvas, pending };
-  ctx.scale(dpr, dpr);
-  const paint = (element, x, y) => {
-    const style = getComputedStyle(element);
-    if (style.display === 'none' || style.visibility === 'hidden') return;
-    const w = element.offsetWidth;
-    const h = element.offsetHeight;
-    const radius = parseFloat(style.borderTopLeftRadius) || 0;
-    const opacity = element !== node && Number.isFinite(parseFloat(style.opacity)) ? parseFloat(style.opacity) : 1;
-    ctx.save();
-    ctx.globalAlpha *= opacity;
-    if (!isClear(style.backgroundColor)) {
-      ctx.fillStyle = style.backgroundColor;
-      roundedRect(ctx, x, y, w, h, radius);
-      ctx.fill();
-    }
-    if (style.overflow !== 'visible') {
-      roundedRect(ctx, x, y, w, h, radius);
-      ctx.clip();
-    }
-    if (element instanceof HTMLImageElement) {
-      if (!element.complete || !element.naturalWidth) pending.push(element);
-      else if (!skipImages) {
-        const ratio = Math.max(w / element.naturalWidth, h / element.naturalHeight);
-        const sw = w / ratio;
-        const sh = h / ratio;
-        ctx.drawImage(element, (element.naturalWidth - sw) / 2, (element.naturalHeight - sh) / 2, sw, sh, x, y, w, h);
+  // Tira o transform 3D na hora da foto — senão getBoundingClientRect / offset saem tortos.
+  const savedTransform = node.style.transform;
+  node.style.transform = 'none';
+  void node.offsetWidth;
+  try {
+    ctx.scale(dpr, dpr);
+    const paint = (element, x, y) => {
+      if (element.classList?.contains('mini-folder')) {
+        const w = element.offsetWidth;
+        const h = element.offsetHeight;
+        if (w > 0 && h > 0) paintMiniFolder(ctx, x, y, w, h, element);
+        return;
       }
-    } else {
-      drawText(ctx, element, x, y, w, style);
-      Array.from(element.children).forEach(child => {
-        const at = offsetWithin(child, node);
-        if (at) paint(child, at[0], at[1]);
-      });
-    }
-    ctx.restore();
-  };
-  paint(node, 0, 0);
+      const style = getComputedStyle(element);
+      if (style.display === 'none' || style.visibility === 'hidden') return;
+      const w = element.offsetWidth;
+      const h = element.offsetHeight;
+      if (w <= 0 || h <= 0) return;
+      const attrRadii = element.getAttribute?.('data-folder-radii');
+      const radius = attrRadii
+        ? attrRadii.split(',').map(v => Math.max(0, Number.parseFloat(v) || 0))
+        : [
+            readCorner(style.borderTopLeftRadius, w, h),
+            readCorner(style.borderTopRightRadius, w, h),
+            readCorner(style.borderBottomRightRadius, w, h),
+            readCorner(style.borderBottomLeftRadius, w, h)
+          ];
+      while (radius.length < 4) radius.push(radius[0] || 0);
+      const opacity = element !== node && Number.isFinite(parseFloat(style.opacity)) ? parseFloat(style.opacity) : 1;
+      ctx.save();
+      ctx.globalAlpha *= opacity;
+      if (!isClear(style.backgroundColor)) {
+        ctx.fillStyle = style.backgroundColor;
+        if (typeof ctx.roundRect === 'function') {
+          ctx.beginPath();
+          ctx.roundRect(x, y, w, h, radius);
+          ctx.fill();
+        } else {
+          roundedRect(ctx, x, y, w, h, radius);
+          ctx.fill();
+        }
+      }
+      if (style.overflow !== 'visible') {
+        if (typeof ctx.roundRect === 'function') {
+          ctx.beginPath();
+          ctx.roundRect(x, y, w, h, radius);
+          ctx.clip();
+        } else {
+          roundedRect(ctx, x, y, w, h, radius);
+          ctx.clip();
+        }
+      }
+      if (element instanceof HTMLImageElement) {
+        if (!element.complete || !element.naturalWidth) pending.push(element);
+        else if (!skipImages) {
+          const ratio = Math.max(w / element.naturalWidth, h / element.naturalHeight);
+          const sw = w / ratio;
+          const sh = h / ratio;
+          ctx.drawImage(element, (element.naturalWidth - sw) / 2, (element.naturalHeight - sh) / 2, sw, sh, x, y, w, h);
+        }
+      } else {
+        drawText(ctx, element, x, y, w, style);
+        Array.from(element.children).forEach(child => {
+          const at = offsetWithin(child, node);
+          if (at) paint(child, at[0], at[1]);
+        });
+      }
+      ctx.restore();
+    };
+    paint(node, 0, 0);
+  } finally {
+    node.style.transform = savedTransform;
+  }
   return { canvas, pending };
 };
 
-const paintBack = (g, top, bottom, dpr) => {
+const paintBack = (g, top, bottom, dpr, accent, glow) => {
   const canvas = document.createElement('canvas');
   canvas.width = Math.max(1, Math.round(g.w * dpr));
   canvas.height = Math.max(1, Math.round((g.tabH + g.h) * dpr));
   const ctx = canvas.getContext('2d');
   if (!ctx) return canvas;
   ctx.scale(dpr, dpr);
-  const fill = ctx.createLinearGradient(0, 0, 0, g.tabH + g.h);
+  const fill = ctx.createLinearGradient(g.w * 0.2, 0, g.w * 0.75, (g.tabH + g.h) * 0.85);
   fill.addColorStop(0, top);
   fill.addColorStop(1, bottom);
   ctx.fillStyle = fill;
-  ctx.fill(new Path2D(backPath(g)));
+  const outline = new Path2D(backPath(g));
+  ctx.fill(outline);
+  if (accent) {
+    // Brilho da cor de destaque na lateral esquerda, dissipando para o cinza.
+    ctx.save();
+    ctx.clip(outline);
+    const edge = cssLinearGradient(ctx, 0, 0, g.w, g.tabH + g.h, glow.angle, glow.reach);
+    edge.addColorStop(0, `rgba(${accent[0]}, ${accent[1]}, ${accent[2]}, ${glow.alpha})`);
+    edge.addColorStop(1, `rgba(${accent[0]}, ${accent[1]}, ${accent[2]}, 0)`);
+    ctx.fillStyle = edge;
+    ctx.fillRect(0, 0, g.w, g.tabH + g.h);
+    ctx.restore();
+  }
   return canvas;
 };
 
@@ -764,6 +1053,7 @@ const placeFlap = (rank, count, phase, layout, g, pointer) => {
 const Folder = ({
   items,
   label,
+  meta,
   mode = 'flap',
   variant = 'solid',
   color = '#3d8bff',
@@ -852,10 +1142,19 @@ const Folder = ({
   const setOpenRef = useRef(setOpen);
   setOpenRef.current = setOpen;
 
-  const rgb = parseColor(color);
   const paper = parseColor(paperColor);
-  const backTone = mixRgb(rgb, [0, 0, 0], 0.16);
-  const insideTop = rgbString(mixRgb(rgb, [0, 0, 0], 0.08));
+  const [siteLight, setSiteLight] = useState(
+    () => typeof document !== 'undefined' && document.documentElement.getAttribute('data-theme') === 'light'
+  );
+  const tone = siteLight ? [255, 255, 255] : [0, 0, 0];
+  // A pasta segue a paleta do site (cinza). A cor de destaque (`color`) vira só um gradiente
+  // pequeno na lateral esquerda, que se dissipa no cinza.
+  const accent = parseColor(color);
+  const glow = accentGlow(`${color}|${label ?? ''}`);
+  const rgb = siteLight ? [176, 176, 184] : [92, 92, 98];
+  const topTone = mixRgb(rgb, [255, 255, 255], 0.06);
+  const backTone = mixRgb(rgb, tone, 0.55);
+  const insideTop = rgbString(topTone);
   const insideBottom = rgbString(backTone);
 
   const settingsRef = useRef(null);
@@ -878,11 +1177,14 @@ const Folder = ({
     entries,
     glass,
     light: theme === 'light',
+    siteLight,
     tint: rgb,
+    accent,
+    glow,
     insideTop,
     insideBottom,
-    insideTone: [mixRgb(rgb, [0, 0, 0], 0.08).map(v => v / 255), backTone.map(v => v / 255)],
-    content: `${mode}|${scale}|${paperColor}|${color}|${g.tabX}|${g.tabW}`,
+    insideTone: [topTone.map(v => v / 255), backTone.map(v => v / 255)],
+    content: `${mode}|${scale}|${paperColor}|${color}|${g.tabX}|${g.tabW}|mini-draw`,
     depth: Math.round(Math.max(g.w, g.h) * 5),
     view,
     g
@@ -1328,17 +1630,18 @@ const Folder = ({
     };
 
     const refreshContent = (renderer, s) => {
+      const contentKey = `${s.content}|${document.documentElement.getAttribute('data-theme')}`;
       if (
-        state.content.key === s.content &&
+        state.content.key === contentKey &&
         state.content.entries === s.entries &&
         state.content.renderer === renderer
       ) {
         return;
       }
-      state.content = { key: s.content, entries: s.entries, renderer };
+      state.content = { key: contentKey, entries: s.entries, renderer };
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const keys = new Set(['back']);
-      renderer.upload('back', paintBack(s.g, s.insideTop, s.insideBottom, dpr));
+      renderer.upload('back', paintBack(s.g, s.insideTop, s.insideBottom, dpr, s.accent, s.glow));
       itemRefs.current.slice(0, s.count).forEach((node, index) => {
         if (!node) return;
         const key = `item-${index}`;
@@ -1487,6 +1790,7 @@ const Folder = ({
           matrix: frontMatrix,
           width: w,
           height: frontH,
+          notch: isBook ? [0, 0, 0] : [(w * 32) / 340, (w * 150) / 340, (w * 26) / 340],
           radii: isBook ? [0, s.g.r, s.g.r, 0] : [s.g.r, s.g.r, s.g.r, s.g.r],
           spine: isBook ? w * 2 : 0,
           bleed: flipped ? 2 : 0,
@@ -1500,8 +1804,16 @@ const Folder = ({
           split: 0.26,
           lens: 0.02,
           frost: s.frost * 6 * scale,
-          tint: [s.tint[0] / 255, s.tint[1] / 255, s.tint[2] / 255, s.light ? 0.1 : 0.14],
-          haze: 0.04 + s.frost * 0.1,
+          glow: [
+            Math.sin((s.glow.angle * Math.PI) / 180),
+            -Math.cos((s.glow.angle * Math.PI) / 180),
+            s.glow.reach,
+            s.glow.alpha
+          ],
+          bottom: s.siteLight ? [0.97, 0.97, 0.98, 0.86] : [0.03, 0.03, 0.035, 0.9],
+          accent: [s.accent[0] / 255, s.accent[1] / 255, s.accent[2] / 255],
+          tint: [s.tint[0] / 255, s.tint[1] / 255, s.tint[2] / 255, s.light ? 0.3 : 0.34],
+          haze: 0.02 + s.frost * 0.05,
           dim: dim * 0.8,
           glint,
           shine: s.light ? 0.72 : 0.85,
@@ -1794,6 +2106,17 @@ const Folder = ({
     engineRef.current?.wake();
   });
 
+  // Trocar o tema do site muda o degradê das mini-pastas: refaz a foto que o vidro usa.
+  useEffect(() => {
+    const sync = () => {
+      setSiteLight(document.documentElement.getAttribute('data-theme') === 'light');
+      engineRef.current?.invalidate();
+    };
+    const observer = new MutationObserver(sync);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => observer.disconnect();
+  }, []);
+
   const toggle = () => {
     if (engineRef.current?.blur()) return;
     if (openOn === 'hover') return;
@@ -1814,12 +2137,18 @@ const Folder = ({
 
   const vars = {
     '--folder-rgb': rgb.join(', '),
+    '--folder-accent': accent.join(', '),
+    '--folder-glow-angle': `${glow.angle}deg`,
+    '--folder-glow-reach': `${Math.round(glow.reach * 100)}%`,
+    '--folder-glow-alpha': glow.alpha,
     '--folder-base': rgbString(rgb),
     '--folder-front-top': rgbString(mixRgb(rgb, [255, 255, 255], 0.12)),
     '--folder-front-bottom': rgbString(mixRgb(rgb, [0, 0, 0], 0.06)),
     '--folder-inside-top': insideTop,
     '--folder-inside-bottom': insideBottom,
-    '--folder-tab-ink': luma(backTone) > 0.6 ? 'rgba(0, 0, 0, 0.72)' : 'rgba(255, 255, 255, 0.92)',
+    '--folder-tab-ink':
+      siteLight || luma(topTone) > 0.6 ? 'rgba(18, 18, 22, 0.92)' : 'rgba(255, 255, 255, 0.95)',
+    '--folder-label-shadow': siteLight ? '0 1px 6px rgba(255, 255, 255, 0.45)' : '0 1px 8px rgba(0, 0, 0, 0.28)',
     '--folder-paper': rgbString(paper),
     '--folder-paper-ink': rgbString(mixRgb(paper, [0, 0, 0], 0.11)),
     '--folder-paper-ink-strong': rgbString(mixRgb(paper, [0, 0, 0], 0.28)),
@@ -1918,6 +2247,12 @@ const Folder = ({
             <div className="folder-face folder-face-inner">
               <span className="folder-inner-gutter" />
             </div>
+          )}
+          {label && (
+            <span className="folder-front-label">
+              <span className="folder-front-label__title">{label}</span>
+              {meta && <span className="folder-front-label__meta">{meta}</span>}
+            </span>
           )}
         </div>
 

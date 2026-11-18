@@ -236,7 +236,13 @@
 
 .folder-root[data-variant='solid'] .folder-back-fill,
 .folder-root[data-variant='solid'] .folder-face-inner {
-  background: linear-gradient(180deg, var(--folder-inside-top), var(--folder-inside-bottom));
+  background:
+    linear-gradient(
+      var(--folder-glow-angle, 135deg),
+      rgba(var(--folder-accent), var(--folder-glow-alpha, 0.4)) 0%,
+      rgba(var(--folder-accent), 0) var(--folder-glow-reach, 80%)
+    ),
+    linear-gradient(160deg, var(--folder-inside-top) 5%, var(--folder-inside-bottom) 75%);
 }
 
 .folder-root[data-variant='solid'] .folder-face-outer {
@@ -252,28 +258,82 @@
 }
 
 .folder-root[data-variant='glass'] .folder-back-fill {
-  background: linear-gradient(180deg, var(--folder-inside-top), var(--folder-inside-bottom));
+  background:
+    linear-gradient(
+      var(--folder-glow-angle, 135deg),
+      rgba(var(--folder-accent), var(--folder-glow-alpha, 0.4)) 0%,
+      rgba(var(--folder-accent), 0) var(--folder-glow-reach, 80%)
+    ),
+    linear-gradient(160deg, var(--folder-inside-top) 5%, var(--folder-inside-bottom) 75%);
 }
 
 .folder-root[data-variant='glass'] .folder-face-outer,
 .folder-root[data-variant='glass'] .folder-face-inner {
   background:
     linear-gradient(
-      160deg,
-      rgba(255, 255, 255, 0.34) 0%,
-      rgba(255, 255, 255, 0.08) 46%,
-      rgba(255, 255, 255, 0.16) 100%
+      180deg,
+      rgba(255, 255, 255, 0.28) 0%,
+      rgba(255, 255, 255, 0.06) 38%,
+      rgba(var(--folder-rgb), 0.22) 100%
     ),
-    rgba(var(--folder-rgb), 0.24);
+    rgba(var(--folder-rgb), 0.56);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  -webkit-backdrop-filter: blur(var(--folder-frost)) saturate(1.8);
-  backdrop-filter: blur(var(--folder-frost)) saturate(1.8);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -12px 28px rgba(0, 0, 0, 0.12);
+  -webkit-backdrop-filter: blur(var(--folder-frost)) saturate(1.35);
+  backdrop-filter: blur(var(--folder-frost)) saturate(1.35);
+}
+
+/* Nome na frente do vidro (fosco), não escondido na aba. */
+.folder-front-label {
+  position: absolute;
+  left: calc(16px * var(--folder-scale));
+  bottom: calc(18px * var(--folder-scale));
+  z-index: 2;
+  max-width: calc(70% - 12px * var(--folder-scale));
+  pointer-events: none;
+  color: var(--folder-tab-ink);
+  text-shadow: var(--folder-label-shadow, 0 1px 8px rgba(0, 0, 0, 0.18));
+}
+
+.folder-front-label__title {
+  display: block;
+  overflow: hidden;
+  font-size: calc(15px * var(--folder-scale));
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder-root[data-variant='glass'] .folder-tab-text:not(.folder-measure) {
+  opacity: 0;
 }
 
 .folder-root[data-gl] .folder-face {
   visibility: hidden;
+}
+
+.folder-root[data-gl] .folder-front-label {
+  visibility: visible;
+}
+
+/* Com o vidro na GPU a camada da frente só carrega o nome: precisa ficar ACIMA do canvas (z 40), senão o vidro cobre o texto. */
+.folder-root[data-gl] .folder-front {
+  /* O JS grava z-index inline na camada da frente: sem !important ele vence e o canvas (z 40) cobre o nome. */
+  z-index: 50 !important;
+}
+
+.folder-front-label__meta {
+  display: block;
+  margin-top: calc(3px * var(--folder-scale));
+  font-size: calc(11px * var(--folder-scale));
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  opacity: 0.78;
+  text-transform: uppercase;
 }
 
 .folder-glass {
@@ -301,6 +361,7 @@
 }
 
 .folder-doc-title {
+  flex: none;
   overflow: hidden;
   margin-bottom: calc(4px * var(--folder-scale));
   color: var(--folder-paper-text);
@@ -313,6 +374,7 @@
 }
 
 .folder-doc-text {
+  flex: none;
   margin-top: calc(-6px * var(--folder-scale));
   margin-bottom: calc(4px * var(--folder-scale));
   color: var(--folder-paper-ink-strong);
@@ -322,7 +384,7 @@
 
 .folder-doc-heading {
   width: 56%;
-  height: calc(7px * var(--folder-scale));
+  height: calc(3.5px * var(--folder-scale));
   flex: none;
   margin-bottom: calc(4px * var(--folder-scale));
   border-radius: 999px;
@@ -330,7 +392,7 @@
 }
 
 .folder-doc-line {
-  height: calc(4px * var(--folder-scale));
+  height: calc(2.5px * var(--folder-scale));
   flex: none;
   border-radius: 999px;
   background: var(--folder-paper-ink);

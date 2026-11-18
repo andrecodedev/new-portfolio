@@ -363,6 +363,23 @@ export default function CircularGallery({
     }
   }, [font, fontUrl])
 
+  // O navegador limita quantos contextos WebGL ficam vivos (a página tem várias pastas de vidro).
+  // Quando ele derruba o da galeria, o canvas ficava em branco até recarregar de novo:
+  // aqui a galeria é remontada assim que o contexto volta.
+  const [epoch, setEpoch] = useState(0)
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return undefined
+    const onLost = (event: Event) => event.preventDefault()
+    const onRestored = () => setEpoch((value) => value + 1)
+    canvas.addEventListener('webglcontextlost', onLost)
+    canvas.addEventListener('webglcontextrestored', onRestored)
+    return () => {
+      canvas.removeEventListener('webglcontextlost', onLost)
+      canvas.removeEventListener('webglcontextrestored', onRestored)
+    }
+  }, [])
+
   useEffect(() => {
     const container = containerRef.current
     const canvas = canvasRef.current
@@ -1176,7 +1193,7 @@ export default function CircularGallery({
       gl.deleteVertexArray(vao)
       if (!canvas.isConnected) gl.getExtension('WEBGL_lose_context')?.loseContext()
     }
-  }, [])
+  }, [epoch])
 
   useEffect(() => {
     engineRef.current?.wake()

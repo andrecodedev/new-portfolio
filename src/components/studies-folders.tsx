@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { ArrowLeft, CaretRight, Check, FolderSimple, Medal } from '@phosphor-icons/react'
-import Folder from './Folder'
+import GlassFolder from './ui/glass-folder-cards'
+import { accentGlow } from './ui/accent-glow'
 import { useScrollToSectionOnChange } from '../navigation/use-scroll-to-section'
 import { MiniFolder } from './clients-folders'
 import type { ReadingPageCopy } from '../i18n/copy'
@@ -205,6 +206,17 @@ function Crumbs({
   )
 }
 
+/** Pasta cinza com um brilho diagonal da cor da plataforma (canto e ângulo próprios, sempre os mesmos). */
+function glowStyle(color: string, label: string): CSSProperties {
+  const glow = accentGlow(`${color}|${label}`)
+  return {
+    '--gf-accent': color,
+    '--gf-glow-angle': `${glow.angle}deg`,
+    '--gf-glow-reach': `${Math.round(glow.reach * 100)}%`,
+    '--gf-glow-alpha': `${Math.round(glow.alpha * 100)}%`,
+  } as CSSProperties
+}
+
 export function StudiesFolders({ labels, isMobile, path: controlled, onPathChange }: StudiesFoldersProps) {
   const [inner, setInner] = useState<Path>({ platform: null, course: null })
   const path = controlled ?? inner
@@ -222,7 +234,7 @@ export function StudiesFolders({ labels, isMobile, path: controlled, onPathChang
 
   const platform = path.platform !== null ? studyPlatforms[path.platform] : null
   const course = platform && path.course !== null ? platform.courses[path.course] : null
-  const size = isMobile ? 0.62 : 1.1
+  const width = isMobile ? 220 : 300
 
   return (
     <div
@@ -238,33 +250,26 @@ export function StudiesFolders({ labels, isMobile, path: controlled, onPathChang
         <div className="showcase-folders study-folders" key="root">
           {studyPlatforms.map((item, index) => (
             <div className="showcase-folder study-folder" key={item.id}>
-              <Folder
+              <GlassFolder
                 label={item.label}
-                mode="flap"
-                variant="solid"
-                layout="spread"
-                color={item.color}
-                paperColor="#ffffff"
-                tabPosition="right"
-                openOn="click"
-                size={size}
-                tilt={0.5}
-                speed={1}
-                bounce={0.4}
-                peek
-                intro
-                theme="dark"
-                items={item.courses.slice(0, 3).map((entry) => ({ title: entry.title }))}
+                meta={`${item.courses.length} ${labels.courses}`}
+                tone="dark"
+                art="none"
+                style={glowStyle(item.color, item.label)}
+                action="none"
+                labelPlacement="bottom-left"
+                width={width}
+                appearDelay={index * 120}
+                files={item.courses.slice(0, 4).map((entry) => ({
+                  name: entry.title,
+                  meta: entry.status === 'done' ? '100%' : entry.progress != null ? `${entry.progress}%` : undefined,
+                  // Mesmo desenho das mini pastas de trabalho (pasta dentro de pasta).
+                  content: <MiniFolder label={entry.title} color={item.color} variant="rest" />,
+                }))}
                 onOpenChange={(open) => {
                   if (open) go({ platform: index, course: null })
                 }}
               />
-              <p className="folder-caption">
-                <span className="folder-caption__sub">
-                  {item.courses.length} {labels.courses}
-                </span>
-                <span className="folder-caption__name">{item.label}</span>
-              </p>
             </div>
           ))}
         </div>
