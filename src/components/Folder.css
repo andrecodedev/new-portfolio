@@ -136,8 +136,9 @@
   z-index: 10;
   width: var(--folder-doc-w);
   height: var(--folder-doc-h);
+  --folder-fold: calc(16px * var(--folder-scale));
   overflow: hidden;
-  border-radius: calc(7px * var(--folder-scale));
+  border-radius: calc(4px * var(--folder-scale));
   background: var(--folder-paper);
   box-shadow:
     0 0 0 0.5px rgba(0, 0, 0, 0.06),
@@ -351,7 +352,32 @@
   background: var(--folder-base);
 }
 
+/* Folha com dobra no canto de cima direito: o canto é recortado de verdade (mostra o que está atrás).
+   O polígono se estende 60px para fora para a sombra da folha não ser cortada junto. */
+.folder-item:has(.folder-doc-fold) {
+  clip-path: polygon(
+    -60px -60px,
+    calc(100% - var(--folder-fold) - 60px) -60px,
+    calc(100% + 60px) calc(var(--folder-fold) + 60px),
+    calc(100% + 60px) calc(100% + 60px),
+    -60px calc(100% + 60px)
+  );
+}
+
+/* Aba dobrada: triângulo na cor de destaque da pasta (currentColor). */
+.folder-doc-fold {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--folder-fold);
+  height: var(--folder-fold);
+  color: color-mix(in srgb, rgb(var(--folder-accent, 120, 120, 128)) 55%, #e4e0d6);
+  background: linear-gradient(225deg, transparent 50%, currentColor 50%);
+  pointer-events: none;
+}
+
 .folder-doc {
+  position: relative;
   display: flex;
   height: 100%;
   box-sizing: border-box;

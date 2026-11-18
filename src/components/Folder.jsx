@@ -849,6 +849,20 @@ const rasterize = (node, dpr, skipImages) => {
   try {
     ctx.scale(dpr, dpr);
     const paint = (element, x, y) => {
+      if (element.classList?.contains('folder-doc-fold')) {
+        // Aba dobrada do canto (metade de baixo/esquerda do quadrado), na cor do elemento.
+        const f = element.offsetWidth;
+        if (f > 0) {
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + f, y + f);
+          ctx.lineTo(x, y + f);
+          ctx.closePath();
+          ctx.fillStyle = getComputedStyle(element).color;
+          ctx.fill();
+        }
+        return;
+      }
       if (element.classList?.contains('mini-folder')) {
         const w = element.offsetWidth;
         const h = element.offsetHeight;
@@ -873,6 +887,18 @@ const rasterize = (node, dpr, skipImages) => {
       const opacity = element !== node && Number.isFinite(parseFloat(style.opacity)) ? parseFloat(style.opacity) : 1;
       ctx.save();
       ctx.globalAlpha *= opacity;
+      const foldEl = element.querySelector?.(':scope > .folder-doc > .folder-doc-fold');
+      if (foldEl) {
+        // Canto de cima direito recortado de verdade (transparente), como no DOM.
+        const cut = foldEl.offsetWidth;
+        ctx.beginPath();
+        ctx.rect(x - 1, y - 1, w + 2, h + 2);
+        ctx.moveTo(x + w - cut, y);
+        ctx.lineTo(x + w + 1, y - 1);
+        ctx.lineTo(x + w + 1, y + cut);
+        ctx.closePath();
+        ctx.clip('evenodd');
+      }
       if (!isClear(style.backgroundColor)) {
         ctx.fillStyle = style.backgroundColor;
         if (typeof ctx.roundRect === 'function') {
@@ -955,6 +981,7 @@ const DocumentCard = ({ title, description }) => (
     <span className="folder-doc-block" />
     <span className="folder-doc-line" style={{ width: '80%' }} />
     <span className="folder-doc-line" style={{ width: '62%' }} />
+    <span className="folder-doc-fold" aria-hidden="true" />
   </div>
 );
 
